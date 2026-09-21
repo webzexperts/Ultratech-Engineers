@@ -19,8 +19,8 @@ jobs:
           username: ${{ secrets.FTP_USERNAME_STAGING }}
           password: ${{ secrets.FTP_PASSWORD_STAGING }}
           port: 21
-          server-dir: /public_html/storage/
-          local-dir: ./storage/
+          server-dir: /public_html/tests/
+          local-dir: ./tests/
           
           exclude: |
             **/.git*
