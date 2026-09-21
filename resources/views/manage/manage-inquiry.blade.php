@@ -1,0 +1,173 @@
+@extends('layouts.master')
+@section('title') Inquiry @endsection
+@section('css')
+
+@endsection
+@section('content')
+@component('components.breadcrumb')
+@slot('li_1') Marketing @endslot
+@slot('title')Inquiry @endslot
+@endcomponent
+
+@include('modals.inquiry_modal')
+@include('modals.customer_modal')
+@include('modals.modals-details.contact_modal')
+@include('modals.city_modal')
+@include('modals.state_modal')
+@include('modals.country_modal')
+
+@include('modals.modals-details.inquiry_details')
+@include('modals.type_of_job_modal')
+@include('modals.job_description_modal')
+@include('modals.part_modal')
+@include('modals.unit_modal')
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+           <div class="card-header d-flex align-items-center pb-2">
+                <h5 class="card-title mb-0 flex-grow-1">Inquiry</h5>
+                <div>
+                    @if(hasAccess("inquiry","export"))
+                        <a href="javascript:void(0)" class="btn btn-primary" id="export-excel">Excel</a>
+                    @endif
+
+                    @if(hasAccess("inquiry","add"))
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#InquiryModal">Add</button>
+                    @endif
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="dyntable" class="table nowrap align-middle table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="action_col">Actions</th>
+                            <th>Inq No.</th>
+                            <th>Date</th>
+                            {{-- <th>Customer Code</th> --}}
+                            <th>Customer</th>
+                            <th>Kind Attn.</th>
+                            <th>Ref. No. & Date</th>
+                            <th>Type of Test</th>
+                            <th>Type of Job</th>
+                            <th>Job Description</th>
+                            <th>Part No.</th>
+                            <th>Process At</th>
+                            <th>Qty.</th>
+                            <th>Unit</th>
+                            <th>Remark</th>
+                            <th>Prepared By</th>
+                            <th>Modified By</th>
+                            <th>Modified On</th>
+                            <th>Created By</th>
+                            <th>Created On</th>
+                            <th style="display:none;"></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('script-manage')
+    <script>
+        var headerOpt = {'Authorization':'Bearer {{ Auth::user()->auth_token }}','X-CSRF-TOKEN':'{{ csrf_token() }}'};
+        jQuery('#export-excel').on('click',function(){
+            jQuery('.export_inquiry').click();
+        });
+        var table = $('#dyntable').DataTable({
+            "processing": false,
+            "serverSide": true,
+            "scrollX": true,
+            "order": [[ 2, 'desc' ],[ 18, 'desc' ]],
+            dom: 'Blfrtip',
+            buttons: [{
+                extend:'excel',
+                filename: 'Inquiry List',
+                title:"",
+                className: 'export_inquiry d-none',
+                exportOptions: { columns: ':not(:eq(0))', modifier: { page: 'all' } },
+                action: newexportaction
+            }],
+            ajax: {
+                url: "listing-inquiry",
+                type: "POST",
+                headers: headerOpt,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    jQuery('#dyntable_processing').hide();
+                    if (jqXHR.status == 401) {
+                        console.log(jqXHR.statusText);
+                    } else {
+                        console.log('Somthing went wrong!');
+                    }
+                    console.log(JSON.parse(jqXHR.responseText));
+                }
+            },
+            columns: [
+                { data: 'options', name: 'options', orderable: false, searchable: false, },
+                { data: 'inq_number', name: 'inquiry.inq_number', },
+                { data: 'inq_date', name: 'inquiry.inq_date', },
+                // { data: 'customer_code', name: 'customers.customer_code', },
+                { data: 'customer', name: 'customers.customer', },
+                { data: 'contact_person', name: 'customer_contacts.contact_person', },
+                { data: 'inq_ref_no_date', name: 'inquiry.inq_ref_no_date', },
+                { data: 'inqd_test_method', name: 'inquiry_details.inqd_test_method', },
+                { data: 'type_of_job', name: 'type_of_job.type_of_job', },
+                { data: 'job_description', name: 'job_descriptions.job_description', },
+                // { data: 'part', name: 'part', },
+                { data: 'inqd_part_no', name: 'inquiry_details.inqd_part_no', },
+                { data: 'inqd_process_at', name: 'inqd_process_at', },
+                { data: 'inqd_quantity', name: 'inquiry_details.inqd_quantity', },
+                { data: 'unit', name: 'unit.unit', },
+                { data: 'inqd_remark', name: 'inquiry_details.inqd_remark', },
+                { data: 'user_name', name: 'admin.person_name', },
+                { data: 'last_by', name: 'last_by', },
+                { data: 'last_on', name: 'inquiry.last_on', },
+                { data: 'created_by', name: 'created_by', },
+                { data: 'created_on', name: 'inquiry.created_on', },
+                { data: 'inq_sequence', name: 'inquiry.inq_sequence', visible:false},
+            ],
+        });
+
+        jQuery('#dyntable tbody').on('click', '.remove-item-btn', function () {
+            var data = table.row(jQuery(this).parents('tr')).data();
+            toastDelete("Do you want to delete this record?", function () {
+                jQuery.ajax({
+                    url: "delete-inquiry",
+                    type: 'GET',
+                    data: "id=" + data["inq_id"],
+                    headers: headerOpt,
+                    dataType: 'json',
+                    processData: false,
+                    success: function (data) {
+                        if (data.response_code == 1) {
+                            Swal.fire({
+                                text: data.response_message,
+                                icon: 'success',
+                                customClass: {
+                                    confirmButton: 'btn btn-primary w-xs mt-2',
+                                },
+                                buttonsStyling: false
+                            })
+                            table.row(jQuery(this)).draw(false);
+                        } else {
+                            console.log(data.response_message);
+                             toastr.error(data.response_message);
+                        }
+                    },
+                    error: function (jqXHR) {
+                        if (jqXHR.status == 401) {
+                            console.log(jqXHR.statusText);
+                        } else {
+                            console.log('Something went wrong!');
+                        }
+                        console.log(JSON.parse(jqXHR.responseText));
+                    }
+                });
+            });
+        });
+    </script>
+@endsection

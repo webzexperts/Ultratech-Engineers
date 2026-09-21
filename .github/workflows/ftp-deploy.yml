@@ -1,0 +1,30 @@
+name: Deploy to FTP
+
+on:
+  push:
+    branches:
+      - sitastesting   # change if needed
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER_TESTING }}
+          username: ${{ secrets.FTP_USERNAME_TESTING }}
+          password: ${{ secrets.FTP_PASSWORD_TESTING }}
+          port: 21
+          server-dir: /public_html/
+          local-dir: ./
+          
+          exclude: |
+            **/.git*
+            **/.github/**
+            node_modules/**
+            vendor/**
+            .env
