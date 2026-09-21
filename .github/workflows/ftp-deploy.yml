@@ -15,9 +15,9 @@ jobs:
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER_TESTING }}
-          username: ${{ secrets.FTP_USERNAME_TESTING }}
-          password: ${{ secrets.FTP_PASSWORD_TESTING }}
+          server: ${{ secrets.FTP_SERVER_STAGING }}
+          username: ${{ secrets.FTP_USERNAME_STAGING }}
+          password: ${{ secrets.FTP_PASSWORD_STAGING }}
           port: 21
           server-dir: /public_html/app/
           local-dir: ./app/
