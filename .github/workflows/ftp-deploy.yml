@@ -19,8 +19,8 @@ jobs:
           username: ${{ secrets.FTP_USERNAME_TESTING }}
           password: ${{ secrets.FTP_PASSWORD_TESTING }}
           port: 21
-          server-dir: /public_html/config/
-          local-dir: ./config/
+          server-dir: /public_html/database/
+          local-dir: ./database/
           
           exclude: |
             **/.git*
