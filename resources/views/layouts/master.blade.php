@@ -53,6 +53,8 @@
     <input type="hidden" id="def_year_startdate" value="{{ getCurrentYearDates()['startdate'] }}" />
     <input type="hidden" id="def_year_enddate" value="{{ getCurrentYearDates()['enddate'] }}" />
     <input type="hidden" id="current_year_id" value="{{ getCurrentYearData()['id'] }}" />
+    <input type="hidden" id="current_tab_year_id" value="{{ session('default_year_id') }}" />
+    <input type="hidden" id="current_tab_location_id" value="{{ session('getLocationId') }}" />
 
     <!-- JAVASCRIPT -->
     @include('layouts.vendor-scripts')

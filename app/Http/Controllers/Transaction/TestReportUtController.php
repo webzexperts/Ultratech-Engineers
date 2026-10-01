@@ -37,11 +37,15 @@ class TestReportUtController extends Controller
         $location_data = getCurrentLocation();
 
         $reports = TestReportUt::select([
-            'test_report_ut.test_report_ut_id as id','test_report_ut.test_report_no','test_report_ut.test_report_sequence','test_report_ut.test_report_date','test_report_ut.nabl_type_fix','test_report_ut.ulr_no','test_report_ut.test_carried_out_at','test_report_ut.job_type_fix','test_report_ut.from_type_id_fix','customers.customer','material_inward.dc_no','material_inward.dc_date','material_inward.po_no','material_inward.po_date','type_of_job.type_of_job','job_descriptions.job_description','test_report_ut.part_no','test_report_ut.drg_no','materials.material','test_report_ut.heat_no','test_report_ut.product_code','test_report_ut.total_qty','test_report_ut.created_on','test_report_ut.created_by','test_report_ut.last_by','test_report_ut.last_on'
+            'test_report_ut.test_report_ut_id as id','test_report_ut.test_report_no','test_report_ut.test_report_sequence','test_report_ut.test_report_date','test_report_ut.entry_type_fix','test_report_ut.nabl_type_fix','test_report_ut.ulr_no','test_report_ut.test_carried_out_at','test_report_ut.job_type_fix','test_report_ut.from_type_id_fix','customers.customer','material_inward.dc_no','material_inward.dc_date','material_inward.po_no','material_inward.po_date',
+            // 'type_of_job.type_of_job',
+            // 'job_descriptions.job_description',
+            'test_report_ut.job_desc as job_description',
+            'test_report_ut.part_no','test_report_ut.drg_no','materials.material','test_report_ut.heat_no','test_report_ut.product_code','test_report_ut.total_qty','test_report_ut.created_on','test_report_ut.created_by','test_report_ut.last_by','test_report_ut.last_on'
         ])
         ->leftJoin('customers', 'customers.id', '=', 'test_report_ut.customer_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_ut.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_ut.job_desc_id')
+        // ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_ut.type_of_job_id')
+        // ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_ut.job_desc_id')
         ->leftJoin('materials', 'materials.id', '=', 'test_report_ut.material_id')
         ->leftJoin('material_inward_details', 'material_inward_details.material_inward_details_id', '=', 'test_report_ut.material_inward_details_id')
         ->leftJoin('material_inward', 'material_inward.material_inward_id', '=', 'material_inward_details.material_inward_id')
@@ -85,6 +89,18 @@ class TestReportUtController extends Controller
             $query->where(function($q) use ($keyword) {
                 $q->where('test_report_ut.drg_no', 'like', "%{$keyword}%");
             });
+        })
+        ->filterColumn('test_report_ut.job_type_fix', function ($query, $keyword) {
+            $globalSearch = request()->input('search.value');
+            $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
+            $lowerKeyword = strtolower(trim($searchValue));
+            if ($lowerKeyword === 'welding') {
+                $query->where('test_report_ut.job_type_fix', '=', 'Welding');
+            } elseif ($lowerKeyword === 'non-welding' || $lowerKeyword === 'non welding') {
+                $query->where('test_report_ut.job_type_fix', '=', 'Non-Welding');
+            } else {
+                $query->where('test_report_ut.job_type_fix', 'like', "{$lowerKeyword}%");
+            }
         })
         ->addColumn('options', function($report) {
             $action = '<div class="dropdown d-inline-block">
@@ -131,10 +147,13 @@ class TestReportUtController extends Controller
             'test_report_sequence' => 'required',
             'test_report_date' => 'required',
             'customer_id' => 'required',
-            'type_of_job_id' => 'required',
-            'job_desc_id' => 'required',
+            // 'type_of_job_id' => 'required',
+            // 'job_desc_id' => 'required',
+            'job_desc' => 'required',
             'material_id' => 'required',
             'area_of_coverage_id' => 'required',
+        ], [
+            'job_desc.required' => 'Enter Job Description.',
         ]);
 
         $receiptDate = !empty($request->date_of_receipt) ? Carbon::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null;
@@ -191,10 +210,11 @@ class TestReportUtController extends Controller
         DB::beginTransaction();
         try {
             $fromTypeId = $request->from_type_id_fix;
-            $qtyCheck = $this->qtyValidation($request->total_qty ?? 0, 0, 'I', $request->customer_id, $request->material_inward_details_id, $request->observation_sheet_details_id ?? null, $fromTypeId, 0);
-            if ($qtyCheck) {
-                return $qtyCheck;
-            }
+            // Inward validation commented out for Manual entry:
+            // $qtyCheck = $this->qtyValidation($request->total_qty ?? 0, 0, 'I', $request->customer_id, $request->material_inward_details_id, $request->observation_sheet_details_id ?? null, $fromTypeId, 0);
+            // if ($qtyCheck) {
+            //     return $qtyCheck;
+            // }
 
             $existNumber = TestReportUt::where([
                 ['test_report_sequence', $request->test_report_sequence],
@@ -211,6 +231,11 @@ class TestReportUtController extends Controller
             } else {
                 $report_no = $request->test_report_no;
                 $report_seq = $request->test_report_sequence;
+            }
+
+            $checkDup = checkReportDuplication(TestReportUt::class, 'test_report_no', $report_no, $request, "Duplicate Test Report No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
             }
 
             $defectogramPath = null;
@@ -265,15 +290,19 @@ class TestReportUtController extends Controller
                 'test_report_sequence' => $report_seq,
                 'test_report_no' => $report_no,
                 'test_report_date' => isset($request->test_report_date) ? Date::createFromFormat('d/m/Y', $request->test_report_date)->format('Y-m-d') : null,
+                'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
                 'customer_id' => $request->customer_id,
-                'material_inward_details_id' => $request->material_inward_details_id,
+                'material_inward_details_id' => $request->material_inward_details_id ?: null,
                 'observation_sheet_details_id' => $request->observation_sheet_details_id ?? null,
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
                 'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
-                'type_of_job_id' => $request->type_of_job_id,
-                'job_desc_id' => $request->job_desc_id,
+                // 'type_of_job_id' => $request->type_of_job_id,
+                // 'job_desc_id' => $request->job_desc_id,
+                'type_of_job_id' => $request->type_of_job_id ?? null,
+                'job_desc_id' => null,
+                'job_desc' => $request->job_desc,
                 'part_no' => $request->part_no,
                 'drg_no' => $request->drg_no,
                 'material_id' => $request->material_id,
@@ -297,6 +326,8 @@ class TestReportUtController extends Controller
                 'scan_plan_no' => $request->scan_plan_no,
                 'procedure_ref_id' => $request->procedure_ref_id,
                 'acceptance_standard_id' => $request->acceptance_standard_id,
+                'ut_test_no_label' => $request->filled('ut_test_no_label') ? $request->ut_test_no_label : 'UT Test No.',
+                'heat_no_label' => $request->filled('heat_no_label') ? $request->heat_no_label : 'Heat No.',
                 'defectogram_image' => $defectogramPath,
                 'defectogram_image_blob' => $blobImage,
                 'total_qty' => $request->total_qty ?? 0,
@@ -532,10 +563,13 @@ class TestReportUtController extends Controller
             'test_report_sequence' => 'required',
             'test_report_date' => 'required',
             'customer_id' => 'required',
-            'type_of_job_id' => 'required',
-            'job_desc_id' => 'required',
+            // 'type_of_job_id' => 'required',
+            // 'job_desc_id' => 'required',
+            'job_desc' => 'required',
             'material_id' => 'required',
             'area_of_coverage_id' => 'required',
+        ], [
+            'job_desc.required' => 'Enter Job Description.',
         ]);
 
         $report = TestReportUt::where('test_report_ut_id', $request->id)->first();
@@ -544,6 +578,11 @@ class TestReportUtController extends Controller
                 'response_code' => '0',
                 'response_message' => 'Report Not Found',
             ]);
+        }
+
+        $checkDup = checkReportDuplication(TestReportUt::class, 'test_report_no', $request->test_report_no, $request, "Duplicate Test Report No. Found.", $request->id, 'test_report_ut_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
         }
 
         $receiptDate = !empty($request->date_of_receipt) ? Carbon::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null;
@@ -605,10 +644,11 @@ class TestReportUtController extends Controller
             $next_qty = $diff < 0 ? abs($diff) : 0;
 
             $fromTypeId = $request->from_type_id_fix;
-            $qtyCheck = $this->qtyValidation($from_qty, $next_qty, 'U', $request->customer_id, $report->material_inward_details_id, $report->observation_sheet_details_id ?? null, $fromTypeId, $request->id);
-            if ($qtyCheck) {
-                return $qtyCheck;
-            }
+            // Inward validation commented out for Manual entry:
+            // $qtyCheck = $this->qtyValidation($from_qty, $next_qty, 'U', $request->customer_id, $report->material_inward_details_id, $report->observation_sheet_details_id ?? null, $fromTypeId, $request->id);
+            // if ($qtyCheck) {
+            //     return $qtyCheck;
+            // }
 
             $file = new File();
             $defectogramPath = $report->defectogram_image;
@@ -671,6 +711,7 @@ class TestReportUtController extends Controller
                 'test_report_sequence' => $request->test_report_sequence,
                 'test_report_no' => $request->test_report_no,
                 'test_report_date' => isset($request->test_report_date) ? Date::createFromFormat('d/m/Y', $request->test_report_date)->format('Y-m-d') : null,
+                'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
                 'customer_id' => $request->customer_id,
                 'material_inward_details_id' => $report->material_inward_details_id,
                 'observation_sheet_details_id' => $request->observation_sheet_details_id ?? null,
@@ -678,8 +719,11 @@ class TestReportUtController extends Controller
                 'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
-                'type_of_job_id' => $request->type_of_job_id,
-                'job_desc_id' => $request->job_desc_id,
+                // 'type_of_job_id' => $request->type_of_job_id,
+                // 'job_desc_id' => $request->job_desc_id,
+                'type_of_job_id' => $request->type_of_job_id ?? null,
+                'job_desc_id' => null,
+                'job_desc' => $request->job_desc,
                 'part_no' => $request->part_no,
                 'drg_no' => $request->drg_no,
                 'material_id' => $request->material_id,
@@ -703,6 +747,8 @@ class TestReportUtController extends Controller
                 'scan_plan_no' => $request->scan_plan_no,
                 'procedure_ref_id' => $request->procedure_ref_id,
                 'acceptance_standard_id' => $request->acceptance_standard_id,
+                'ut_test_no_label' => $request->filled('ut_test_no_label') ? $request->ut_test_no_label : 'UT Test No.',
+                'heat_no_label' => $request->filled('heat_no_label') ? $request->heat_no_label : 'Heat No.',
                 'defectogram_image' => $defectogramPath,
                 'defectogram_image_blob' => $blobImage,
                 'total_qty' => $request->total_qty ?? 0,
@@ -948,12 +994,16 @@ class TestReportUtController extends Controller
 
             $query = DB::table('pending_material_inward_ut_qty as pend')
                 ->select([
-                    'pend.from_type_id_fix','pend.material_inward_details_id','pend.observation_sheet_details_id','pend.pending_qty','pend.current_location_id','mid.type_of_job_id','mid.job_desc_id','mid.material_id','mid.area_of_coverage_id','mid.procedure_ref_id','mid.evaluation_as_per_id','mid.acceptance_standard_id','mid.thickness','mid.quantity as inward_qty','pend.customer_id','mi.year_id','mi.dc_no','mi.dc_date','mi.po_no','mi.po_date','mi.nabl_type_fix','mi.job_type_fix','mi.material_inward_no','mi.material_inward_date','mi.test_at_fix','toj.type_of_job','jd.job_description','mid.part_no','mid.drg_no','m.material','mid.heat_no','mid.product_code','ac.area_of_coverage','pr.procedure_reference','as_std.acceptance_standard'
+                    'pend.from_type_id_fix','pend.material_inward_details_id','pend.observation_sheet_details_id','pend.pending_qty','pend.current_location_id','mid.type_of_job_id','mid.job_desc_id','mid.material_id','mid.area_of_coverage_id','mid.procedure_ref_id','mid.evaluation_as_per_id','mid.acceptance_standard_id','mid.thickness','mid.quantity as inward_qty','pend.customer_id','mi.year_id','mi.dc_no','mi.dc_date','mi.po_no','mi.po_date','mi.nabl_type_fix','mi.job_type_fix','mi.material_inward_no','mi.material_inward_date','mi.test_at_fix',
+                    //'toj.type_of_job',
+                    //'jd.job_description',
+                    'mid.job_desc as job_description',
+                    'mid.part_no','mid.drg_no','m.material','mid.heat_no','mid.product_code','ac.area_of_coverage','pr.procedure_reference','as_std.acceptance_standard'
                 ])
                 ->leftJoin('material_inward_details as mid', 'mid.material_inward_details_id', '=', 'pend.material_inward_details_id')
                 ->leftJoin('material_inward as mi', 'mi.material_inward_id', '=', 'mid.material_inward_id')
-                ->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
-                ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
+                //->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
+                //->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
                 ->leftJoin('materials as m', 'm.id', '=', 'mid.material_id')
                 ->leftJoin('area_of_coverage as ac', 'ac.area_of_coverage_id', '=', 'mid.area_of_coverage_id')
                 ->leftJoin('procedure_reference as pr', 'pr.procedure_reference_id', '=', 'mid.procedure_ref_id')
@@ -1005,6 +1055,8 @@ class TestReportUtController extends Controller
                     ->first();
             }
 
+            // Pending Inward customer filter (Commented for Manual Entry):
+            /*
             $customers = DB::table('pending_material_inward_ut_qty as pend')
                 ->join('customers', 'customers.id', '=', 'pend.customer_id')
                 ->join('material_inward_details as mid', 'mid.material_inward_details_id', '=', 'pend.material_inward_details_id')
@@ -1017,6 +1069,21 @@ class TestReportUtController extends Controller
                 ->orderBy('customers.customer', 'asc')
                 ->get()
                 ->toArray();
+            */
+
+            // Fetch all customers for Manual Entry
+            $customers = Customer::select('id', 'customer')
+                ->where('status', 'Active')
+                ->orderBy('customer', 'asc')
+                ->get()
+                ->toArray();
+
+            if (empty($customers)) {
+                $customers = Customer::select('id', 'customer')
+                    ->orderBy('customer', 'asc')
+                    ->get()
+                    ->toArray();
+            }
 
             if ($currentCustomer) {
                 $exists = false;
@@ -1119,8 +1186,9 @@ class TestReportUtController extends Controller
             'customers.customer',
             'test_report_ut.nabl_type_fix',
             'test_report_ut.job_type_fix',
-            'type_of_job.type_of_job',
-            'job_descriptions.job_description',
+            // 'type_of_job.type_of_job',
+            // 'job_descriptions.job_description',
+            'test_report_ut.job_desc as job_description',
             'test_report_ut.part_no',
             'test_report_ut.drg_no',
             'materials.material',
@@ -1128,14 +1196,17 @@ class TestReportUtController extends Controller
             'test_report_ut.product_code'
         ])
         ->leftJoin('customers', 'customers.id', '=', 'test_report_ut.customer_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_ut.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_ut.job_desc_id')
+        // ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_ut.type_of_job_id')
+        // ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_ut.job_desc_id')
         ->leftJoin('materials', 'materials.id', '=', 'test_report_ut.material_id')
         ->where('test_report_ut.year_id', $year)
         ->where('test_report_ut.current_location_id', $location);
 
-        if ($request->filled('type_of_job_id')) {
-            $query->where('test_report_ut.type_of_job_id', $request->type_of_job_id);
+        // if ($request->filled('type_of_job_id')) {
+        //     $query->where('test_report_ut.type_of_job_id', $request->type_of_job_id);
+        // }
+        if ($request->filled('customer_id')) {
+            $query->where('test_report_ut.customer_id', $request->customer_id);
         }
 
         $reports = $query->orderBy('test_report_ut.test_report_ut_id', 'desc')->get();
@@ -1177,6 +1248,11 @@ class TestReportUtController extends Controller
             $report_data->amendment_date = ($report_data->amendment_date != "" && $report_data->amendment_date != "0000-00-00")
                 ? Date::createFromFormat('Y-m-d', $report_data->amendment_date)->format('d/m/Y') 
                 : "";
+            $report_data->ut_test_no_label = !empty($report_data->ut_test_no_label) ? $report_data->ut_test_no_label : (TestReportUt::where('test_report_ut_id', $id)->value('ut_test_no_label') ?: 'UT Test No.');
+            $report_data->heat_no_label = !empty($report_data->heat_no_label) ? $report_data->heat_no_label : (TestReportUt::where('test_report_ut_id', $id)->value('heat_no_label') ?: 'Heat No.');
+            if (!isset($report_data->note) || $report_data->note === null) {
+                $report_data->note = TestReportUt::where('test_report_ut_id', $id)->value('note') ?: '';
+            }
 
             if (isset($report_data->cmp_logo)) {
                 $report_data->cmp_logo = base64_encode($report_data->cmp_logo);
@@ -1399,6 +1475,10 @@ class TestReportUtController extends Controller
 
     public function qtyValidation($from_qty, $next_qty, $transaction_mode, $customer_id, $material_inward_details_id, $observation_sheet_details_id = null, $from_type_id_fix = 1, $test_report_ut_id = 0)
     {
+        if (empty($material_inward_details_id)) {
+            return null;
+        }
+
         $location_id = getCurrentLocation()->location_id;
 
         if ($from_qty > 0) {
@@ -1486,7 +1566,9 @@ class TestReportUtController extends Controller
 
         $lnr_data = TestReportUt::select([
             'test_report_ut_id',
-            'note'
+            'note',
+            'ut_test_no_label',
+            'heat_no_label'
         ])
         ->where('current_location_id', $location_data->location_id)
         ->orderBy('test_report_ut_id', 'desc')
@@ -1496,14 +1578,21 @@ class TestReportUtController extends Controller
 except in full, without written approval of Ultratech ENGINEERS PRIVATE LIMITED.
 Disclaimer : *Marked informations as given by customer that can affects the validity of the test results.';
 
+        $ut_test_no_label = 'UT Test No.';
+        $heat_no_label = 'Heat No.';
+
         if ($lnr_data) {
-            $note = $lnr_data->note ?? '';
+            $note = $lnr_data->note ?? $note;
+            $ut_test_no_label = !empty($lnr_data->ut_test_no_label) ? $lnr_data->ut_test_no_label : 'UT Test No.';
+            $heat_no_label = !empty($lnr_data->heat_no_label) ? $lnr_data->heat_no_label : 'Heat No.';
         }
 
         return response()->json([
             'response_code' => 1,
             'lnr_data'      => [
-                'note' => $note
+                'note'             => $note,
+                'ut_test_no_label' => $ut_test_no_label,
+                'heat_no_label'    => $heat_no_label
             ]
         ]);
     }

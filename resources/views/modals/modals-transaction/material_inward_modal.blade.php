@@ -10,6 +10,7 @@
                     @csrf
                     <input type="hidden" name="id" id="id">
                     <input type="hidden" name="old_inward_date" id="old_inward_date">
+                    <input type="hidden" name="inward_type_value_fix" id="inward_type_value_fix" value="Manual">
 
                     <div class="row">
                         <div class="row g-1">
@@ -157,9 +158,9 @@
                                                             <th class="action_col">Actions</th>
                                                             <th>Type of Test</th>
                                                             <th>Nature</th>
-                                                            <th>Type of Job</th>
+                                                            <!-- <th>Type of Job</th> -->
                                                             <th>Job Description</th>
-                                                            <th>Part No.</th>
+                                                            <th>Part No. / Die No.</th>
                                                             <th>Drg No.</th>
                                                             <th>Material</th>
                                                             <th>Heat No.</th>

@@ -66,7 +66,14 @@
                 filename: 'Pending Supplier DC for GRN List',
                 title:"",
                 className: 'export_pending_supplier_dc_for_grn d-none',
-                exportOptions: {  modifier: { page: 'all' } },
+                exportOptions: {
+                    columns: function(idx, data, node) {
+                        return table.column(idx).visible();
+                    },
+                    modifier: {
+                        page: 'all'
+                    }
+                },
                 action: newexportaction
             }],
             ajax: {

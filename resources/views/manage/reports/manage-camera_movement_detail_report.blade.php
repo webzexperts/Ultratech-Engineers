@@ -26,7 +26,7 @@
                                 <th>Camera Sr. No.</th>
                                 <th>Camera Name</th>
                                 <th>Isotope</th>
-                                <th>Location</th>
+                                <!-- <th>Location</th> -->
                                 <th>Application No.</th>
                                 <th class="action_col">Approval Letter</th>
                                 <th>Validity</th>
@@ -66,7 +66,7 @@
             { data: 'camera_sr_no', name: 'camera_sr_no' },
             { data: 'camera_name', name: 'camera_name' },
             { data: 'isotope', name: 'isotope' },
-            { data: 'location', name: 'location' },
+            // { data: 'location', name: 'location' },
             { data: 'application_no', name: 'application_no' },
             { data: 'approval_letter', name: 'approval_letter', orderable: false, searchable: false, },
             { data: 'validity', name: 'validity' },
@@ -87,7 +87,7 @@
                 className: 'export_camera_movement_detail d-none',
                 exportOptions: { 
                     modifier: { page: 'all' },
-                    columns: [0, 1, 2, 3, 4, 5, 7, 8]
+                    columns: [0, 1, 2, 3, 4, 6, 7]
                 },
                 action: newexportaction
             }],

@@ -1,7 +1,7 @@
 
 pi_details_data = [];
 var formId = jQuery('#commonPurchaseIndentForm').find('input[name="id"]').val();
-var defaultPurchaseIndentLocation = jQuery('#to_location_id').val() || '';
+// var defaultPurchaseIndentLocation = jQuery('#to_location_id').val() || '';
 
 
 // Edit purchase Indent row click
@@ -34,14 +34,14 @@ function fetchAndFillPurchaseIndent(id) {
                 jQuery('#PurchaseIndentModal').find('#old_pi_date').val(data.pi_data.pi_date != "" ? data.pi_data.pi_date : "");
                 jQuery('#PurchaseIndentModal').find('#pi_sequence').val(data.pi_data.pi_sequence != "" ? data.pi_data.pi_sequence : "");
 
-                jQuery('#PurchaseIndentModal').find('#to_location_id').val(data.pi_data.to_location_id).trigger('change.select2');
-                if (data.pi_data.in_use == true) {
-                    jQuery('#PurchaseIndentModal').find('#to_location_id').addClass('skip-tab');
-                    setSelect2Readonly('#PurchaseIndentModal #to_location_id', true);
-                } else {
-                    jQuery('#PurchaseIndentModal').find('#to_location_id').removeClass('skip-tab');
-                    setSelect2Readonly('#PurchaseIndentModal #to_location_id', false);
-                }
+                // jQuery('#PurchaseIndentModal').find('#to_location_id').val(data.pi_data.to_location_id).trigger('change.select2');
+                // if (data.pi_data.in_use == true) {
+                // jQuery('#PurchaseIndentModal').find('#to_location_id').addClass('skip-tab');
+                // setSelect2Readonly('#PurchaseIndentModal #to_location_id', true);
+                // } else {
+                // jQuery('#PurchaseIndentModal').find('#to_location_id').removeClass('skip-tab');
+                // setSelect2Readonly('#PurchaseIndentModal #to_location_id', false);
+                // }
                 jQuery('#PurchaseIndentModal').find('#indent_by_user_id').val(data.pi_data.indent_by_user_id).trigger('change.select2');
 
                 jQuery('#PurchaseIndentModal').find('#special_note').val(data.pi_data.special_note != "" ? data.pi_data.special_note : "");
@@ -116,7 +116,7 @@ jQuery('#resetbtn').on('click', function () {
 
         jQuery('#indent_by_user_id').val(loginUserId).trigger("change.select2");
         jQuery('#pi_sequence').prop('readonly', false).focus();
-        jQuery('#PurchaseIndentModal').find("#to_location_id").val(defaultPurchaseIndentLocation).trigger('change.select2');
+        // jQuery('#PurchaseIndentModal').find("#to_location_id").val(defaultPurchaseIndentLocation).trigger('change.select2');
         getLatestPurchaseIndentNo();
     } else {
         fetchAndFillPurchaseIndent(formId);
@@ -167,7 +167,7 @@ jQuery('#PurchaseIndentModal').on('show.bs.modal', function () {
 
     if (formId == "" || formId == undefined) {
         getLatestPurchaseIndentNo();
-        jQuery('#to_location_id').val(defaultPurchaseIndentLocation).trigger('change.select2');
+        // jQuery('#to_location_id').val(defaultPurchaseIndentLocation).trigger('change.select2');
         jQuery('#PurchaseIndentModal').find('#add_new').hide();
         jQuery('#PurchaseIndentModal').find('#preview_btn').hide();
         const input = document.getElementById('pi_sequence');
@@ -201,8 +201,8 @@ jQuery('#PurchaseIndentModal').on('hide.bs.modal', function (e) {
     var thisForm = jQuery('#PurchaseIndentDetailsModal');
     thisForm.find("#pid_id").val(0);
     pi_details_data = [];
-    jQuery("#PurchaseIndentModal #to_location_id").removeClass('skip-tab');
-    setSelect2Readonly('#PurchaseIndentModal #to_location_id', false);
+    // jQuery("#PurchaseIndentModal #to_location_id").removeClass('skip-tab');
+    // setSelect2Readonly('#PurchaseIndentModal #to_location_id', false);
 
     jQuery('#PurchaseIndentModal').find('#add_new').hide();
     jQuery('#PurchaseIndentModal').find('#preview_btn').hide();
@@ -212,7 +212,7 @@ jQuery('#PurchaseIndentModal').on('hide.bs.modal', function (e) {
         formElement.reset();
         jQuery(formElement).removeClass('was-validated');
     }
-    jQuery('#to_location_id').val(defaultPurchaseIndentLocation).trigger('change.select2');
+    // jQuery('#to_location_id').val(defaultPurchaseIndentLocation).trigger('change.select2');
     jQuery('#indent_by_user_id').val(loginUserId).trigger('change.select2');
 });
 
@@ -256,7 +256,7 @@ jQuery('#PurchaseIndentModal').on('click', '#add_new', function () {
         </tr>
     `);
     pi_details_data = [];
-    jQuery("#to_location_id").val(defaultPurchaseIndentLocation).trigger('change.select2');
+    // jQuery("#to_location_id").val(defaultPurchaseIndentLocation).trigger('change.select2');
     jQuery('#PurchaseIndentModal').find('#add_new').hide();
     jQuery('#PurchaseIndentModal').find('#preview_btn').hide();
 });
@@ -331,7 +331,7 @@ $('#commonPurchaseIndentForm').on('submit', function (e) {
                                 form.classList.remove('was-validated');
                             }
                             jQuery('#pi_sequence').prop('readonly', false).focus();
-                            $("#to_location_id").val(defaultPurchaseIndentLocation).trigger('change.select2');
+                            // $("#to_location_id").val(defaultPurchaseIndentLocation).trigger('change.select2');
                             $("#indent_by_user_id").val(loginUserId).trigger('change.select2');
                             pi_details_data = [];
                             jQuery('#PurchaseIndentDetailsTable tbody').empty();
@@ -691,8 +691,8 @@ function getLatestPurchaseIndentNo() {
                 jQuery('#pi_no').val(data.latest_no).prop({ tabindex: -1, readonly: true });
                 jQuery('#pi_sequence').val(data.number);
                 jQuery('#pi_date').val(currentDate);
-                jQuery("#PurchaseIndentModal #to_location_id").removeClass('skip-tab');
-                setSelect2Readonly('#PurchaseIndentModal #to_location_id', false);
+                // jQuery("#PurchaseIndentModal #to_location_id").removeClass('skip-tab');
+                // setSelect2Readonly('#PurchaseIndentModal #to_location_id', false);
 
             } else {
                 console.log(data.response_message)
@@ -721,9 +721,11 @@ function checkSequence() {
             jQuery('#pi_sequence').parent().parent().parent('div.control-group').addClass('error');
             jQuery('#pi_sequence').focus();
             jQuery('#pi_sequence').val('');
+            jQuery('#PurchaseIndentModal').find('#submitbtn, #updatebtn').prop('disabled', false);
 
         } else {
             jQuery('#pi_sequence').addClass('file-loader');
+            jQuery('#PurchaseIndentModal').find('#submitbtn, #updatebtn').prop('disabled', true);
             jQuery('#pi_sequence').parent().parent().parent('div.control-group').removeClass('error');
 
             var urL = "check-purchase_indent_number_duplication?for=add&pi_sequence=" + val;
@@ -746,13 +748,16 @@ function checkSequence() {
                         toastr.error(data.response_message);
                         jQuery('#commonPurchaseIndentForm #pi_sequence').val('');
                         const input = document.getElementById('pi_sequence'); input?.focus();
+                        jQuery('#PurchaseIndentModal').find('#submitbtn, #updatebtn').prop('disabled', false);
                     } else {
                         jQuery('#commonPurchaseIndentForm #pi_no').val(data.latest_no);
                         jQuery('#commonPurchaseIndentForm #pi_sequence').val(val);
+                        jQuery('#PurchaseIndentModal').find('#submitbtn, #updatebtn').prop('disabled', false);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     jQuery('#pi_sequence').removeClass('file-loader');
+                    jQuery('#PurchaseIndentModal').find('#submitbtn, #updatebtn').prop('disabled', false);
                     var errMessage = JSON.parse(jqXHR.responseText);
                     if (errMessage.errors) {
                         validator.showErrors(errMessage.errors);
@@ -769,6 +774,7 @@ function checkSequence() {
     } else {
         jQuery('#pi_no').val('');
         jQuery('#pi_sequence').val('');
+        jQuery('#PurchaseIndentModal').find('#submitbtn, #updatebtn').prop('disabled', false);
     }
 
 }

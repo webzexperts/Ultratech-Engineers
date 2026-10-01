@@ -38,6 +38,7 @@ class TestReportDptController extends Controller
             'test_report_dpt.test_report_no',
             'test_report_dpt.test_report_sequence',
             'test_report_dpt.test_report_date',
+            'test_report_dpt.entry_type_fix',
             'test_report_dpt.nabl_type_fix',
             'test_report_dpt.ulr_no',
             'test_report_dpt.test_carried_out_at',
@@ -47,8 +48,9 @@ class TestReportDptController extends Controller
             'material_inward.dc_date',
             'material_inward.po_no',
             'material_inward.po_date',
-            'type_of_job.type_of_job',
-            'job_descriptions.job_description',
+            // 'type_of_job.type_of_job',
+            // 'job_descriptions.job_description',
+            'test_report_dpt.job_desc as job_description',
             'test_report_dpt.part_no',
             'test_report_dpt.drg_no',
             'materials.material',
@@ -60,8 +62,8 @@ class TestReportDptController extends Controller
             'test_report_dpt.last_on'
         ])
         ->leftJoin('customers', 'customers.id', '=', 'test_report_dpt.customer_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_dpt.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_dpt.job_desc_id')
+        // ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_dpt.type_of_job_id')
+        // ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_dpt.job_desc_id')
         ->leftJoin('materials', 'materials.id', '=', 'test_report_dpt.material_id')
         ->leftJoin('material_inward_details', 'material_inward_details.material_inward_details_id', '=', 'test_report_dpt.material_inward_details_id')
         ->leftJoin('material_inward', 'material_inward.material_inward_id', '=', 'material_inward_details.material_inward_id')
@@ -105,6 +107,18 @@ class TestReportDptController extends Controller
             $query->where(function($q) use ($keyword) {
                 $q->where('test_report_dpt.drg_no', 'like', "%{$keyword}%");
             });
+        })
+        ->filterColumn('test_report_dpt.job_type_fix', function ($query, $keyword) {
+            $globalSearch = request()->input('search.value');
+            $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
+            $lowerKeyword = strtolower(trim($searchValue));
+            if ($lowerKeyword === 'welding') {
+                $query->where('test_report_dpt.job_type_fix', '=', 'Welding');
+            } elseif ($lowerKeyword === 'non-welding' || $lowerKeyword === 'non welding') {
+                $query->where('test_report_dpt.job_type_fix', '=', 'Non-Welding');
+            } else {
+                $query->where('test_report_dpt.job_type_fix', 'like', "{$lowerKeyword}%");
+            }
         })
         ->addColumn('options', function($report) {
             $action = '<div class="dropdown d-inline-block">
@@ -151,21 +165,26 @@ class TestReportDptController extends Controller
             'test_report_sequence' => 'required',
             'test_report_date' => 'required',
             'customer_id' => 'required',
-            'type_of_job_id' => 'required',
-            'job_desc_id' => 'required',
+            // 'type_of_job_id' => 'required',
+            // 'job_desc_id' => 'required',
+            'job_desc' => 'required',
             'material_id' => 'required',
             'area_of_coverage_id' => 'required',
+        ], [
+            'job_desc.required' => 'Enter Job Description.',
         ]);
 
-        $pendingQty = DB::table('pending_material_inward_dpt_qty')
-            ->where('material_inward_details_id', $request->material_inward_details_id)
-            ->value('pending_qty') ?? 0;
+        if ($request->entry_type_fix === 'From Inward' && $request->material_inward_details_id) {
+            $pendingQty = DB::table('pending_material_inward_dpt_qty')
+                ->where('material_inward_details_id', $request->material_inward_details_id)
+                ->value('pending_qty') ?? 0;
 
-        if ($request->total_qty > $pendingQty) {
-            return response()->json([
-                'response_code' => '0',
-                'response_message' => 'DPT Report Qty. Is Used.',
-            ]);
+            if ($request->total_qty > $pendingQty) {
+                return response()->json([
+                    'response_code' => '0',
+                    'response_message' => 'DPT Report Qty. Is Used.',
+                ]);
+            }
         }
 
         $receiptDate = !empty($request->date_of_receipt) ? Carbon::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null;
@@ -209,9 +228,11 @@ class TestReportDptController extends Controller
         DB::beginTransaction();
         try {
             $fromTypeId = $request->from_type_id_fix;
-            $qtyCheck = $this->qtyValidation($request->total_qty ?? 0, 0, 'I', $request->customer_id, $request->material_inward_details_id, $request->observation_sheet_details_id ?? null, $fromTypeId, 0);
-            if ($qtyCheck) {
-                return $qtyCheck;
+            if ($request->entry_type_fix === 'From Inward' && $request->material_inward_details_id) {
+                $qtyCheck = $this->qtyValidation($request->total_qty ?? 0, 0, 'I', $request->customer_id, $request->material_inward_details_id, $request->observation_sheet_details_id ?? null, $fromTypeId, 0);
+                if ($qtyCheck) {
+                    return $qtyCheck;
+                }
             }
 
             $existNumber = TestReportDpt::where([
@@ -229,6 +250,11 @@ class TestReportDptController extends Controller
             } else {
                 $report_no = $request->test_report_no;
                 $report_seq = $request->test_report_sequence;
+            }
+
+            $checkDup = checkReportDuplication(TestReportDpt::class, 'test_report_no', $report_no, $request, "Duplicate Test Report No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
             }
 
             $defectogramPath = null;
@@ -279,19 +305,28 @@ class TestReportDptController extends Controller
             $page_id = getMenuIdBassedOnDisplayName('test_report_dpt');
             $assign_format_no = $page_id ? getAssignFormateNoForTransaction($location_data->location_id, $page_id->id, $request->test_report_date) : '';
 
+            $isFromInward = ($request->entry_type_fix === 'From Inward');
+            $mid = ($isFromInward && !empty($request->material_inward_details_id) && (int)$request->material_inward_details_id > 0) ? (int)$request->material_inward_details_id : null;
+            $obsId = ($isFromInward && !empty($request->observation_sheet_details_id) && (int)$request->observation_sheet_details_id > 0) ? (int)$request->observation_sheet_details_id : null;
+            $fromTypeId = ($isFromInward && !empty($request->from_type_id_fix) && (int)$request->from_type_id_fix > 0) ? (int)$request->from_type_id_fix : null;
+
             $report = TestReportDpt::create([
                 'test_report_sequence' => $report_seq,
                 'test_report_no' => $report_no,
                 'test_report_date' => isset($request->test_report_date) ? Date::createFromFormat('d/m/Y', $request->test_report_date)->format('Y-m-d') : null,
                 'customer_id' => $request->customer_id,
-                'material_inward_details_id' => $request->material_inward_details_id,
-                'observation_sheet_details_id' => $request->observation_sheet_details_id ?? null,
+                'material_inward_details_id' => $mid,
+                'observation_sheet_details_id' => $obsId,
+                'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
                 'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
-                'type_of_job_id' => $request->type_of_job_id,
-                'job_desc_id' => $request->job_desc_id,
+                // 'type_of_job_id' => $request->type_of_job_id,
+                // 'job_desc_id' => $request->job_desc_id,
+                'type_of_job_id' => $request->type_of_job_id ?? null,
+                'job_desc_id' => null,
+                'job_desc' => $request->job_desc,
                 'part_no' => $request->part_no,
                 'drg_no' => $request->drg_no,
                 'material_id' => $request->material_id,
@@ -324,6 +359,8 @@ class TestReportDptController extends Controller
                 
                 'procedure_ref_id' => $request->procedure_ref_id,
                 'acceptance_standard_id' => $request->acceptance_standard_id,
+                'dpt_test_no_label' => $request->filled('dpt_test_no_label') ? $request->dpt_test_no_label : 'DPT Test No.',
+                'heat_no_label' => $request->filled('heat_no_label') ? $request->heat_no_label : 'Heat No.',
                 'defectogram_image' => $defectogramPath,
                 'defectogram_image_blob' => $blobImage,
                 'total_qty' => $request->total_qty ?? 0,
@@ -508,10 +545,13 @@ class TestReportDptController extends Controller
             'test_report_sequence' => 'required',
             'test_report_date' => 'required',
             'customer_id' => 'required',
-            'type_of_job_id' => 'required',
-            'job_desc_id' => 'required',
+            // 'type_of_job_id' => 'required',
+            // 'job_desc_id' => 'required',
+            'job_desc' => 'required',
             'material_id' => 'required',
             'area_of_coverage_id' => 'required',
+        ], [
+            'job_desc.required' => 'Enter Job Description.',
         ]);
 
         $report = TestReportDpt::where('test_report_dpt_id', $request->id)->first();
@@ -520,6 +560,11 @@ class TestReportDptController extends Controller
                 'response_code' => '0',
                 'response_message' => 'Report Not Found',
             ]);
+        }
+
+        $checkDup = checkReportDuplication(TestReportDpt::class, 'test_report_no', $request->test_report_no, $request, "Duplicate Test Report No. Found.", $request->id, 'test_report_dpt_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
         }
 
         $receiptDate = !empty($request->date_of_receipt) ? Carbon::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null;
@@ -572,9 +617,11 @@ class TestReportDptController extends Controller
             $next_qty = $diff < 0 ? abs($diff) : 0;
 
             $fromTypeId = $request->from_type_id_fix;
-            $qtyCheck = $this->qtyValidation($from_qty, $next_qty, 'U', $request->customer_id, $report->material_inward_details_id, $report->observation_sheet_details_id ?? null, $fromTypeId, $request->id);
-            if ($qtyCheck) {
-                return $qtyCheck;
+            if ($report->entry_type_fix === 'From Inward' && $report->material_inward_details_id) {
+                $qtyCheck = $this->qtyValidation($from_qty, $next_qty, 'U', $request->customer_id, $report->material_inward_details_id, $report->observation_sheet_details_id ?? null, $fromTypeId, $request->id);
+                if ($qtyCheck) {
+                    return $qtyCheck;
+                }
             }
             $file = new File();
             $defectogramPath = $report->defectogram_image;
@@ -642,12 +689,16 @@ class TestReportDptController extends Controller
                 'customer_id' => $request->customer_id,
                 'material_inward_details_id' => $report->material_inward_details_id,
                 'observation_sheet_details_id' => $request->observation_sheet_details_id ?? null,
+                'entry_type_fix' => $request->entry_type_fix ?? $report->entry_type_fix ?? 'Manual',
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
                 'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
-                'type_of_job_id' => $request->type_of_job_id,
-                'job_desc_id' => $request->job_desc_id,
+                // 'type_of_job_id' => $request->type_of_job_id,
+                // 'job_desc_id' => $request->job_desc_id,
+                'type_of_job_id' => $request->type_of_job_id ?? null,
+                'job_desc_id' => null,
+                'job_desc' => $request->job_desc,
                 'part_no' => $request->part_no,
                 'drg_no' => $request->drg_no,
                 'material_id' => $request->material_id,
@@ -680,6 +731,8 @@ class TestReportDptController extends Controller
                 
                 'procedure_ref_id' => $request->procedure_ref_id,
                 'acceptance_standard_id' => $request->acceptance_standard_id,
+                'dpt_test_no_label' => $request->filled('dpt_test_no_label') ? $request->dpt_test_no_label : 'DPT Test No.',
+                'heat_no_label' => $request->filled('heat_no_label') ? $request->heat_no_label : 'Heat No.',
                 'defectogram_image' => $defectogramPath,
                 'defectogram_image_blob' => $blobImage,
                 'total_qty' => $request->total_qty ?? 0,
@@ -819,10 +872,12 @@ class TestReportDptController extends Controller
                 // Qty Validation
                 $oldQty = (float)($report->total_qty ?? 0);
                 $fromTypeId = $report->from_type_id_fix;
-                $qtyCheck = $this->qtyValidation(0, $oldQty, 'D', $report->customer_id, $report->material_inward_details_id, $report->observation_sheet_details_id ?? null, $fromTypeId, $request->id);
+                if ($report->entry_type_fix === 'From Inward' && $report->material_inward_details_id) {
+                    $qtyCheck = $this->qtyValidation(0, $oldQty, 'D', $report->customer_id, $report->material_inward_details_id, $report->observation_sheet_details_id ?? null, $fromTypeId, $request->id);
 
-                if ($qtyCheck) {
-                    return $qtyCheck;
+                    if ($qtyCheck) {
+                        return $qtyCheck;
+                    }
                 }
                 if ($report->defectogram_image) {
                     $file = new File();
@@ -892,6 +947,10 @@ class TestReportDptController extends Controller
 
     public function qtyValidation($from_qty, $next_qty, $transaction_mode, $customer_id, $material_inward_details_id, $observation_sheet_details_id = null, $from_type_id_fix = 1, $test_report_dpt_id = 0)
     {
+        if (empty($material_inward_details_id)) {
+            return null;
+        }
+
         $location_id = getCurrentLocation()->location_id;
 
         if ($from_qty > 0) {
@@ -1003,7 +1062,8 @@ class TestReportDptController extends Controller
                     'pend.current_location_id',
                     'mid.type_of_job_id',
                     'mid.job_desc_id',
-                    'mid.part_id',
+                    'mid.job_desc as job_description',
+                    //'mid.part_id',
                     'mid.material_id',
                     'mid.area_of_coverage_id',
                     'mid.procedure_ref_id',
@@ -1022,8 +1082,8 @@ class TestReportDptController extends Controller
                     'mi.material_inward_no',
                     'mi.material_inward_date',
                     'mi.test_at_fix',
-                    'toj.type_of_job',
-                    'jd.job_description',
+                    //'toj.type_of_job',
+                    //'jd.job_description',
                     'mid.part_no',
                     'mid.drg_no',
                     'm.material',
@@ -1035,9 +1095,9 @@ class TestReportDptController extends Controller
                 ])
                 ->leftJoin('material_inward_details as mid', 'mid.material_inward_details_id', '=', 'pend.material_inward_details_id')
                 ->leftJoin('material_inward as mi', 'mi.material_inward_id', '=', 'mid.material_inward_id')
-                ->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
-                ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
-                ->leftJoin('part as p', 'p.part_id', '=', 'mid.part_id')
+               // ->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
+               // ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
+                //->leftJoin('part as p', 'p.part_id', '=', 'mid.part_id')
                 ->leftJoin('materials as m', 'm.id', '=', 'mid.material_id')
                 ->leftJoin('area_of_coverage as ac', 'ac.area_of_coverage_id', '=', 'mid.area_of_coverage_id')
                 ->leftJoin('procedure_reference as pr', 'pr.procedure_reference_id', '=', 'mid.procedure_ref_id')
@@ -1090,6 +1150,8 @@ class TestReportDptController extends Controller
                     ->first();
             }
 
+            // Pending Inward customer filter (Commented for Manual Entry):
+            /*
             $customers = DB::table('pending_material_inward_dpt_qty as pend')
                 ->join('customers', 'customers.id', '=', 'pend.customer_id')
                 ->join('material_inward_details as mid', 'mid.material_inward_details_id', '=', 'pend.material_inward_details_id')
@@ -1102,17 +1164,33 @@ class TestReportDptController extends Controller
                 ->orderBy('customers.customer', 'asc')
                 ->get()
                 ->toArray();
+            */
+
+            // Fetch all customers for Manual Entry
+            $customers = Customer::select('id', 'customer')
+                ->where('status', 'Active')
+                ->orderBy('customer', 'asc')
+                ->get()
+                ->toArray();
+
+            if (empty($customers)) {
+                $customers = Customer::select('id', 'customer')
+                    ->orderBy('customer', 'asc')
+                    ->get()
+                    ->toArray();
+            }
 
             if ($currentCustomer) {
                 $exists = false;
                 foreach ($customers as $c) {
-                    if (is_array($c) ? ($c['id'] == $currentCustomer->id) : ($c->id == $currentCustomer->id)) {
+                    $cId = is_array($c) ? $c['id'] : $c->id;
+                    if ($cId == $currentCustomer->id) {
                         $exists = true;
                         break;
                     }
                 }
                 if (!$exists) {
-                    $customers[] = is_array($currentCustomer) ? $currentCustomer : $currentCustomer->toArray();
+                    $customers[] = is_array($customers[0] ?? []) ? (array)$currentCustomer : $currentCustomer;
                 }
             }
 
@@ -1207,22 +1285,26 @@ class TestReportDptController extends Controller
             'customers.customer',
             'test_report_dpt.nabl_type_fix',
             'test_report_dpt.job_type_fix',
-            'type_of_job.type_of_job',
-            'job_descriptions.job_description',
+            // 'type_of_job.type_of_job',
+            // 'job_descriptions.job_description',
+            'test_report_dpt.job_desc as job_description',
             'test_report_dpt.part_no',
             'test_report_dpt.drg_no',
             'materials.material',
             'test_report_dpt.product_code'
         ])
         ->leftJoin('customers', 'customers.id', '=', 'test_report_dpt.customer_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_dpt.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_dpt.job_desc_id')
+        // ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_dpt.type_of_job_id')
+        // ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_dpt.job_desc_id')
         ->leftJoin('materials', 'materials.id', '=', 'test_report_dpt.material_id')
         ->where('test_report_dpt.year_id', $year)
         ->where('test_report_dpt.current_location_id', $location);
 
-        if ($request->filled('type_of_job_id')) {
-            $query->where('test_report_dpt.type_of_job_id', $request->type_of_job_id);
+        // if ($request->filled('type_of_job_id')) {
+        //     $query->where('test_report_dpt.type_of_job_id', $request->type_of_job_id);
+        // }
+        if ($request->filled('customer_id')) {
+            $query->where('test_report_dpt.customer_id', $request->customer_id);
         }
 
         $reports = $query->orderBy('test_report_dpt.test_report_dpt_id', 'desc')->get();
@@ -1264,6 +1346,12 @@ class TestReportDptController extends Controller
             $report_data->amendment_date = ($report_data->amendment_date != "" && $report_data->amendment_date != "0000-00-00")
                 ? Date::createFromFormat('Y-m-d', $report_data->amendment_date)->format('d/m/Y') 
                 : "";
+            
+            $report_data->dpt_test_no_label = !empty($report_data->dpt_test_no_label) ? $report_data->dpt_test_no_label : (TestReportDPT::where('test_report_dpt_id', $id)->value('dpt_test_no_label') ?: 'DPT Test No.');
+            $report_data->heat_no_label = !empty($report_data->heat_no_label) ? $report_data->heat_no_label : (TestReportDPT::where('test_report_dpt_id', $id)->value('heat_no_label') ?: 'Heat No.');
+            if (!isset($report_data->note) || $report_data->note === null) {
+                $report_data->note = TestReportDpt::where('test_report_dpt_id', $id)->value('note') ?: '';
+            }
 
             if (isset($report_data->cmp_logo)) {
                 $report_data->cmp_logo = base64_encode($report_data->cmp_logo);
@@ -1422,7 +1510,9 @@ class TestReportDptController extends Controller
 
         $lnr_data = TestReportDpt::select([
             'test_report_dpt_id',
-            'note'
+            'note',
+            'dpt_test_no_label',
+            'heat_no_label'
         ])
         ->where('current_location_id', $location_data->location_id)
         ->orderBy('test_report_dpt_id', 'desc')
@@ -1432,14 +1522,21 @@ class TestReportDptController extends Controller
 except in full, without written approval of Ultratech ENGINEERS PRIVATE LIMITED.
 Disclaimer : *Marked informations as given by customer that can affects the validity of the test results.';
 
+        $dpt_test_no_label = 'DPT Test No.';
+        $heat_no_label = 'Heat No.';
+
         if ($lnr_data) {
-            $note = $lnr_data->note ?? '';
+            $note = $lnr_data->note ?? $note;
+            $dpt_test_no_label = !empty($lnr_data->dpt_test_no_label) ? $lnr_data->dpt_test_no_label : 'DPT Test No.';
+            $heat_no_label = !empty($lnr_data->heat_no_label) ? $lnr_data->heat_no_label : 'Heat No.';
         }
 
         return response()->json([
             'response_code' => 1,
             'lnr_data'      => [
-                'note' => $note
+                'note'              => $note,
+                'dpt_test_no_label' => $dpt_test_no_label,
+                'heat_no_label'     => $heat_no_label
             ]
         ]);
     }

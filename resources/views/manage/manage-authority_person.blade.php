@@ -35,7 +35,7 @@
                             <th>Signature</th>
                             <th>Operator Type</th>
                             <th>RSO / Radiographer</th>
-                            <th>Location</th>
+                            <!-- <th>Location</th> -->
                             <th>Validity</th>
                             <th>PMS No.</th>
                             <th>Certificate</th>
@@ -100,7 +100,7 @@
                 { data: 'signature', name: 'signature',  class:'remove_filters_short_qty'},
                 { data: 'operator_type', name: 'operator_type', },
                 { data: 'authority_person_type_value_fix', name: 'authority_person.authority_person_type_value_fix', },
-                { data: 'location_name', name: 'location.location_name', },
+                // { data: 'location_name', name: 'location.location_name', },
                 { data: 'validity', name: 'validity', },
                 { data: 'pms_no', name: 'pms_no', },
                 { data: 'certificate', name: 'certificate',class:'remove_filters_short_qty' },

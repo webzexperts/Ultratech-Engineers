@@ -111,8 +111,8 @@ function fillServicePOShortCloseTable() {
             tblHtml += `<td>${supplier_name}</td>`;
             tblHtml += `<td>${purpose}</td>`;
             tblHtml += `<td>${ref_no_date}</td>`;
-            tblHtml += `<td>${bill_to}</td>`;
-            tblHtml += `<td>${for_location}</td>`;
+            // tblHtml += `<td>${bill_to}</td>`;
+            // tblHtml += `<td>${for_location}</td>`;
             tblHtml += `<td>${item_name}</td>`;
             tblHtml += `<td>${item_group}</td>`;
             tblHtml += `<td>${main_group}</td>`;

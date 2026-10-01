@@ -26,11 +26,11 @@ function fetchAndFillItem(id) {
                 jQuery('#ItemModal').find('#item_group_id').val(data.item_data.item_group_id).trigger("change");
                 jQuery('#ItemModal').find('#item_type').val(data.item_data.item_type).trigger("change");
                 jQuery('#ItemModal').find('#identification_req').val(data.item_data.identification_req).trigger("change.select2");
-                jQuery('#ItemModal').find('#inter_location_transfer').val(data.item_data.inter_location_transfer).trigger("change.select2");
-                if (data.item_data.used_inter_location_transfer_item == true) {
-                    jQuery('#inter_location_transfer').addClass('skip-tab');
-                    setSelect2Readonly('#commonItemForm #inter_location_transfer', true);
-                }
+                // jQuery('#ItemModal').find('#inter_location_transfer').val(data.item_data.inter_location_transfer).trigger("change.select2");
+                // if (data.item_data.used_inter_location_transfer_item == true) {
+                //     jQuery('#inter_location_transfer').addClass('skip-tab');
+                //     setSelect2Readonly('#commonItemForm #inter_location_transfer', true);
+                // }
                 if (data.item_data.used_in_any == true) {
                     jQuery('#item_group_id').addClass('skip-tab');
                     setSelect2Readonly('#commonItemForm #item_group_id', true);
@@ -93,9 +93,9 @@ jQuery('#resetbtn').on('click', function () {
         setSelect2Readonly('#commonItemForm #item_group_id', false);
         jQuery('#ItemModal').find('#item_type').val('').trigger('change.select2');
         jQuery('#ItemModal').find('#identification_req').val('').trigger('change.select2');
-        jQuery('#ItemModal').find('#inter_location_transfer').val('Allowed').trigger('change.select2');
-        jQuery('#inter_location_transfer').removeClass('skip-tab');
-        setSelect2Readonly('#commonItemForm #inter_location_transfer', false);
+        // jQuery('#ItemModal').find('#inter_location_transfer').val('Allowed').trigger('change.select2');
+        // jQuery('#inter_location_transfer').removeClass('skip-tab');
+        // setSelect2Readonly('#commonItemForm #inter_location_transfer', false);
         jQuery('#ItemModal').find('#unit_id').val('').trigger('change.select2');
         jQuery('#ItemModal').find('#status').val('Active').trigger('change.select2');
         jQuery('#ItemModal').find('#document_ref_no').prop({ tabindex: 0, readonly: false });
@@ -170,24 +170,24 @@ $('#commonItemForm').on('submit', function (e) {
         return;
     }
 
-    var item_type = jQuery('#item_type option:selected').val();
-    if (item_type == 'film' || item_type == 'Industrial X-Ray Films') {
-        var conv_factor_val = jQuery('#conv_factor').val().trim();
-        if (conv_factor_val === '') {
-            // toastr.error("Enter Conv. Factor.");
-            jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
-            jQuery('#ItemModal').find('#submitbtn').prop('disabled', false);
-            jQuery('#conv_factor').focus();
-            return;
-        }
-        if (parseInt(conv_factor_val) <= 0 || isNaN(parseInt(conv_factor_val))) {
-            toastr.error("Enter Conv. Factor Greater Than 0.");
-            jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
-            jQuery('#ItemModal').find('#submitbtn').prop('disabled', false);
-            jQuery('#conv_factor').focus();
-            return;
-        }
-    }
+    // var item_type = jQuery('#item_type option:selected').val();
+    // if (item_type == 'film' || item_type == 'Industrial X-Ray Films') {
+    //     var conv_factor_val = jQuery('#conv_factor').val().trim();
+    //     if (conv_factor_val === '') {
+    //         // toastr.error("Enter Conv. Factor.");
+    //         jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
+    //         jQuery('#ItemModal').find('#submitbtn').prop('disabled', false);
+    //         jQuery('#conv_factor').focus();
+    //         return;
+    //     }
+    //     if (parseInt(conv_factor_val) <= 0 || isNaN(parseInt(conv_factor_val))) {
+    //         toastr.error("Enter Conv. Factor Greater Than 0.");
+    //         jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
+    //         jQuery('#ItemModal').find('#submitbtn').prop('disabled', false);
+    //         jQuery('#conv_factor').focus();
+    //         return;
+    //     }
+    // }
 
     if (!form.checkValidity()) {
         e.stopPropagation();
@@ -238,7 +238,7 @@ $('#commonItemForm').on('submit', function (e) {
                                         if (form) {
                                             form.classList.remove('was-validated');
                                         }
-                                        jQuery('#ItemModal').find('#inter_location_transfer').val('Allowed').trigger('change.select2');
+                                        // jQuery('#ItemModal').find('#inter_location_transfer').val('Allowed').trigger('change.select2');
                                         // getItemCode();
                                         setSelect2Readonly('#identification_req', true);
                                         setSelect2Readonly('#item_type', true);
@@ -449,13 +449,14 @@ function ChangeItemType() {
          jQuery('#identification_req').val('No').trigger("change.select2");
          setSelect2Readonly('#identification_req', true);
          setSelect2Readonly('#item_type', true);
-         let isUsedInIssue = jQuery('#ItemModal').data('used_item_issue');
-         if (isUsedInIssue) {
-             jQuery('#ItemModal #conv_factor').prop('readonly', true).prop('required', true).attr('tabindex', '-1').addClass('skip-tab');
-         } else {
-             jQuery('#ItemModal #conv_factor').prop('readonly', false).prop('required', true).attr('tabindex', '0').removeClass('skip-tab');
-         }
-         jQuery('#ItemModal #conv_factor_astric').show();
+         // let isUsedInIssue = jQuery('#ItemModal').data('used_item_issue');
+         // if (isUsedInIssue) {
+         //     jQuery('#ItemModal #conv_factor').prop('readonly', true).prop('required', true).attr('tabindex', '-1').addClass('skip-tab');
+         // } else {
+         //     jQuery('#ItemModal #conv_factor').prop('readonly', false).prop('required', true).attr('tabindex', '0').removeClass('skip-tab');
+         // }
+         // jQuery('#ItemModal #conv_factor_astric').show();
+         jQuery('#ItemModal #conv_factor').val('');
  
          jQuery('#ItemModal #document_ref_no').prop({ tabindex: 0, readonly: false });
         jQuery('#ItemModal #validity_date').prop({ tabindex: 0, readonly: false });
@@ -515,8 +516,8 @@ jQuery('#ItemModal').on('hide.bs.modal', function (e) {
     jQuery('#ItemModal').find('#conv_factor').val('').prop('readonly', true).prop('required', false).attr('tabindex', '-1');
     jQuery('#ItemModal').find('#conv_factor_astric').hide();
     jQuery('#ItemModal').data('used_item_issue', false);
-    jQuery('#inter_location_transfer').removeClass('skip-tab');
-    setSelect2Readonly('#commonItemForm #inter_location_transfer', false);
+    // jQuery('#inter_location_transfer').removeClass('skip-tab');
+    // setSelect2Readonly('#commonItemForm #inter_location_transfer', false);
     jQuery('#item_group_id').removeClass('skip-tab');
     setSelect2Readonly('#commonItemForm #item_group_id', false);
 });
@@ -532,7 +533,7 @@ $('#ItemModal').on('shown.bs.modal', function () {
         // getItemCode();
         // }, 300);
     }
-    jQuery('#ItemModal').find('#inter_location_transfer').val('Allowed').trigger('change.select2');
+    // jQuery('#ItemModal').find('#inter_location_transfer').val('Allowed').trigger('change.select2');
     setSelect2Readonly('#identification_req', true);
     setSelect2Readonly('#item_type', true);
     // setSelect2Readonly('#unit_id', true);
@@ -560,7 +561,7 @@ jQuery('#ItemModal').on('click', '#add_new', function () {
     setSelect2Readonly('#commonItemForm #item_group_id', false);
     jQuery('#ItemModal').find('#item_type').val('').trigger('change.select2');
     jQuery('#ItemModal').find('#identification_req').val('').trigger('change.select2');
-    jQuery('#ItemModal').find('#inter_location_transfer').val('Allowed').trigger('change.select2');
+    // jQuery('#ItemModal').find('#inter_location_transfer').val('Allowed').trigger('change.select2');
     jQuery('#ItemModal').find('#unit_id').val('').trigger('change.select2');
     jQuery('#ItemModal').find('#status').val('Active').trigger('change.select2');
     jQuery('#ItemModal').find('#document_ref_no').prop({ tabindex: 0, readonly: false });
@@ -569,8 +570,8 @@ jQuery('#ItemModal').on('click', '#add_new', function () {
     jQuery('#ItemModal').data('used_item_issue', false);
     jQuery('#ItemModal').find('#conv_factor_astric').hide();
     jQuery('#ItemModal').find('#add_new').hide();
-    jQuery('#inter_location_transfer').removeClass('skip-tab');
-    setSelect2Readonly('#commonItemForm #inter_location_transfer', false);
+    // jQuery('#inter_location_transfer').removeClass('skip-tab');
+    // setSelect2Readonly('#commonItemForm #inter_location_transfer', false);
 });
 
 jQuery('#ItemGroupModal').on('hide.bs.modal', function (e) {

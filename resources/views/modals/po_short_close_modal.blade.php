@@ -32,8 +32,8 @@
                                 <th>Date</th>
                                 <th>Supplier</th>
                                 <th>Ref. No. & Date</th>
-                                <th>Bill To</th>
-                                <th>Ship To</th>
+                                <!-- <th>Bill To</th>
+                                <th>Ship To</th> -->
                                 <th>Item</th>
                                 <th>Item Group</th>
                                 <th>Main Group</th>

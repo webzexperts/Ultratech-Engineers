@@ -39,10 +39,11 @@ class CustomerDCNonReturnableController extends Controller
             'material_inward.po_no as mi_po_number',
             'material_inward.po_date as mi_po_date',
             'material_inward_details.type_of_testing_id_fix as type_of_test',
-            'type_of_job.type_of_job',
-            'job_descriptions.job_description',
+            //'type_of_job.type_of_job',
+            //'job_descriptions.job_description',
             'material_inward_details.part_no',
             'material_inward_details.drg_no',
+            'material_inward_details.job_desc as job_description',
             'materials.material',
             'materials.material as material_name',
             'material_inward_details.heat_no as mid_heat_no',
@@ -61,8 +62,8 @@ class CustomerDCNonReturnableController extends Controller
         ->leftJoin('material_inward_details', 'material_inward_details.material_inward_details_id', '=', 'customer_dc_non_returnable_details.material_inward_details_id')
         ->leftJoin('material_inward', 'material_inward.material_inward_id', '=', 'material_inward_details.material_inward_id')
         ->leftJoin('customers', 'customers.id', '=', 'customer_dc_non_returnable.customer_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'material_inward_details.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'material_inward_details.job_desc_id')
+        //->leftJoin('type_of_job', 'type_of_job.id', '=', 'material_inward_details.type_of_job_id')
+        //->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'material_inward_details.job_desc_id')
         ->leftJoin('materials', 'materials.id', '=', 'material_inward_details.material_id')
         ->leftJoin('admin as prepared_by', 'prepared_by.id', '=', 'customer_dc_non_returnable.prepared_by_user_id')
         ->where('customer_dc_non_returnable.year_id', $year_data->id)
@@ -166,8 +167,8 @@ class CustomerDCNonReturnableController extends Controller
         $query = DB::table('pending_at_lab_customer_dc_non_returnable_qty as pend')
             ->join('material_inward_details as mid', 'mid.material_inward_details_id', '=', 'pend.material_inward_details_id')
             ->join('material_inward as mi', 'mi.material_inward_id', '=', 'mid.material_inward_id')
-            ->leftJoin('type_of_job', 'type_of_job.id', '=', 'mid.type_of_job_id')
-            ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'mid.job_desc_id')
+            //->leftJoin('type_of_job', 'type_of_job.id', '=', 'mid.type_of_job_id')
+            //->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'mid.job_desc_id')
             ->leftJoin('materials', 'materials.id', '=', 'mid.material_id')
             ->select([
                 'pend.material_inward_details_id',
@@ -178,8 +179,9 @@ class CustomerDCNonReturnableController extends Controller
                 'mi.po_no as mi_po_number',
                 'mi.po_date as mi_po_date',
                 'mid.type_of_testing_id_fix as type_of_test',
-                'type_of_job.type_of_job',
-                'job_descriptions.job_description',
+                //'type_of_job.type_of_job',
+                //'job_descriptions.job_description',
+                'mid.job_desc as job_description',
                 'mid.part_no',
                 'mid.drg_no',
                 'materials.material',
@@ -283,6 +285,11 @@ class CustomerDCNonReturnableController extends Controller
             } else {
                 $dc_number = $request->customer_dc_non_returnable_no;
                 $dc_sequence = $request->customer_dc_non_returnable_sequence;
+            }
+
+            $checkDup = checkReportDuplication(CustomerDCNonReturnable::class, 'customer_dc_non_returnable_no', $dc_number, $request, "Duplicate DC No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
             }
 
             $page_id = getMenuIdBassedOnDisplayName('customer_dc_non_returnable');
@@ -419,6 +426,11 @@ class CustomerDCNonReturnableController extends Controller
 
         if (!$dc) {
             return response()->json(['response_code' => 0, 'response_message' => 'Record not found.']);
+        }
+
+        $checkDup = checkReportDuplication(CustomerDCNonReturnable::class, 'customer_dc_non_returnable_no', $request->customer_dc_non_returnable_no, $request, "Duplicate DC No. Found.", $id, 'customer_dc_non_returnable_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
         }
 
         DB::beginTransaction();

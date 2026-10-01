@@ -36,7 +36,7 @@
                             <th>Phone</th>
                             <th>Email</th>
                             <th>Status</th>
-                            <th>Allow Production Back Days Entry</th>
+                            <!-- <th>Allow Production Back Days Entry</th> -->
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -93,7 +93,7 @@
                 { data: 'phone_no', name: 'admin.phone_no'},
                 { data: 'email', name: 'admin.email'},
                 { data: 'status', name: 'admin.status'},
-                { data: 'allow_production_back_days_entry', name: 'admin.allow_production_back_days_entry'},
+                // { data: 'allow_production_back_days_entry', name: 'admin.allow_production_back_days_entry'},
                 { data: 'last_by', name: 'last_by', },
                 { data: 'last_on', name: 'admin.last_on', className: "wsn"},
                 { data: 'created_by', name: 'created_by', },

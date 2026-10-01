@@ -41,7 +41,7 @@
                             <th>Type of Test</th>
                             <th>Type of Job</th>
                             <th>Job Description</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>Estimation</th>
                             <th>Costing</th>
                             <th>Prepared By</th>

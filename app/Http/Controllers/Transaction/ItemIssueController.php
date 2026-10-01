@@ -182,6 +182,11 @@ class ItemIssueController extends Controller
                 $issue_sequence = $request->issue_sequence;
             }
 
+            $checkDup = checkReportDuplication(ItemIssue::class, 'issue_number', $issue_number, $request, "Duplicate Issue No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
+
             $page_id = getMenuIdBassedOnDisplayName('item_issue');
             $assign_format_no = getAssignFormateNoForTransaction($current_location_id, $page_id->id,$request->issue_date);
 
@@ -257,13 +262,13 @@ class ItemIssueController extends Controller
 
                             stockEffect($current_location_id, $ctVal['item_id'],$ctVal['item_id'],$ctVal['issue_qty'],0,$amount,0,'Insert','D','Item Issue', $issue_details_data->issue_detail_id, $ctVal['sr_table_unique_id'] ?? null, $ctVal['sr_table_pk_id'] ?? null);
 
-                            if ($ctVal['item_type'] == 'film' && $ctVal['issue_type'] == 'Production Area') {
-                                if (empty($ctVal['conv_factor']) || $ctVal['conv_factor'] <= 0) {
-                                    throw new \Exception("Add Conversion Factor in Item Master");
-                                }
-                                $issue_sq_in = $ctVal['issue_qty'] * $ctVal['conv_factor'];
-                                stockEffectSQIN($current_location_id, $ctVal['item_id'], $ctVal['item_id'], $issue_sq_in, 0, 'Insert', 'U', 'Item Issue', $issue_details_data->issue_detail_id);
-                            }
+                            // if ($ctVal['item_type'] == 'film' && $ctVal['issue_type'] == 'Production Area') {
+                            //     if (empty($ctVal['conv_factor']) || $ctVal['conv_factor'] <= 0) {
+                            //         throw new \Exception("Add Conversion Factor in Item Master");
+                            //     }
+                            //     $issue_sq_in = $ctVal['issue_qty'] * $ctVal['conv_factor'];
+                            //     stockEffectSQIN($current_location_id, $ctVal['item_id'], $ctVal['item_id'], $issue_sq_in, 0, 'Insert', 'U', 'Item Issue', $issue_details_data->issue_detail_id);
+                            // }
                         }
                     }
                 }
@@ -313,7 +318,7 @@ class ItemIssueController extends Controller
                     'Insufficient Stock',
                     'Invalid Location Code',
                     'Invalid Item',
-                    'Add Conversion Factor in Item Master'
+                    // 'Add Conversion Factor in Item Master'
                 ]) || str_contains($message, 'Sr. No. Is Already') || str_contains($message, "You Can't Delete")
             ) {
                 return response()->json([
@@ -410,6 +415,11 @@ class ItemIssueController extends Controller
             'issue_sequence.required' => 'Enter Issue No.',
         ]);
 
+        $checkDup = checkReportDuplication(ItemIssue::class, 'issue_number', $request->issue_number, $request, "Duplicate Issue No. Found.", $request->id, 'issue_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
+
         try
         {                    
             $page_id = getMenuIdBassedOnDisplayName('item_issue');
@@ -490,13 +500,13 @@ class ItemIssueController extends Controller
 
                         stockEffect($current_location_id, $ctVal['item_id'],$ctVal['item_id'],$ctVal['issue_qty'],0,$amount,0,'Insert','D','Item Issue', $issue_details_data->issue_detail_id, $ctVal['sr_table_unique_id'] ?? null, $ctVal['sr_table_pk_id'] ?? null);
 
-                        if ($ctVal['item_type'] == 'film' && $ctVal['issue_type'] == 'Production Area') {
-                            if (empty($ctVal['conv_factor']) || $ctVal['conv_factor'] <= 0) {
-                                throw new \Exception("Add Conversion Factor in Item Master");
-                            }
-                            $issue_sq_in = $ctVal['issue_qty'] * $ctVal['conv_factor'];
-                            stockEffectSQIN($current_location_id, $ctVal['item_id'], $ctVal['item_id'], $issue_sq_in, 0, 'Insert', 'U', 'Item Issue', $issue_details_data->issue_detail_id);
-                        }
+                        // if ($ctVal['item_type'] == 'film' && $ctVal['issue_type'] == 'Production Area') {
+                        //     if (empty($ctVal['conv_factor']) || $ctVal['conv_factor'] <= 0) {
+                        //         throw new \Exception("Add Conversion Factor in Item Master");
+                        //     }
+                        //     $issue_sq_in = $ctVal['issue_qty'] * $ctVal['conv_factor'];
+                        //     stockEffectSQIN($current_location_id, $ctVal['item_id'], $ctVal['item_id'], $issue_sq_in, 0, 'Insert', 'U', 'Item Issue', $issue_details_data->issue_detail_id);
+                        // }
                     }
 
                  
@@ -526,26 +536,26 @@ class ItemIssueController extends Controller
 
                             stockEffect($current_location_id,$ctVal['item_id'], $olddata->item_id,$ctVal['issue_qty'],$olddata->issue_qty,$ctVal['issue_qty'] * $olddata->rate_unit,$olddata->amount,'Update','D','Item Issue',$ctVal['issue_detail_id'], $ctVal['sr_table_unique_id'] ?? $olddata->sr_table_unique_id ?? null, $ctVal['sr_table_pk_id'] ?? $olddata->sr_table_pk_id ?? null);
 
-                            $curQtySqIn = 0;
-                            $preQtySqIn = 0;
+                            // $curQtySqIn = 0;
+                            // $preQtySqIn = 0;
 
-                            if ($ctVal['item_type'] == 'film' && $ctVal['issue_type'] == 'Production Area') {
-                                if (empty($ctVal['conv_factor']) || $ctVal['conv_factor'] <= 0) {
-                                    throw new \Exception("Add Conversion Factor in Item Master");
-                                }
-                                $curQtySqIn = $ctVal['issue_qty'] * $ctVal['conv_factor'];
-                            }
+                            // if ($ctVal['item_type'] == 'film' && $ctVal['issue_type'] == 'Production Area') {
+                            //     if (empty($ctVal['conv_factor']) || $ctVal['conv_factor'] <= 0) {
+                            //         throw new \Exception("Add Conversion Factor in Item Master");
+                            //     }
+                            //     $curQtySqIn = $ctVal['issue_qty'] * $ctVal['conv_factor'];
+                            // }
 
-                            if ($olddata && ($olddata->item_type == 'film' && $olddata->issue_type == 'Production Area')) {
-                                if (empty($olddata->conv_factor) || $olddata->conv_factor <= 0) {
-                                    throw new \Exception("Add Conversion Factor in Item Master");
-                                }
-                                $preQtySqIn = $olddata->issue_qty * $olddata->conv_factor;
-                            }
+                            // if ($olddata && ($olddata->item_type == 'film' && $olddata->issue_type == 'Production Area')) {
+                            //     if (empty($olddata->conv_factor) || $olddata->conv_factor <= 0) {
+                            //         throw new \Exception("Add Conversion Factor in Item Master");
+                            //     }
+                            //     $preQtySqIn = $olddata->issue_qty * $olddata->conv_factor;
+                            // }
 
-                            if ($curQtySqIn > 0 || $preQtySqIn > 0) {
-                                stockEffectSQIN($current_location_id, $ctVal['item_id'], $olddata->item_id, $curQtySqIn, $preQtySqIn, 'Update', 'U', 'Item Issue', $ctVal['issue_detail_id']);
-                            }
+                            // if ($curQtySqIn > 0 || $preQtySqIn > 0) {
+                            //     stockEffectSQIN($current_location_id, $ctVal['item_id'], $olddata->item_id, $curQtySqIn, $preQtySqIn, 'Update', 'U', 'Item Issue', $ctVal['issue_detail_id']);
+                            // }
                             
                             if($olddata->issue_type != $ctVal['issue_qty']){
                                 $detailRecord = ItemIssueDetails::find($ctVal['issue_detail_id']);
@@ -602,13 +612,13 @@ class ItemIssueController extends Controller
 
                             stockEffect($current_location_id,$olddata->item_id,$olddata->item_id,0,$olddata->issue_qty,0,$olddata->amount,'Delete','D','Item Issue',$ctVal['issue_detail_id'], $olddata->sr_table_unique_id ?? null, $olddata->sr_table_pk_id ?? null);
 
-                            if ($olddata && ($olddata->item_type == 'film' && $olddata->issue_type == 'Production Area')) {
-                                if (empty($olddata->conv_factor) || $olddata->conv_factor <= 0) {
-                                    throw new \Exception("Add Conversion Factor in Item Master");
-                                }
-                                $preQtySqIn = $olddata->issue_qty * $olddata->conv_factor;
-                                stockEffectSQIN($current_location_id, $olddata->item_id, $olddata->item_id, 0, $preQtySqIn, 'Delete', 'U', 'Item Issue', $ctVal['issue_detail_id']);
-                            }
+                            // if ($olddata && ($olddata->item_type == 'film' && $olddata->issue_type == 'Production Area')) {
+                            //     if (empty($olddata->conv_factor) || $olddata->conv_factor <= 0) {
+                            //         throw new \Exception("Add Conversion Factor in Item Master");
+                            //     }
+                            //     $preQtySqIn = $olddata->issue_qty * $olddata->conv_factor;
+                            //     stockEffectSQIN($current_location_id, $olddata->item_id, $olddata->item_id, 0, $preQtySqIn, 'Delete', 'U', 'Item Issue', $ctVal['issue_detail_id']);
+                            // }
 
                             if(!empty($olddata->sr_table_pk_id)){
 
@@ -669,7 +679,7 @@ class ItemIssueController extends Controller
                     'Insufficient Stock',
                     'Invalid Location Code',
                     'Invalid Item',
-                    'Add Conversion Factor in Item Master'
+                    // 'Add Conversion Factor in Item Master'
                 ]) || str_contains($message, 'Sr. No. Is Already') || str_contains($message, "You Can't Delete")
             ) {
                 return response()->json([
@@ -716,13 +726,13 @@ class ItemIssueController extends Controller
                 foreach($issue_details_data as $ctVal){
                     stockEffect($LocationData,$ctVal->item_id,$ctVal->item_id,0,$ctVal->issue_qty,0,$ctVal->amount,'Delete','D','Item Issue',$ctVal->issue_detail_id, $ctVal->sr_table_unique_id ?? null, $ctVal->sr_table_pk_id ?? null);
                     
-                    if ($ctVal && ($ctVal->item_type == 'film' && $ctVal->issue_type == 'Production Area')) {
-                        if (empty($ctVal->conv_factor) || $ctVal->conv_factor <= 0) {
-                            throw new \Exception("Add Conversion Factor in Item Master");
-                        }
-                        $preQtySqIn = $ctVal->issue_qty * $ctVal->conv_factor;
-                        stockEffectSQIN($LocationData, $ctVal->item_id, $ctVal->item_id, 0, $preQtySqIn, 'Delete', 'U', 'Item Issue', $ctVal->issue_detail_id);
-                    }
+                    // if ($ctVal && ($ctVal->item_type == 'film' && $ctVal->issue_type == 'Production Area')) {
+                    //     if (empty($ctVal->conv_factor) || $ctVal->conv_factor <= 0) {
+                    //         throw new \Exception("Add Conversion Factor in Item Master");
+                    //     }
+                    //     $preQtySqIn = $ctVal->issue_qty * $ctVal->conv_factor;
+                    //     stockEffectSQIN($LocationData, $ctVal->item_id, $ctVal->item_id, 0, $preQtySqIn, 'Delete', 'U', 'Item Issue', $ctVal->issue_detail_id);
+                    // }
 
                     if(!empty($ctVal->sr_table_pk_id)){
 
@@ -771,7 +781,7 @@ class ItemIssueController extends Controller
                     'Insufficient Stock',
                     'Invalid Location Code',
                     'Invalid Item',
-                    'Add Conversion Factor in Item Master'
+                    // 'Add Conversion Factor in Item Master'
                 ]) || str_contains($message, 'Sr. No. Is Already') || str_contains($message, "You Can't Delete"))
             {
                 $error_msg = $message;

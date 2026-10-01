@@ -33,6 +33,23 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Job Type -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                </div>
+                                <div class="col-8">
+                                    <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_non_welding" value="Non-Welding" checked>
+                                            <label class="form-check-label" for="job_type_non_welding">Non-Welding</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_welding" value="Welding">
+                                            <label class="form-check-label" for="job_type_welding">Welding</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Sr. No. -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
@@ -79,39 +96,36 @@
                                 </div>
                             </div>
                             <!-- Type of Job -->
+                            <!--
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
                                     <label for="type_of_job_id" class="form-label">Type of Job <sup class="astric">*</sup></label>
                                 </div>
                                 <div class="col-8 position-relative">
-                                    <div class="d-flex gap-2">
-
-                                        <select class="js-example-basic-single" name="type_of_job_id" id="type_of_job_id" required>
-                                            <option value="">Select Type of Job</option>
-                                            @forelse(getTypeOfJob() as $tj)
-                                            <option value="{{ $tj->id }}">{{ $tj->type_of_job }}</option>
-                                            @empty
-                                            @endforelse
-                                        </select>
-                                        <button type="button" class="btn btn-success btn-sm" id="copyAllBtn" disabled>Copy</button>
-                                        <div class="invalid-tooltip">Select Type of Job.</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Job Description -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="job_desc_id" class="form-label">Job Description <sup class="astric">*</sup></label>
-                                </div>
-                                <div class="col-8 position-relative">
-                                    <select class="js-example-basic-single" name="job_desc_id" id="job_desc_id" required>
-                                        <option value="">Select Job Description</option>
-                                        @forelse(getJobDescription() as $jd)
-                                        <option value="{{ $jd->id }}">{{ $jd->job_description }}</option>
+                                    <select class="js-example-basic-single" name="type_of_job_id" id="type_of_job_id">
+                                        <option value="">Select Type of Job</option>
+                                        @forelse(getTypeOfJob() as $tj)
+                                        <option value="{{ $tj->id }}">{{ $tj->type_of_job }}</option>
                                         @empty
                                         @endforelse
                                     </select>
-                                    <div class="invalid-tooltip">Select Job Description.</div>
+                                    <div class="invalid-tooltip">Select Type of Job.</div>
+                                </div>
+                            </div>
+                            -->
+                            <input type="hidden" name="type_of_job_id" id="type_of_job_id" value="">
+
+                            <!-- Job Description -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="job_desc" class="form-label">Job Description <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <div class="d-flex gap-2">
+                                        <input type="text" class="form-control" name="job_desc" id="job_desc" required autocomplete="off">
+                                        <div class="invalid-tooltip">Enter Job Description.</div>
+                                        <button type="button" class="btn btn-success btn-sm ms-1" id="copyAllBtn">Copy</button>
+                                    </div>
                                 </div>
                             </div>
                             <!-- Part No. -->
@@ -136,13 +150,13 @@
                             <!-- New Part No. Textbox with suggestion -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
-                                    <label for="part_no" class="form-label">Part No.</label>
+                                    <label for="part_no" class="form-label">Part No. / Die No.</label>
                                 </div>
                                 <div class="col-8">
                                     <input type="text" class="form-control" id="part_no" name="part_no" onkeyup="suggestPartNo(event, this)" autocomplete="off">
                                     <div id="part_no_list"></div>
                                     <input type="hidden" name="part_no_suggestion" id="part_no_suggestion">
-                                    <div class="invalid-tooltip">Enter Part No.</div>
+                                    <div class="invalid-tooltip">Enter Part No. / Die No.</div>
                                 </div>
                             </div>
 
@@ -159,13 +173,42 @@
                             <!-- New Drg. No. Textbox with suggestion -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
-                                    <label for="drg_no" class="form-label">Drg. No.</label></label>
+                                    <label for="drg_no" class="form-label">Drg. No.</label>
                                 </div>
                                 <div class="col-8">
                                     <input type="text" class="form-control" id="drg_no" name="drg_no" onkeyup="suggestDrgNo(event, this)" autocomplete="off">
                                     <div id="drg_no_list"></div>
                                     <input type="hidden" name="drg_no_suggestion" id="drg_no_suggestion">
                                     <div class="invalid-tooltip">Enter Drg. No.</div>
+                                </div>
+                            </div>
+
+                            <!-- Material -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="material_id" class="form-label">Material <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <select class="js-example-basic-single" name="material_id" id="material_id" required>
+                                        <option value="">Select Material</option>
+                                        @forelse(getMaterial() as $m)
+                                        <option value="{{ $m->id }}">{{ $m->material }}</option>
+                                        @empty
+                                        @endforelse
+                                    </select>
+                                    <div class="invalid-tooltip">Select Material.</div>
+                                </div>
+                            </div>
+
+                            <!-- Product Code -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="product_code" class="form-label">Product Code</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="product_code" name="product_code" onkeyup="suggestProductCode(event, this)" autocomplete="off">
+                                    <div id="product_code_list"></div>
+                                    <input type="hidden" name="product_code_suggestion" id="product_code_suggestion">
                                 </div>
                             </div>
 
@@ -189,6 +232,30 @@
 
                         <!-- Column 2 -->
                         <div class="col-md-4">
+                            <!-- Welding Process -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="welding_process" class="form-label">Welding Process</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="welding_process" name="welding_process" onkeyup="suggestWeldingProcess(event, this)" autocomplete="off">
+                                    <div id="welding_process_list"></div>
+                                    <input type="hidden" name="welding_process_suggestion" id="welding_process_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Joint Type -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="joint_type" class="form-label">Joint Type</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="joint_type" name="joint_type" onkeyup="suggestJointType(event, this)" autocomplete="off">
+                                    <div id="joint_type_list"></div>
+                                    <input type="hidden" name="joint_type_suggestion" id="joint_type_suggestion">
+                                </div>
+                            </div>
+
                             <!-- Source Used -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
@@ -439,10 +506,10 @@
                                             <th scope="col" class="th_sfd_unit">SFD</th>
                                             <th scope="col">IQI Designation</th>
                                             <th scope="col">IQI Sensitivity</th>
-                                            <th scope="col">Film Size</th>
-                                            <th scope="col">No. of Film</th>
                                             <th scope="col">Test Technique</th>
                                             <th scope="col">Film Position</th>
+                                            <th scope="col">Film Size</th>
+                                            <th scope="col">No. of Film</th>
                                             <th scope="col" class="d-none">Film Qty</th>
                                             <th scope="col" class="d-none th_sq_unit">SqIn / SqCm</th>
                                             <th scope="col" class="d-none th_total_sq_unit">Total SqIn / SqCm</th>

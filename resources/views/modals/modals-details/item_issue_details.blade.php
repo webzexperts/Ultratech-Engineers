@@ -14,7 +14,8 @@
                     <input type="hidden" name="row_index" id="row_index" />  
                     <input type="hidden" name="sr_table_unique_id" id="sr_table_unique_id"/>
                     <input type="hidden" name="issue_detail_id" id="issue_detail_id" /> 
-                    <input type="hidden" name="conv_factor" id="conv_factor" /> 
+                    {{-- <input type="hidden" name="conv_factor" id="conv_factor" /> --}}
+                    <input type="hidden" name="conv_factor" id="conv_factor" value="" /> 
                     <input type="hidden" name="item_type" id="item_type" /> 
                     {{-- <input type="hidden" name="stock_rate_unit" id="stock_rate_unit"/>  --}}
                     {{-- <input type="hidden" name="amount" id="amount"/>  --}}

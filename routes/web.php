@@ -104,6 +104,8 @@ use App\Http\Controllers\Transaction\TestReportDptController;
 use App\Http\Controllers\Transaction\TestReportMptController;
 use App\Http\Controllers\Transaction\RtLabelPrintController;
 use App\Http\Controllers\Transaction\ObservationSheetController;
+use App\Http\Controllers\Transaction\FilmDCController;
+use App\Http\Controllers\Transaction\InvoiceController;
 
 use App\Models\Transaction\DeliveryChallanCustomer;
 use App\Http\Controllers\Reports\DeliveryChallanCustomerReportController;
@@ -248,6 +250,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('manage-test_report_ut',                     [TestReportUtController::class, 'manage'])->name('manage-test_report_ut');
     Route::get('manage-test_report_dpt',                    [TestReportDptController::class, 'manage'])->name('manage-test_report_dpt');
     Route::get('manage-test_report_mpt',                    [TestReportMptController::class, 'manage'])->name('manage-test_report_mpt');
+    Route::get('manage-film_dc',                            [FilmDCController::class, 'manage'])->name('manage-film_dc');
+    Route::get('manage-invoice',                            [InvoiceController::class, 'manage'])->name('manage-invoice');
 
     Route::get('manage-observation_sheet', [ObservationSheetController::class, 'manage'])->name('manage-observation_sheet');
     
@@ -368,7 +372,9 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('listing-test_report_ut',                    [TestReportUtController::class, 'index'])->name('listing-test_report_ut');
     Route::post('listing-test_report_dpt',                   [TestReportDptController::class, 'index'])->name('listing-test_report_dpt');
     Route::post('listing-test_report_mpt',                   [TestReportMptController::class, 'index'])->name('listing-test_report_mpt');
-     Route::post('listing-observation_sheet', [ObservationSheetController::class, 'index'])->name('listing-observation_sheet');
+    Route::post('listing-film_dc',                           [FilmDCController::class, 'index'])->name('listing-film_dc');
+    Route::post('listing-invoice',                           [InvoiceController::class, 'index'])->name('listing-invoice');
+    Route::post('listing-observation_sheet', [ObservationSheetController::class, 'index'])->name('listing-observation_sheet');
 
 
 
@@ -489,6 +495,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('store-test_report_ut',                      [TestReportUtController::class, 'store'])->name('store-test_report_ut');
     Route::post('store-test_report_dpt',                     [TestReportDptController::class, 'store'])->name('store-test_report_dpt');
     Route::post('store-test_report_mpt',                     [TestReportMptController::class, 'store'])->name('store-test_report_mpt');
+    Route::post('store-film_dc',                             [FilmDCController::class, 'store'])->name('store-film_dc');
+    Route::post('store-invoice',                             [InvoiceController::class, 'store'])->name('store-invoice');
     Route::post('store-observation_sheet', [ObservationSheetController::class, 'store'])->name('store-observation_sheet');
     
 
@@ -569,6 +577,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('edit-test_report_ut',                        [TestReportUtController::class, 'edit'])->name('edit-test_report_ut');
     Route::get('edit-test_report_dpt',                       [TestReportDptController::class, 'edit'])->name('edit-test_report_dpt');
     Route::get('edit-test_report_mpt',                       [TestReportMptController::class, 'edit'])->name('edit-test_report_mpt');
+    Route::get('edit-film_dc',                               [FilmDCController::class, 'edit'])->name('edit-film_dc');
+    Route::get('edit-invoice',                               [InvoiceController::class, 'edit'])->name('edit-invoice');
 
      Route::get('edit-observation_sheet', [ObservationSheetController::class, 'edit'])->name('edit-observation_sheet');
     
@@ -651,6 +661,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('update-test_report_ut',                     [TestReportUtController::class, 'update'])->name('update-test_report_ut');
     Route::post('update-test_report_dpt',                    [TestReportDptController::class, 'update'])->name('update-test_report_dpt');
     Route::post('update-test_report_mpt',                    [TestReportMptController::class, 'update'])->name('update-test_report_mpt');
+    Route::post('update-film_dc',                            [FilmDCController::class, 'update'])->name('update-film_dc');
+    Route::post('update-invoice',                            [InvoiceController::class, 'update'])->name('update-invoice');
      Route::post('update-observation_sheet', [ObservationSheetController::class, 'update'])->name('update-observation_sheet');
     
     
@@ -735,6 +747,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('delete-test_report_ut',                      [TestReportUtController::class, 'destroy'])->name('delete-test_report_ut');
     Route::get('delete-test_report_dpt',                     [TestReportDptController::class, 'destroy'])->name('delete-test_report_dpt');
     Route::get('delete-test_report_mpt',                     [TestReportMptController::class, 'destroy'])->name('delete-test_report_mpt');
+    Route::get('delete-film_dc',                            [FilmDCController::class, 'destroy'])->name('delete-film_dc');
+    Route::get('delete-invoice',                            [InvoiceController::class, 'destroy'])->name('delete-invoice');
      Route::get('delete-observation_sheet', [ObservationSheetController::class, 'destroy'])->name('delete-observation_sheet');
      Route::get('view-pdf-observation_sheet', [ObservationSheetController::class, 'viewPdf'])->name('view-pdf-observation_sheet');
     
@@ -787,6 +801,9 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/technique_sheet_rt_film_processing-list', [TechniqueSheetRtController::class, 'existsFilmProcessing'])->name('technique_sheet_rt_film_processing-list');
     Route::get('/technique_sheet_rt_part_no-list', [TechniqueSheetRtController::class, 'existsPart'])->name('technique_sheet_rt_part_no-list');
     Route::get('/technique_sheet_rt_drg_no-list', [TechniqueSheetRtController::class, 'existsDrgNo'])->name('technique_sheet_rt_drg_no-list');
+    Route::get('/technique_sheet_rt_product_code-list', [TechniqueSheetRtController::class, 'existsProductCode'])->name('technique_sheet_rt_product_code-list');
+    Route::get('/technique_sheet_rt_welding_process-list', [TechniqueSheetRtController::class, 'existsWeldingProcess'])->name('technique_sheet_rt_welding_process-list');
+    Route::get('/technique_sheet_rt_joint_type-list', [TechniqueSheetRtController::class, 'existsJointType'])->name('technique_sheet_rt_joint_type-list');
     Route::get('/technique_sheet_rt_test_technique-list', [TechniqueSheetRtController::class, 'existsTestTechnique'])->name('technique_sheet_rt_test_technique-list');
     Route::get('/finding_level-list', [FindingLevelController::class, 'existsFindingLevel'])->name('finding_level-list');
     Route::get('/finding-list', [FindingController::class, 'existsFinding'])->name('finding-list');
@@ -921,6 +938,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
       Route::get('check-test_report_mpt_number_duplication',   'checkTestReportMPTNumberDuplication')->name('check-test_report_mpt_number_duplication');
       Route::get('check-measurement_sheet_number_duplication',   'checkMeasurementSheetNumberDuplication')->name('check-measurement_sheet_number_duplication');
       Route::get('check-customer_dc_non_returnable_number_duplication', 'checkCustomerDCNonReturnableSequenceDuplication')->name('check-customer_dc_non_returnable_number_duplication');
+      Route::get('check-film_dc_number_duplication', 'checkFilmDcSequenceDuplication')->name('check-film_dc_number_duplication');
+      Route::get('check-invoice_number_duplication', [InvoiceController::class, 'checkInvoiceSequenceDuplication'])->name('check-invoice_number_duplication');
       Route::get('check-observation_sheet_number_duplication', 'checkObservationSheetSequenceDuplication')->name('check-observation_sheet_number_duplication');
     });
 
@@ -1046,6 +1065,15 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/get-latest_supplier_dc_number',[SupplierDCController::class,'getLatestSupplierDCNumber'])->name('get-latest_supplier_dc_number');
     Route::get('/get-latest_delivery_challan_customer_number',[DeliveryChallanCustomerController::class,'getLatestCustomerDCNumber'])->name('get-latest_delivery_challan_customer_number');
     Route::get('/get-latest-dc-sequence-customer_dc_non_returnable', [CustomerDCNonReturnableController::class, 'getLatestDCSequence'])->name('get-latest-dc-sequence-customer_dc_non_returnable');
+    Route::get('get-latest-dc-sequence-film_dc', [FilmDCController::class, 'getLatestDCSequence'])->name('get-latest-dc-sequence-film_dc');
+    Route::get('get-pending-customers-for-film_dc', [FilmDCController::class, 'getPendingCustomers'])->name('get-pending-customers-for-film_dc');
+    Route::get('get-pending-rt-for-film_dc', [FilmDCController::class, 'getPendingRtReports'])->name('get-pending-rt-for-film_dc');
+    Route::post('get-rt-details-for-film_dc', [FilmDCController::class, 'getRtDetailsForFilmDc'])->name('get-rt-details-for-film_dc');
+
+    Route::get('get-latest-sequence-invoice', [InvoiceController::class, 'getLatestInvoiceSequence'])->name('get-latest-sequence-invoice');
+    Route::get('get-customer-details-for-invoice', [InvoiceController::class, 'getCustomerDetails'])->name('get-customer-details-for-invoice');
+    Route::get('get-pending-film-dc-for-invoice', [InvoiceController::class, 'getPendingFilmDc'])->name('get-pending-film-dc-for-invoice');
+    Route::post('get-film-dc-items-for-invoice', [InvoiceController::class, 'getFilmDcItemsForInvoice'])->name('get-film-dc-items-for-invoice');
     Route::get('/get-latest_item_return_customer_number',[ItemReturnCustomerController::class,'getLatestItemReturnCustomerNumber'])->name('get-latest_item_return_customer_number');
     Route::get('/get-latest_material_inward_number', [MaterialInwardController::class, 'getLatestMaterialInwardNumber']);
 
@@ -1249,9 +1277,29 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('/email_single_purchase_order', [EmailController::class, 'EmailSinglePurchaseOrder'])->name('email_single_purchase_order');
     Route::post('/email_single_service_po', [EmailController::class, 'EmailSingleServicePO'])->name('email_single_service_po');
     Route::post('/get-old-inward-details', [MaterialInwardController::class, 'getOldInwardDetails'])->name('get-old-inward-details');
+    Route::post('/get-old-offer-details', [OfferController::class, 'getOldOfferDetails'])->name('get-old-offer-details');
     Route::post('/get-rt-reports-list-for-inward', [MaterialInwardController::class, 'getRtReportsListForInward'])->name('get-rt-reports-list-for-inward');
 
-    /* Offer Routes */
+    /* Film DC Helper Routes */
+    Route::get('/get-latest-dc-sequence-film_dc', [FilmDCController::class, 'getLatestDCSequence'])->name('get-latest-dc-sequence-film_dc');
+    Route::get('/get-pending-customers-for-film_dc', [FilmDCController::class, 'getPendingCustomers'])->name('get-pending-customers-for-film_dc');
+    Route::get('/get-pending-rt-for-film_dc', [FilmDCController::class, 'getPendingRtReports'])->name('get-pending-rt-for-film_dc');
+    Route::post('/get-rt-details-for-film_dc', [FilmDCController::class, 'getRtDetailsForFilmDc'])->name('get-rt-details-for-film_dc');
+
+    /* Invoice Routes */
+    Route::get('/manage-invoice', [InvoiceController::class, 'manage'])->name('manage-invoice');
+    Route::post('/listing-invoice', [InvoiceController::class, 'index'])->name('listing-invoice');
+    Route::post('/store-invoice', [InvoiceController::class, 'store'])->name('store-invoice');
+    Route::get('/edit-invoice', [InvoiceController::class, 'edit'])->name('edit-invoice');
+    Route::post('/update-invoice', [InvoiceController::class, 'update'])->name('update-invoice');
+    Route::post('/delete-invoice', [InvoiceController::class, 'destroy'])->name('delete-invoice');
+    Route::get('/get-latest-sequence-invoice', [InvoiceController::class, 'getLatestInvoiceSequence'])->name('get-latest-sequence-invoice');
+    Route::get('/check-invoice_number_duplication', [InvoiceController::class, 'checkInvoiceSequenceDuplication'])->name('check-invoice_number_duplication');
+    Route::get('/get-customer-details-for-invoice', [InvoiceController::class, 'getCustomerDetails'])->name('get-customer-details-for-invoice');
+    Route::get('/get-pending-film-dc-for-invoice', [InvoiceController::class, 'getPendingFilmDc'])->name('get-pending-film-dc-for-invoice');
+    Route::post('/get-film-dc-items-for-invoice', [InvoiceController::class, 'getFilmDcItemsForInvoice'])->name('get-film-dc-items-for-invoice');
+
+    /* Offer authorized Routes */
     Route::get('/get-offer_authorized_details',[OfferAuthorizedController::class,'getOfferDetails'])->name('get-offer_authorized_details');
     Route::post('/authorize-offer',[OfferAuthorizedController::class,'authorizeOffer'])->name('authorize-offer');
     Route::post('/unauthorize-offer',[OfferAuthorizedController::class,'unauthorizeOffer'])->name('unauthorize-offer');

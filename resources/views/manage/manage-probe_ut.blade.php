@@ -39,9 +39,9 @@
                             <th>Size Of Probe</th>
                             <th>Refraction Angle</th>
                             <th>Frequency (MHZ)</th>
-                            <th>Current Location</th>
+                            <!-- <th>Current Location</th> -->
                             <th>Status</th>
-                            <th>Own Location</th>
+                            <!-- <th>Own Location</th> -->
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -99,9 +99,9 @@
                 { data: 'pu_size_of_probe', name: 'probe_ut.pu_size_of_probe', },
                 { data: 'pu_ref_angle', name: 'probe_ut.pu_ref_angle', },
                 { data: 'pu_frequency', name: 'probe_ut.pu_frequency', },
-                { data: 'current_location', name: 'current_location.location_name', },
+                // { data: 'current_location', name: 'current_location.location_name', },
                 { data: 'pu_status', name: 'probe_ut.pu_status', },
-                { data: 'own_location', name: 'own_location.location_name', },
+                // { data: 'own_location', name: 'own_location.location_name', },
                 { data: 'last_by', name: 'last_by', },
                 { data: 'last_on', name: 'probe_ut.last_on', },
                 { data: 'created_by', name: 'created_by', },

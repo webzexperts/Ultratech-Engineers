@@ -11,7 +11,7 @@
 
 @include('modals.modals-transaction.offer_modal')
 @include('modals.modals-details.offer_details_modal')
-@include('modals.modals-details.copy_material_inward_details_modal')
+@include('modals.modals-details.copy_offer_details_modal')
 @include('modals.modals-pending.pending_repair_reports_modal')
 @include('modals.customer_modal')
 @include('modals.modals-details.contact_modal')
@@ -57,9 +57,9 @@
                             <th>PO No.</th>
                             <th>PO Date</th>
                             <th>Test</th>
-                            <th>Type of Job</th>
+                            <!-- <th>Type of Job</th> -->
                             <th>Job Desc.</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>Drg. No.</th>
                             <th>Material</th>
                             <th>Heat No.</th>
@@ -91,7 +91,7 @@
             "processing": false,
             "serverSide": true,
             "scrollX": true,
-            "order": [[1, 'desc'],[25, 'desc']],
+            "order": [[1, 'desc'],[24, 'desc']],
             dom: 'Blfrtip',
             buttons: [{
                 extend:'excel',
@@ -137,7 +137,7 @@
                 { data: 'po_no', name: 'offer.po_no', },
                 { data: 'po_date', name: 'offer.po_date', },
                 { data: 'type_of_testing_id_fix', name: 'offer_details.type_of_testing_id_fix', },
-                { data: 'type_of_job', name: 'type_of_job.type_of_job', },
+                // { data: 'type_of_job', name: 'type_of_job.type_of_job', },
                 { data: 'job_description', name: 'job_descriptions.job_description', },
                 { data: 'part_no', name: 'offer_details.part_no', },
                 { data: 'drg_no', name: 'offer_details.drg_no', },

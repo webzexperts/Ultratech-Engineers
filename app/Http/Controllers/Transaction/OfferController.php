@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Transaction;
 
 use App\Http\Controllers\Controller;
+use App\Models\Transaction\MaterialInward;
 use App\Models\Transaction\Offer;
 use App\Models\Transaction\OfferDetails;
 use Illuminate\Http\Request;
@@ -40,7 +41,8 @@ class OfferController extends Controller
                 'offer.po_date',
                 'offer_details.type_of_testing_id_fix',
                 'type_of_job.type_of_job',
-                'job_descriptions.job_description',
+                DB::raw("COALESCE(offer_details.job_desc, job_descriptions.job_description) as job_description"),
+                'offer_details.job_desc',
                 'offer_details.part_no',
                 'offer_details.drg_no',
                 'materials.material',
@@ -106,15 +108,11 @@ class OfferController extends Controller
                 $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
                 $lowerKeyword = strtolower(trim($searchValue));
                 if ($lowerKeyword === 'welding') {
-                    $searchJobTypeFix = 'Welding';
-                } elseif ($lowerKeyword === 'non-welding') {
-                    $searchJobTypeFix = 'Non-Welding';
-                }
-                if (!empty($searchJobTypeFix)) {
-                    $query->where('offer.job_type_fix', '=', $searchJobTypeFix);
+                    $query->where('offer.job_type_fix', '=', 'Welding');
+                } elseif ($lowerKeyword === 'non-welding' || $lowerKeyword === 'non welding') {
+                    $query->where('offer.job_type_fix', '=', 'Non-Welding');
                 } else {
-                    $dbFormatKeyword = str_replace(' ', '_', $lowerKeyword);
-                    $query->where('offer.job_type_fix', 'like', "$dbFormatKeyword%");
+                    $query->where('offer.job_type_fix', 'like', "{$lowerKeyword}%");
                 }
             })
             ->editColumn('quantity', function ($row) {
@@ -130,14 +128,14 @@ class OfferController extends Controller
                     </button>
                     <ul class="dropdown-menu">';
 
-                // if (hasAccess("offer", "print")) {
-                //     $offer_number = !empty($row->offer_no) ? '_' . str_replace('/', '_', $row->offer_no) : "";
-                //     $cust_name = !empty($row->customer) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $row->customer) : "";
-                //     $pdfName   = 'Offer' . $offer_number . $cust_name;
-                //     $encodedId = base64_encode($row->offer_id);
-                //     $url = url("/check-file_exists?id={$encodedId}&name={$pdfName}&type=offer");
-                //     $action .= '<li><a class="dropdown-item" target="_blank" href="' . $url . '"><i class="bx bxs-file-pdf align-bottom me-2 text-muted" id="print_a"></i> Print</a></li>';
-                // }
+                if (hasAccess("offer", "print")) {
+                    $offer_number = !empty($row->offer_no) ? '_' . str_replace('/', '_', $row->offer_no) : "";
+                    $cust_name = !empty($row->customer) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $row->customer) : "";
+                    $pdfName   = 'Offer' . $offer_number . $cust_name;
+                    $encodedId = base64_encode($row->offer_id);
+                    $url = url("/check-file_exists?id={$encodedId}&name={$pdfName}&type=offer");
+                    $action .= '<li><a class="dropdown-item" target="_blank" href="' . $url . '"><i class="bx bxs-file-pdf align-bottom me-2 text-muted" id="print_a"></i> Print</a></li>';
+                }
 
                 if (hasAccess("offer", "edit")) {
                     $action .= '<li><a class="dropdown-item edit-item-btn edit-offer"><i class="ri-pencil-fill align-bottom me-2 text-muted" id="edit_a"></i> Edit</a></li>';
@@ -176,7 +174,7 @@ class OfferController extends Controller
         $middle_num = str_pad($isFound, 4, '0', STR_PAD_LEFT);
         $postfix    = $year_data->yearcode;
 
-        $format = 'OFFER/' . $middle_num . '/' . $postfix;
+        $format = 'OF/' . $middle_num . '/' . $postfix;
 
         return response()->json([
             'response_code' => 1,
@@ -249,7 +247,9 @@ class OfferController extends Controller
                     if (!isset($dVal->process_type) && isset($dbDetail->process_type)) $dVal->process_type = $dbDetail->process_type;
                     if (!isset($dVal->is_observation_sheet) && isset($dbDetail->is_observation_sheet)) $dVal->is_observation_sheet = $dbDetail->is_observation_sheet;
                     if (!isset($dVal->test_report_rt_id) && isset($dbDetail->test_report_rt_id)) $dVal->test_report_rt_id = $dbDetail->test_report_rt_id;
+                    if (isset($dbDetail->job_desc)) $dVal->job_desc = $dbDetail->job_desc;
                 }
+                $dVal->is_observation_sheet = $dVal->is_observation_sheet ?? ($dbDetail->is_observation_sheet ?? null);
 
                 $rtReportId = $dVal->test_report_rt_id ?? ($dbDetail->test_report_rt_id ?? null);
                 if (!empty($rtReportId)) {
@@ -266,8 +266,9 @@ class OfferController extends Controller
                 $dVal->type_of_job = $dVal->type_of_job_name ?? ($dVal->type_of_job ?? '');
                 $dVal->type_of_job_name = $dVal->type_of_job_name ?? $dVal->type_of_job;
 
-                $dVal->job_description = $dVal->job_description_name ?? ($dVal->job_description ?? '');
-                $dVal->job_description_name = $dVal->job_description_name ?? $dVal->job_description;
+                $dVal->job_desc = $dVal->job_desc ?? ($dbDetail->job_desc ?? '');
+                $dVal->job_description = !empty($dVal->job_desc) ? $dVal->job_desc : ($dVal->job_description_name ?? ($dVal->job_description ?? ''));
+                $dVal->job_description_name = $dVal->job_description;
 
                 $dVal->material = $dVal->material_name ?? ($dVal->material ?? '');
                 $dVal->material_name = $dVal->material_name ?? $dVal->material;
@@ -311,6 +312,15 @@ class OfferController extends Controller
     {
         DB::beginTransaction();
         try {
+           $is_auth = Offer::where('offer_id', $request->id)->first();
+           if($is_auth->authorized_id == 1){
+                $message = "You Can't Delete, Offer Is Authorized";
+                    return response()->json([
+                        'response_code' => '0',
+                        'response_message' => $message,
+                    ]);
+            
+           }
             DB::table('offer_details')->where('offer_id', $request->id)->delete();
             DB::table('offer')->where('offer_id', $request->id)->delete();
 
@@ -353,6 +363,11 @@ class OfferController extends Controller
                 $offer_sequence = $request->offer_sequence;
             }
 
+            $checkInwardDup = checkReportDuplication(Offer::class, 'offer_no', $offer_no, $request, "Duplicate Offer No. Found.");
+            if ($checkInwardDup) {
+                return response()->json($checkInwardDup);
+            }
+
             $offer_id = DB::table('offer')->insertGetId([
                 'offer_no'                                  => $offer_no,
                 'offer_sequence'                            => $offer_sequence,
@@ -390,35 +405,48 @@ class OfferController extends Controller
                 foreach ($details as $row) {
                     if (($row['mode'] ?? '') == 'Delete') continue;
                     if (empty($row['type_of_testing_id_fix'])) continue;
+
+                    if($request->nabl_type_fix == 'NABL' && ($row['process_type'] ?? '') != 'Repair'){
+                        $is_observation_sheet = 'Yes';
+                    }else if(($row['process_type'] ?? '') == 'Repair'){
+                        $is_observation_sheet = 'N/A';
+                    }else if(($row['type_of_testing_id_fix'] ?? '') != 'RT' && $request->nabl_type_fix != 'NABL'){
+                        $is_observation_sheet = 'N/A';
+                    }else{
+                        $is_observation_sheet = 'No';
+                    }
+
                     DB::table('offer_details')->insert([
                         'offer_id'               => $offer_id,
                         'process_type'           => $row['process_type'] ?? 'Fresh',
+                        'is_observation_sheet'   => $is_observation_sheet,
                         'test_report_rt_id'      => (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0) ? $row['test_report_rt_id'] : null,
-                        'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? null,
-                        'type_of_job_id'         => $row['type_of_job_id'] ?? null,
-                        'job_desc_id'            => $row['job_desc_id'] ?? null,
-                        'part_no'                => $row['part_no'] ?? null,
-                        'drg_no'                 => $row['drg_no'] ?? null,
-                        'material_id'            => $row['material_id'] ?? null,
-                        'heat_no'                => $row['heat_no'] ?? null,
-                        'rt_no'                  => $row['rt_no'] ?? null,
-                        'product_code'           => $row['product_code'] ?? null,
-                        'thickness'              => $row['thickness'] ?? null,
-                        'area_of_coverage_id'    => $row['area_of_coverage_id'] ?? null,
+                        'type_of_testing_id_fix' => !empty($row['type_of_testing_id_fix']) ? $row['type_of_testing_id_fix'] : null,
+                        'type_of_job_id'         => !empty($row['type_of_job_id']) ? $row['type_of_job_id'] : null,
+                        'job_desc_id'            => !empty($row['job_desc_id']) ? $row['job_desc_id'] : null,
+                        'job_desc'               => !empty($row['job_desc']) ? $row['job_desc'] : null,
+                        'part_no'                => !empty($row['part_no']) ? $row['part_no'] : null,
+                        'drg_no'                 => !empty($row['drg_no']) ? $row['drg_no'] : null,
+                        'material_id'            => !empty($row['material_id']) ? $row['material_id'] : null,
+                        'heat_no'                => !empty($row['heat_no']) ? $row['heat_no'] : null,
+                        'rt_no'                  => !empty($row['rt_no']) ? $row['rt_no'] : null,
+                        'product_code'           => !empty($row['product_code']) ? $row['product_code'] : null,
+                        'thickness'              => !empty($row['thickness']) ? $row['thickness'] : null,
+                        'area_of_coverage_id'    => !empty($row['area_of_coverage_id']) ? $row['area_of_coverage_id'] : null,
                         'procedure_ref_id'       => !empty($row['procedure_ref_id']) ? $row['procedure_ref_id'] : null,
                         'evaluation_as_per_id'   => !empty($row['evaluation_as_per_id']) ? $row['evaluation_as_per_id'] : null,
                         'acceptance_standard_id' => !empty($row['acceptance_standard_id']) ? $row['acceptance_standard_id'] : null,
                         'quantity'               => $row['quantity'] ?? 0,
-                        'approx_value'           => $row['approx_value'] !== '' ? ($row['approx_value'] ?? null) : null,
-                        'approx_weight'          => $row['approx_weight'] !== '' ? ($row['approx_weight'] ?? null) : null,
-                        'remark'                 => $row['remark'] ?? null,
+                        'approx_value'           => ($row['approx_value'] !== '' && $row['approx_value'] !== null) ? $row['approx_value'] : null,
+                        'approx_weight'          => ($row['approx_weight'] !== '' && $row['approx_weight'] !== null) ? $row['approx_weight'] : null,
+                        'remark'                 => !empty($row['remark']) ? $row['remark'] : null,
                     ]);
                 }
             }
 
             DB::commit();
 
-            /*
+            
             $offer_number = !empty($offer_no) ? '_' . str_replace('/', '_', $offer_no) : "";
             $cust = DB::table('customers')->where('id', $request->customer_id)->value('customer');
             $cust_name = !empty($cust) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $cust) : "";
@@ -429,8 +457,6 @@ class OfferController extends Controller
             }
             $encodedId = base64_encode($offer_id);
             $url = hasAccess("offer", "print") ? url("/check-file_exists?id={$encodedId}&name={$pdf_name}&type=offer") : "";
-            */
-            $url = "";
 
             return response()->json([
                 'response_code' => '1',
@@ -452,6 +478,27 @@ class OfferController extends Controller
     {
         $year_data    = getCurrentYearData();
         $LocationData = getCurrentLocation();
+
+        $validated = $request->validate([
+            'offer_sequence' => [
+                'required',
+                'max:155',
+                Rule::unique('offer')
+                    ->where(function ($query) use ($year_data, $LocationData) {
+                        $query->where('year_id', $year_data->id)
+                            ->where('current_location_id', $LocationData->location_id);
+                    })
+                    ->ignore($request->id, 'offer_id')
+            ],
+        ], [
+            'offer_sequence.unique' => 'Duplicate Offer No. Found.',
+            'offer_sequence.required' => 'Enter Offer No.',
+        ]);
+
+        $checkInwardDup = checkReportDuplication(Offer::class, 'offer_no', $request->offer_no, $request, "Duplicate Offer No. Found.", $request->id, 'offer_id');
+        if ($checkInwardDup) {
+            return response()->json($checkInwardDup);
+        }
 
         DB::beginTransaction();
         try {
@@ -491,53 +538,77 @@ class OfferController extends Controller
                     $mode = $row['mode'] ?? '';
 
                     if ($mode == 'Insert') {
+                        if($request->nabl_type_fix == 'NABL' && ($row['process_type'] ?? '') != 'Repair'){
+                            $is_observation_sheet = 'Yes';
+                        }else if(($row['process_type'] ?? '') == 'Repair'){
+                            $is_observation_sheet = 'N/A';
+                        }else if(($row['type_of_testing_id_fix'] ?? '') != 'RT' && $request->nabl_type_fix != 'NABL'){
+                            $is_observation_sheet = 'N/A';
+                        }else{
+                            $is_observation_sheet = 'No';
+                        }
+
                         DB::table('offer_details')->insert([
                             'offer_id'               => $request->id,
                             'process_type'           => $row['process_type'] ?? 'Fresh',
+                            'is_observation_sheet'   => $is_observation_sheet,
                             'test_report_rt_id'      => (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0) ? $row['test_report_rt_id'] : null,
-                            'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? null,
-                            'type_of_job_id'         => $row['type_of_job_id'] ?? null,
-                            'job_desc_id'            => $row['job_desc_id'] ?? null,
-                            'part_no'                => $row['part_no'] ?? null,
-                            'drg_no'                 => $row['drg_no'] ?? null,
-                            'material_id'            => $row['material_id'] ?? null,
-                            'heat_no'                => $row['heat_no'] ?? null,
-                            'rt_no'                  => $row['rt_no'] ?? null,
-                            'product_code'           => $row['product_code'] ?? null,
-                            'thickness'              => $row['thickness'] ?? null,
-                            'area_of_coverage_id'    => $row['area_of_coverage_id'] ?? null,
+                            'type_of_testing_id_fix' => !empty($row['type_of_testing_id_fix']) ? $row['type_of_testing_id_fix'] : null,
+                            'type_of_job_id'         => !empty($row['type_of_job_id']) ? $row['type_of_job_id'] : null,
+                            'job_desc_id'            => !empty($row['job_desc_id']) ? $row['job_desc_id'] : null,
+                            'job_desc'               => !empty($row['job_desc']) ? $row['job_desc'] : null,
+                            'part_no'                => !empty($row['part_no']) ? $row['part_no'] : null,
+                            'drg_no'                 => !empty($row['drg_no']) ? $row['drg_no'] : null,
+                            'material_id'            => !empty($row['material_id']) ? $row['material_id'] : null,
+                            'heat_no'                => !empty($row['heat_no']) ? $row['heat_no'] : null,
+                            'rt_no'                  => !empty($row['rt_no']) ? $row['rt_no'] : null,
+                            'product_code'           => !empty($row['product_code']) ? $row['product_code'] : null,
+                            'thickness'              => !empty($row['thickness']) ? $row['thickness'] : null,
+                            'area_of_coverage_id'    => !empty($row['area_of_coverage_id']) ? $row['area_of_coverage_id'] : null,
                             'procedure_ref_id'       => !empty($row['procedure_ref_id']) ? $row['procedure_ref_id'] : null,
                             'evaluation_as_per_id'   => !empty($row['evaluation_as_per_id']) ? $row['evaluation_as_per_id'] : null,
                             'acceptance_standard_id' => !empty($row['acceptance_standard_id']) ? $row['acceptance_standard_id'] : null,
                             'quantity'               => $row['quantity'] ?? 0,
-                            'approx_value'           => $row['approx_value'] !== '' ? ($row['approx_value'] ?? null) : null,
-                            'approx_weight'          => $row['approx_weight'] !== '' ? ($row['approx_weight'] ?? null) : null,
-                            'remark'                 => $row['remark'] ?? null,
+                            'approx_value'           => ($row['approx_value'] !== '' && $row['approx_value'] !== null) ? $row['approx_value'] : null,
+                            'approx_weight'          => ($row['approx_weight'] !== '' && $row['approx_weight'] !== null) ? $row['approx_weight'] : null,
+                            'remark'                 => !empty($row['remark']) ? $row['remark'] : null,
                         ]);
                     } elseif ($mode == 'Update') {
                         if (!empty($row['offer_details_id'])) {
+                            if($request->nabl_type_fix == 'NABL' && ($row['process_type'] ?? '') != 'Repair'){
+                                $is_observation_sheet = 'Yes';
+                            }else if(($row['process_type'] ?? '') == 'Repair'){
+                                $is_observation_sheet = 'N/A';
+                            }else if(($row['type_of_testing_id_fix'] ?? '') != 'RT' && $request->nabl_type_fix != 'NABL'){
+                                $is_observation_sheet = 'N/A';
+                            }else{
+                                $is_observation_sheet = 'No';
+                            }
+
                             DB::table('offer_details')->where('offer_details_id', $row['offer_details_id'])->update([
                                 'offer_id'               => $request->id,
                                 'process_type'           => $row['process_type'] ?? 'Fresh',
+                                'is_observation_sheet'   => $is_observation_sheet,
                                 'test_report_rt_id'      => (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0) ? $row['test_report_rt_id'] : null,
-                                'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? null,
-                                'type_of_job_id'         => $row['type_of_job_id'] ?? null,
-                                'job_desc_id'            => $row['job_desc_id'] ?? null,
-                                'part_no'                => $row['part_no'] ?? null,
-                                'drg_no'                 => $row['drg_no'] ?? null,
-                                'material_id'            => $row['material_id'] ?? null,
-                                'heat_no'                => $row['heat_no'] ?? null,
-                                'rt_no'                  => $row['rt_no'] ?? null,
-                                'product_code'           => $row['product_code'] ?? null,
-                                'thickness'              => $row['thickness'] ?? null,
-                                'area_of_coverage_id'    => $row['area_of_coverage_id'] ?? null,
+                                'type_of_testing_id_fix' => !empty($row['type_of_testing_id_fix']) ? $row['type_of_testing_id_fix'] : null,
+                                'type_of_job_id'         => !empty($row['type_of_job_id']) ? $row['type_of_job_id'] : null,
+                                'job_desc_id'            => !empty($row['job_desc_id']) ? $row['job_desc_id'] : null,
+                                'job_desc'               => !empty($row['job_desc']) ? $row['job_desc'] : null,
+                                'part_no'                => !empty($row['part_no']) ? $row['part_no'] : null,
+                                'drg_no'                 => !empty($row['drg_no']) ? $row['drg_no'] : null,
+                                'material_id'            => !empty($row['material_id']) ? $row['material_id'] : null,
+                                'heat_no'                => !empty($row['heat_no']) ? $row['heat_no'] : null,
+                                'rt_no'                  => !empty($row['rt_no']) ? $row['rt_no'] : null,
+                                'product_code'           => !empty($row['product_code']) ? $row['product_code'] : null,
+                                'thickness'              => !empty($row['thickness']) ? $row['thickness'] : null,
+                                'area_of_coverage_id'    => !empty($row['area_of_coverage_id']) ? $row['area_of_coverage_id'] : null,
                                 'procedure_ref_id'       => !empty($row['procedure_ref_id']) ? $row['procedure_ref_id'] : null,
                                 'evaluation_as_per_id'   => !empty($row['evaluation_as_per_id']) ? $row['evaluation_as_per_id'] : null,
                                 'acceptance_standard_id' => !empty($row['acceptance_standard_id']) ? $row['acceptance_standard_id'] : null,
                                 'quantity'               => $row['quantity'] ?? 0,
-                                'approx_value'           => $row['approx_value'] !== '' ? ($row['approx_value'] ?? null) : null,
-                                'approx_weight'          => $row['approx_weight'] !== '' ? ($row['approx_weight'] ?? null) : null,
-                                'remark'                 => $row['remark'] ?? null,
+                                'approx_value'           => ($row['approx_value'] !== '' && $row['approx_value'] !== null) ? $row['approx_value'] : null,
+                                'approx_weight'          => ($row['approx_weight'] !== '' && $row['approx_weight'] !== null) ? $row['approx_weight'] : null,
+                                'remark'                 => !empty($row['remark']) ? $row['remark'] : null,
                             ]);
                         }
                     } elseif ($mode == 'Delete') {
@@ -550,7 +621,7 @@ class OfferController extends Controller
 
             DB::commit();
 
-            /*
+            
             $offer_number = !empty($request->offer_no) ? '_' . str_replace('/', '_', $request->offer_no) : "";
             $cust = DB::table('customers')->where('id', $request->customer_id)->value('customer');
             $cust_name = !empty($cust) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $cust) : "";
@@ -561,8 +632,6 @@ class OfferController extends Controller
             }
             $encodedId = base64_encode($request->id);
             $url = hasAccess("offer", "print") ? url("/check-file_exists?id={$encodedId}&name={$pdf_name}&type=offer") : "";
-            */
-            $url = "";
 
             return response()->json([
                 'response_code' => '1',
@@ -663,4 +732,46 @@ class OfferController extends Controller
             'location_lnr_radios'     => $location_lnr_radios,
         ]);
     }
+
+    public function getOldOfferDetails(Request $request)
+    {
+        if ($request->ajax()) {
+            $customer = $request->post('customer');
+            $jobTypeCasting = $request->post('job_type_casting');
+            $typeOfTest = $request->post('type_of_test');
+            $nablType = $request->post('nabl_type');
+
+            if (empty($customer) || empty($jobTypeCasting) || empty($typeOfTest)) {
+                return response()->json(['status' => 'success', 'data' => []]);
+            }
+
+            $current_location_id = getCurrentLocation()->location_id;
+
+            // Find all offers for this customer and job type within current location
+            $offerQuery = Offer::where('customer_id', $customer)
+                ->where('job_type_fix', $jobTypeCasting)
+                ->where('current_location_id', $current_location_id);
+
+            if (!empty($nablType)) {
+                $offerQuery->where('nabl_type_fix', $nablType);
+            }
+
+            $offerIds = $offerQuery->pluck('offer_id');
+
+            if ($offerIds->count() > 0) {
+                // Find all details matching the type of test
+                $query = OfferDetails::whereIn('offer_details.offer_id', $offerIds)
+                    ->join('offer', 'offer.offer_id', '=', 'offer_details.offer_id')
+                    ->select('offer_details.*', 'offer.offer_no as inward_no', 'offer.offer_date as inward_date')
+                    ->where('offer_details.type_of_testing_id_fix', $typeOfTest)
+                    ->orderBy('offer_details.offer_details_id', 'DESC');
+
+                $recentDetails = $query->get();
+
+                return response()->json(['status' => 'success', 'data' => $recentDetails]);
+            }
+            return response()->json(['status' => 'success', 'data' => []]);
+        }
+    }
+
 }

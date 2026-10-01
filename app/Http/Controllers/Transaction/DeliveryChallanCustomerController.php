@@ -179,6 +179,11 @@ class DeliveryChallanCustomerController extends Controller
                 $dc_sequence = $request->dc_sequence;
             }
 
+            $checkDup = checkReportDuplication(DeliveryChallanCustomer::class, 'dc_number', $dc_number, $request, "Duplicate Delivery Challan No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
+
             $page_id = getMenuIdBassedOnDisplayName('delivery_challan_customer');
             $assign_format_no = getAssignFormateNoForTransaction($current_location_id, $page_id->id,$request->dc_date);
 
@@ -405,6 +410,11 @@ class DeliveryChallanCustomerController extends Controller
             'dc_sequence.unique' => 'Duplicate Delivery Challan No. Found.',
             'dc_sequence.required' => 'Enter Delivery Challan No.',
         ]);
+
+         $checkDup = checkReportDuplication(DeliveryChallanCustomer::class, 'dc_number', $request->dc_number, $request, "Duplicate Delivery Challan No. Found.", $request->id, 'dc_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
 
         try
         {           

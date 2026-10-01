@@ -28,8 +28,8 @@
                                 <th><input type="checkbox" name="checkall-purchase_indent_data" class="simple-check" id="checkall-purchase_indent_data"/></th>
                                 <th>Indent No.</th>
                                 <th>Date</th>
-                                <th>From Location</th>
-                                <th>To Location</th>
+                                <!-- <th>From Location</th>
+                                <th>To Location</th> -->
                                 <th>Item</th>
                                 <th>Item Group</th>
                                 <th>Main Group</th>
