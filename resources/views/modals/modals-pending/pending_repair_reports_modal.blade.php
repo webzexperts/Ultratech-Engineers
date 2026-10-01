@@ -15,8 +15,8 @@
                                 <th>Report No.</th>
                                 <th>Rev. No.</th>
                                 <th>Date</th>
-                                <th>Type of Job</th>
-                                <th>Part No.</th>
+                                <!-- <th>Type of Job</th> -->
+                                <th>Part No. / Die No.</th>
                                 <th>Drg. No.</th>
                                 <th>Heat No.</th>
                                 <th>Product Code</th>

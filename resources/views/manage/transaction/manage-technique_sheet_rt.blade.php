@@ -34,9 +34,9 @@
                             <th>Sr. No.</th>
                             <th>Date</th>
                             <th>Customer</th>
-                            <th>Type of Job</th>
+                            <!-- <th style="display:none;">Type of Job</th> -->
                             <th>Job Desc.</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>Drg. No.</th>
                             <th>Area of Coverage</th>
                             <th>Modified By</th>
@@ -64,7 +64,7 @@
             "processing": false,
             "serverSide": true,
             "scrollX": true,
-            "order": [[1, 'desc'], [13, 'desc']],
+            "order": [[1, 'desc'], [12, 'desc']],
             dom: 'Blfrtip',
             buttons: [{
                 extend: 'excel',
@@ -98,8 +98,8 @@
                 { data: 'technique_sheet_rt_no', name: 'technique_sheet_rt.technique_sheet_rt_no' },
                 { data: 'technique_sheet_rt_date', name: 'technique_sheet_rt.technique_sheet_rt_date' },
                 { data: 'customer', name: 'customers.customer' },
-                { data: 'type_of_job', name: 'type_of_job.type_of_job' },
-                { data: 'job_description', name: 'job_descriptions.job_description' },
+                // { data: 'type_of_job', name: 'type_of_job.type_of_job', visible: false },
+                { data: 'job_desc', name: 'technique_sheet_rt.job_desc' },
                 { data: 'part_no', name: 'technique_sheet_rt.part_no' },
                 { data: 'drg_no', name: 'technique_sheet_rt.drg_no' },
                 { data: 'area_of_coverage', name: 'area_of_coverage.area_of_coverage' },

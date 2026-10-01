@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Transaction;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction\MaterialInward;
 use App\Models\Transaction\MaterialInwardDetails;
+use App\Models\Transaction\Offer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
@@ -39,8 +40,9 @@ class MaterialInwardController extends Controller
             'material_inward.po_no',
             'material_inward.po_date',
             'material_inward_details.type_of_testing_id_fix',
-            'type_of_job.type_of_job',
-            'job_descriptions.job_description',
+            //'type_of_job.type_of_job',
+            // DB::raw("COALESCE(material_inward_details.job_desc, job_descriptions.job_description) as job_description"),
+            'material_inward_details.job_desc as job_description',
             'material_inward_details.part_no',
             'material_inward_details.drg_no',
             'materials.material',
@@ -57,8 +59,8 @@ class MaterialInwardController extends Controller
         ->leftJoin('material_inward_details', 'material_inward_details.material_inward_id', '=', 'material_inward.material_inward_id')
         ->leftJoin('customers', 'customers.id', '=', 'material_inward.customer_id')
         ->leftJoin('admin as prepared_by', 'prepared_by.id', '=', 'material_inward.prepared_by_user_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'material_inward_details.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'material_inward_details.job_desc_id')
+        //->leftJoin('type_of_job', 'type_of_job.id', '=', 'material_inward_details.type_of_job_id')
+        //->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'material_inward_details.job_desc_id')
         ->leftJoin('materials', 'materials.id', '=', 'material_inward_details.material_id')
         ->where('material_inward.year_id', $year_data->id)
         ->where('material_inward.current_location_id', $current_location_id);
@@ -102,18 +104,12 @@ class MaterialInwardController extends Controller
             $globalSearch = request()->input('search.value');
             $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
             $lowerKeyword = strtolower(trim($searchValue));
-            if ($lowerKeyword === 'Welding') {
-                $searchJobTypeFix = 'Welding';
-            }
-            elseif ($lowerKeyword === 'Non-Welding') {
-                $searchJobTypeFix = 'Non-Welding';
-            }
-            if (!empty($searchJobTypeFix)) {
-                $query->where('material_inward.job_type_fix', '=', $searchJobTypeFix);
-            }
-            else {
-                $dbFormatKeyword = str_replace(' ', '_', $lowerKeyword);
-                $query->where('material_inward.job_type_fix', 'like', "$dbFormatKeyword%");
+            if ($lowerKeyword === 'welding') {
+                $query->where('material_inward.job_type_fix', '=', 'Welding');
+            } elseif ($lowerKeyword === 'non-welding' || $lowerKeyword === 'non welding') {
+                $query->where('material_inward.job_type_fix', '=', 'Non-Welding');
+            } else {
+                $query->where('material_inward.job_type_fix', 'like', "{$lowerKeyword}%");
             }
         })
         ->editColumn('quantity', function ($mi_data) {
@@ -260,7 +256,11 @@ class MaterialInwardController extends Controller
                     if (isset($dbDetail->process_type)) $dVal->process_type = $dbDetail->process_type;
                     if (isset($dbDetail->is_observation_sheet)) $dVal->is_observation_sheet = $dbDetail->is_observation_sheet;
                     if (isset($dbDetail->test_report_rt_id)) $dVal->test_report_rt_id = $dbDetail->test_report_rt_id;
+                    if (isset($dbDetail->job_desc)) $dVal->job_desc = $dbDetail->job_desc;
                 }
+                $dVal->job_desc = $dVal->job_desc ?? ($dbDetail->job_desc ?? '');
+                $dVal->job_description = !empty($dVal->job_desc) ? $dVal->job_desc : ($dVal->job_description_name ?? ($dVal->job_description ?? ''));
+                $dVal->job_description_name = $dVal->job_description;
 
                 $rtReportId = $dVal->test_report_rt_id ?? ($dbDetail->test_report_rt_id ?? null);
                 if (!empty($rtReportId)) {
@@ -380,6 +380,16 @@ class MaterialInwardController extends Controller
                 ]);
             }
 
+            $materialInward = MaterialInward::find($request->id);
+            if ($materialInward && !empty($materialInward->offer_id)) {
+                Offer::where('offer_id', $materialInward->offer_id)->update([
+                    'authorized_id' => 0,
+                    'authorized_last_on' => Carbon::now('Asia/Kolkata')->toDateTimeString(),
+                    'authorized_last_by_user_id' => Auth::user()->id, 
+                ]);
+            }
+
+
             MaterialInwardDetails::where('material_inward_id', $request->id)->delete();
             MaterialInward::where('material_inward_id', $request->id)->delete();
 
@@ -439,6 +449,11 @@ class MaterialInwardController extends Controller
                 $material_inward_sequence = $request->material_inward_sequence;
             }
 
+            $checkInwardDup = checkReportDuplication(MaterialInward::class, 'material_inward_no', $material_inward_no, $request, "Duplicate Inward No. Found.");
+            if ($checkInwardDup) {
+                return response()->json($checkInwardDup);
+            }
+
             $page_id = getMenuIdBassedOnDisplayName('material_inward');
             $assign_format_no = getAssignFormateNoForTransaction($LocationData->location_id, $page_id->id, $request->material_inward_date);
 
@@ -449,6 +464,7 @@ class MaterialInwardController extends Controller
                 'nabl_type_fix'            => $request->nabl_type_fix,
                 'test_at_fix'              => $request->test_at_fix,
                 'job_type_fix'             => $request->job_type_fix,
+                'inward_type_value_fix'    => $request->inward_type_value_fix,
                 'customer_id'              => $request->customer_id,
                 'dc_no'                    => $request->dc_no,
                 'dc_date'                  => $request->dc_date ? Date::createFromFormat('d/m/Y', $request->dc_date)->format('Y-m-d') : null,
@@ -473,7 +489,7 @@ class MaterialInwardController extends Controller
                 'year_id'                  => $year_data->id,
                 'company_id'               => Auth::user()->company_id,
                 'created_by'               => Auth::user()->id,
-                'created_on'               => Carbon::now('Asia/Kolkata'),
+                'created_on'               => Carbon::now('Asia/Kolkata')->toDateTimeString(),
             ]);
 
             $details = json_decode($request->material_inward_details_data, true);
@@ -502,9 +518,9 @@ class MaterialInwardController extends Controller
                         'is_observation_sheet'   => $is_observation_sheet,
                         'test_report_rt_id'      =>
                          $row['test_report_rt_id'] != '' && $row['test_report_rt_id'] != 0 ? $row['test_report_rt_id'] : null,
-                        'type_of_job_id'         => $row['type_of_job_id'] ?? null,
-                        'job_desc_id'            => $row['job_desc_id'] ?? null,
-                        'part_id'                => !empty($row['part_id']) ? $row['part_id'] : null,
+                        'type_of_job_id'         => !empty($row['type_of_job_id']) ? $row['type_of_job_id'] : null,
+                        'job_desc_id'            => !empty($row['job_desc_id']) ? $row['job_desc_id'] : null,
+                        'job_desc'               => !empty($row['job_desc']) ? $row['job_desc'] : null,
                         'part_no'                => $row['part_no'] ?? null,
                         'drg_no'                 => $row['drg_no'] ?? null,
                         'material_id'            => $row['material_id'] ?? null,
@@ -580,6 +596,11 @@ class MaterialInwardController extends Controller
             // 'tpi_name.required_if' => 'Enter TPI Name.',
         ]);
 
+        $checkInwardDup = checkReportDuplication(MaterialInward::class, 'material_inward_no', $request->material_inward_no, $request, "Duplicate Inward No. Found.", $request->id, 'material_inward_id');
+        if ($checkInwardDup) {
+            return response()->json($checkInwardDup);
+        }
+
         DB::beginTransaction();
         try {
             $mi = MaterialInward::where('material_inward_id', $request->id)->first();
@@ -644,6 +665,7 @@ class MaterialInwardController extends Controller
                 'nabl_type_fix'            => $request->nabl_type_fix,
                 'test_at_fix'              => $request->test_at_fix,
                 'job_type_fix'             => $request->job_type_fix,
+                'inward_type_value_fix'    => $request->inward_type_value_fix,
                 'customer_id'              => $request->customer_id,
                 'dc_no'                    => $request->dc_no,
                 'dc_date'                  => $request->dc_date ? Date::createFromFormat('d/m/Y', $request->dc_date)->format('Y-m-d') : null,
@@ -663,7 +685,7 @@ class MaterialInwardController extends Controller
                 'special_note'             => $request->special_note,
                 // 'assign_format_no'         => $assign_format_no, // not update assign formate discussion ramde sir
                 'last_by'                  => Auth::user()->id,
-                'last_on'                  => Carbon::now('Asia/Kolkata'),
+                'last_on'                  => Carbon::now('Asia/Kolkata')->toDateTimeString(),
             ]);
 
             $details = json_decode($request->material_inward_details_data, true);
@@ -694,9 +716,9 @@ class MaterialInwardController extends Controller
                             // 'is_observation_sheet'   => $row['is_observation_sheet'] ?? 'No',
                             'is_observation_sheet'   =>  $is_observation_sheet,
                             'test_report_rt_id' =>  $row['test_report_rt_id'] != '' && $row['test_report_rt_id'] != 0 ? $row['test_report_rt_id'] : null,
-                            'type_of_job_id'         => $row['type_of_job_id'] ?? null,
-                            'job_desc_id'            => $row['job_desc_id'] ?? null,
-                            'part_id'                => !empty($row['part_id']) ? $row['part_id'] : null,
+                            'type_of_job_id'         => !empty($row['type_of_job_id']) ? $row['type_of_job_id'] : null,
+                            'job_desc_id'            => !empty($row['job_desc_id']) ? $row['job_desc_id'] : null,
+                            'job_desc'               => !empty($row['job_desc']) ? $row['job_desc'] : null,
                             'part_no'                => $row['part_no'] ?? null,
                             'drg_no'                 => $row['drg_no'] ?? null,
                             'material_id'            => $row['material_id'] ?? null,
@@ -786,9 +808,9 @@ class MaterialInwardController extends Controller
                                 // 'is_observation_sheet'   => $row['is_observation_sheet'] ?? 'No',
                                 'is_observation_sheet'   =>  $is_observation_sheet,
                                 'test_report_rt_id'      =>  $row['test_report_rt_id'] != '' && $row['test_report_rt_id'] != 0 ? $row['test_report_rt_id'] : null,
-                                'type_of_job_id'         => $row['type_of_job_id'] ?? null,
-                                'job_desc_id'            => $row['job_desc_id'] ?? null,
-                                'part_id'                => !empty($row['part_id']) ? $row['part_id'] : null,
+                                'type_of_job_id'         => !empty($row['type_of_job_id']) ? $row['type_of_job_id'] : null,
+                                'job_desc_id'            => !empty($row['job_desc_id']) ? $row['job_desc_id'] : null,
+                                'job_desc'               => !empty($row['job_desc']) ? $row['job_desc'] : null,
                                 'part_no'                => $row['part_no'] ?? null,
                                 'drg_no'                 => $row['drg_no'] ?? null,
                                 'material_id'            => $row['material_id'] ?? null,
@@ -1217,6 +1239,7 @@ class MaterialInwardController extends Controller
     public function getInwardPartNoList(Request $request)
     {
         $term = $request->term ?? '';
+        $job_desc = $request->job_desc ?? '';
         $job_desc_id = $request->job_desc_id ?? '';
         $current_location_id = getCurrentLocation()->location_id;
 
@@ -1228,13 +1251,20 @@ class MaterialInwardController extends Controller
                 ->where('material_inward_details.part_no', '!=', '')
                 ->where('material_inward_details.part_no', 'LIKE', '%' . $term . '%');
 
-            if (!empty($job_desc_id)) {
+            if (!empty($job_desc)) {
+                $query->where(function($q) use ($job_desc) {
+                    $q->where('material_inward_details.job_desc', $job_desc);
+                    if (is_numeric($job_desc)) {
+                        $q->orWhere('material_inward_details.job_desc_id', $job_desc);
+                    }
+                });
+            } elseif (!empty($job_desc_id)) {
                 $query->where('material_inward_details.job_desc_id', $job_desc_id);
             }
 
             $partNos = $query->groupBy('material_inward_details.part_no')->orderBy('material_inward_details.part_no', 'asc')->get();
 
-            if ($partNos->isEmpty() && !empty($job_desc_id)) {
+            if ($partNos->isEmpty() && (!empty($job_desc) || !empty($job_desc_id))) {
                 $partNos = MaterialInwardDetails::select('material_inward_details.part_no')
                     ->join('material_inward', 'material_inward.material_inward_id', '=', 'material_inward_details.material_inward_id')
                     ->where('material_inward.current_location_id', $current_location_id)
@@ -1343,30 +1373,35 @@ class MaterialInwardController extends Controller
         if ($request->ajax()) {
             $customer = $request->post('customer');
             $jobTypeCasting = $request->post('job_type_casting');
-            $typeOfJob = $request->post('type_of_job');
-            $jobDescription = $request->post('job_description');
+            $typeOfTest = $request->post('type_of_test');
+            $nablType = $request->post('nabl_type');
 
-            if (empty($customer) || empty($jobTypeCasting) || empty($typeOfJob) || empty($jobDescription)) {
+            if (empty($customer) || empty($jobTypeCasting) || empty($typeOfTest)) {
                 return response()->json(['status' => 'success', 'data' => []]);
             }
 
             $current_location_id = getCurrentLocation()->location_id;
 
             // Find all inwards for this customer and job type within current location
-            $inwardIds = MaterialInward::where('customer_id', $customer)
+            $inwardQuery = MaterialInward::where('customer_id', $customer)
                 ->where('job_type_fix', $jobTypeCasting)
-                ->where('current_location_id', $current_location_id)
-                ->pluck('material_inward_id');
+                ->where('current_location_id', $current_location_id);
+
+            if (!empty($nablType)) {
+                $inwardQuery->where('nabl_type_fix', $nablType);
+            }
+
+            $inwardIds = $inwardQuery->pluck('material_inward_id');
 
             if ($inwardIds->count() > 0) {
-                // Find all details matching the type of job and job description
-                $recentDetails = MaterialInwardDetails::whereIn('material_inward_details.material_inward_id', $inwardIds)
-                    ->where('type_of_job_id', $typeOfJob)
-                                                            ->where('job_desc_id', $jobDescription)
+                // Find all details matching the type of test
+                $query = MaterialInwardDetails::whereIn('material_inward_details.material_inward_id', $inwardIds)
                     ->join('material_inward', 'material_inward.material_inward_id', '=', 'material_inward_details.material_inward_id')
                     ->select('material_inward_details.*', 'material_inward.material_inward_no as inward_no', 'material_inward.material_inward_date as inward_date')
-                    ->orderBy('material_inward_details.material_inward_details_id', 'DESC')
-                    ->get();
+                    ->where('material_inward_details.type_of_testing_id_fix', $typeOfTest)
+                    ->orderBy('material_inward_details.material_inward_details_id', 'DESC');
+
+                $recentDetails = $query->get();
 
                 return response()->json(['status' => 'success', 'data' => $recentDetails]);
             }

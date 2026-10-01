@@ -41,7 +41,7 @@
                             <th>PO Date</th>
                             <th>Type Of Job</th>
                             <th>Job Description</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>Type of Test</th>
                             <th>Process At</th>
                             <th>Qty.</th>

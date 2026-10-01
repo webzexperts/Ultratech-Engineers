@@ -168,7 +168,7 @@ $(document).on('change', 'input[name*="sup_dc_type_id"]', function () {
 
     const typeMapping = {
         'Non Returnable - Manual': ['general', 'film'],
-        'SQIN from Prod. Area': ['film'],
+        // 'SQIN from Prod. Area': ['film'],
         'Returnable - Manual': ['rt_camera', 'mpt_equipment', 'ut_equipment', 'instrument', 'probe_ut']
     };
 
@@ -181,8 +181,10 @@ $(document).on('change', 'input[name*="sup_dc_type_id"]', function () {
     let options = `<option value="">Select Item</option>`;
 
     options += filteredItems.map(item => {
-        let stockQty = (type === 'SQIN from Prod. Area') ? (item.stock_sq_in || 0) : (item.io_stock_qty || '');
-        let stockUnit = (type === 'SQIN from Prod. Area') ? 'SQIN' : item.unit;
+        // let stockQty = (type === 'SQIN from Prod. Area') ? (item.stock_sq_in || 0) : (item.io_stock_qty || '');
+        // let stockUnit = (type === 'SQIN from Prod. Area') ? 'SQIN' : item.unit;
+        let stockQty = item.io_stock_qty || '';
+        let stockUnit = item.unit || '';
         return `
         <option value="${item.id}"
             data-item_group="${item.item_group}"
@@ -309,8 +311,6 @@ function fillPendingSupplierDC() {
                                         <td>${data.dc_data[idx].ser_po_date}</td>
                                         <td>${data.dc_data[idx].purpose ?? ''}</td>
                                         <td>${data.dc_data[idx].ref_no_date != null && data.dc_data[idx].ref_no_date != undefined ? data.dc_data[idx].ref_no_date : ''}</td>
-                                        <td>${data.dc_data[idx].bill_to}</td>
-                                        <td>${data.dc_data[idx].for_location}</td>
                                         <td>${data.dc_data[idx].item_name}</td>
                                         <td>${data.dc_data[idx].item_group}</td>
                                         <td>${data.dc_data[idx].main_group}</td>
@@ -321,12 +321,15 @@ function fillPendingSupplierDC() {
                                         <td>${data.dc_data[idx].prepared_by}</td>
                                     </tr>`;
 
+                                    //  <td>${data.dc_data[idx].bill_to}</td>
+                                    // <td>${data.dc_data[idx].for_location}</td>
                         }
 
                     } else {
 
                         tblHtml += `<tr class="centeralign" id="noPendingPo">
-                                        <td colspan="14">No Pending Service PO Available</td>
+                                        <!-- <td colspan="14">No Pending Service PO Available</td> -->
+                                        <td colspan="13">No Pending Service PO Available</td>
                                     </tr>`;
 
                     }
@@ -762,16 +765,16 @@ jQuery('#item_id').on('change', function (e, isEdit = false) {
     let unit = selected.data('unit');
     let item_id = selected.val();
 
-    var sup_dc_type_id = jQuery('#commonSupplierDCForm').find("input[name*='sup_dc_type_id']:checked").val();
-    if (sup_dc_type_id === 'SQIN from Prod. Area') {
-        unit = 'SQIN';
-        if (typeof allItems !== 'undefined' && Array.isArray(allItems)) {
-            let foundItem = allItems.find(i => i.id == item_id);
-            if (foundItem && foundItem.stock_sq_in !== undefined && foundItem.stock_sq_in !== null) {
-                io_stock_qty = foundItem.stock_sq_in;
-            }
-        }
-    }
+    // var sup_dc_type_id = jQuery('#commonSupplierDCForm').find("input[name*='sup_dc_type_id']:checked").val();
+    // if (sup_dc_type_id === 'SQIN from Prod. Area') {
+    //     unit = 'SQIN';
+    //     if (typeof allItems !== 'undefined' && Array.isArray(allItems)) {
+    //         let foundItem = allItems.find(i => i.id == item_id);
+    //         if (foundItem && foundItem.stock_sq_in !== undefined && foundItem.stock_sq_in !== null) {
+    //             io_stock_qty = foundItem.stock_sq_in;
+    //         }
+    //     }
+    // }
 
     if (isEdit) {
         let formIndx = jQuery('#SupplierDCDetailsModal').find("#form_index").val();
@@ -1372,6 +1375,7 @@ function checkSequence() {
         } else {
             jQuery('#sup_dc_sequence').addClass('file-loader');
             jQuery('#sup_dc_sequence').parent().parent().parent('div.control-group').removeClass('error');
+            jQuery('#commonSupplierDCForm #submitbtn').prop('disabled', true);
 
             var urL = "check-supplier_dc_number_duplication?for=add&sup_dc_sequence=" + val;
 
@@ -1392,14 +1396,17 @@ function checkSequence() {
                     if (data.response_code == 0) {
                         toastr.error(data.response_message);
                         jQuery('#commonSupplierDCForm #sup_dc_sequence').val('');
+                        jQuery('#commonSupplierDCForm #submitbtn').prop('disabled', true);
                         const input = document.getElementById('sup_dc_sequence'); input?.focus();
                     } else {
                         jQuery('#commonSupplierDCForm #sup_dc_number').val(data.latest_no);
                         jQuery('#commonSupplierDCForm #sup_dc_sequence').val(val);
+                        jQuery('#commonSupplierDCForm #submitbtn').prop('disabled', false);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     jQuery('#sup_dc_sequence').removeClass('file-loader');
+                    jQuery('#commonSupplierDCForm #submitbtn').prop('disabled', false);
                     var errMessage = JSON.parse(jqXHR.responseText);
                     if (errMessage.errors) {
                         validator.showErrors(errMessage.errors);

@@ -12,7 +12,6 @@
     use Illuminate\Support\Facades\DB;
     use App\Models\Company;
     use App\Models\SMTPConfiguration;
-
     use App\Models\Menus;
     use App\Models\Module;
     use App\Models\Admin;
@@ -59,16 +58,12 @@
     use App\Models\DPTChemical;
     use App\Models\MptDptMaterialBatchWiseStock;
     use App\Exceptions\InsufficientStockException;
-
-
     use App\Models\PurchaseOrder;
     use App\Models\Transaction\ServicePO;
-    
-    
-
     use App\Http\Controllers\LocationController;
-use App\Models\RTCamera;
-use App\Models\Transaction\TestReportRt;
+    use App\Models\RTCamera;
+    use App\Models\Transaction\TestReportRt;
+    use Illuminate\Support\Facades\Session;
 
     // use function Psy\info;
 
@@ -97,7 +92,7 @@ use App\Models\Transaction\TestReportRt;
     */
     function getJsVersion()
     {
-        return "0.10.02";
+        return "0.0.01";
     } 
 
     /**
@@ -105,7 +100,7 @@ use App\Models\Transaction\TestReportRt;
     */
     function getCssVersion()
     {
-        return "0.10.02";
+        return "0.0.01";
     }
 
     // function getLatestSequence($modal,$sequence)
@@ -234,21 +229,9 @@ use App\Models\Transaction\TestReportRt;
         $middle_num = str_pad($isFound, 4, '0', STR_PAD_LEFT);
         $postfix = $year_data->yearcode;
  
-        // $format = $prefix
-        //     ? $prefix . '/' . $middle_num . '/' . $postfix
-        //     : $middle_num . '/' . $postfix;
-
-        $locationCode = getCurrentLocation()->location_code;
-        // $locationCodeFormatted = !empty($locationCode) 
-        //     ? str_pad($locationCode, 2, '0', STR_PAD_LEFT) 
-        //     : '';
-        $locationCodeFormatted = !empty($locationCode) 
-            ? $locationCode
-            : '';
-
-        $format = 'Ultratech/' 
-            . ($locationCodeFormatted ? $locationCodeFormatted . '/' : '') 
-            . $prefix . '/' . $middle_num . '/' . $postfix;
+        $format = !empty($prefix)
+            ? rtrim($prefix, '/') . '/' . $middle_num . '/' . $postfix
+            : $middle_num . '/' . $postfix;
  
         return [
             'format'  => $format,
@@ -270,7 +253,7 @@ use App\Models\Transaction\TestReportRt;
         if($prefix != ""){
             $format = $prefix .'/' . $middle_num . '/' . $postfix;
         }else{
-            $format = 'Ultratech/' . $middle_num . '/' . $postfix;
+            $format = $middle_num . '/' . $postfix;
         }
 
  
@@ -313,20 +296,9 @@ use App\Models\Transaction\TestReportRt;
             }*/
             // old working code end
 
-            // new code as on 30-03-2026
-            $locationCode = getCurrentLocation()->location_code;
-            // $locationCodeFormatted = !empty($locationCode)
-            //     ? str_pad($locationCode, 2, '0', STR_PAD_LEFT)
-            //     : '';
-            $locationCodeFormatted = !empty($locationCode)
-                ? $locationCode
-                : '';
-
-            $format = 'Ultratech/' 
-                . ($locationCodeFormatted ? $locationCodeFormatted . '/' : '') 
-                . ($prefix ? $prefix . '/' : '') 
-                . $middle_num . '/' 
-                . $postfix;
+            $format = !empty($prefix)
+                ? rtrim($prefix, '/') . '/' . $middle_num . '/' . $postfix
+                : $middle_num . '/' . $postfix;
 
             return [
                 'format'  => $format,
@@ -356,7 +328,7 @@ use App\Models\Transaction\TestReportRt;
             if($prefix != ""){
                 $format = $prefix .'/' . $middle_num . '/' . $postfix;
             }else{
-                $format = 'Ultratech/' . $middle_num . '/' . $postfix;
+                $format = $middle_num . '/' . $postfix;
         }
 
             // $format = 'Ultratech/' 
@@ -572,7 +544,7 @@ use App\Models\Transaction\TestReportRt;
 
     function getStates()
     {
-        return State::select('id','state')->orderBy('state','asc')->get();
+        return State::select('id','state','state_code')->orderBy('state','asc')->get();
     }
 
     function getCities()
@@ -1613,8 +1585,8 @@ use App\Models\Transaction\TestReportRt;
                 'item.min_stock_level',
                 'item.item_type',
                 'item_group.item_group',
-                'item_opening.io_stock_qty',
-                \DB::raw('IFNULL(item_opening_prod_area.stock_sq_in, 0) as stock_sq_in')
+                'item_opening.io_stock_qty'
+                // \DB::raw('IFNULL(item_opening_prod_area.stock_sq_in, 0) as stock_sq_in')
             )
             ->leftJoin('unit', 'unit.id', '=', 'item.unit_id')
             ->leftJoin('item_group', 'item_group.id', '=', 'item.item_group_id')
@@ -1622,10 +1594,10 @@ use App\Models\Transaction\TestReportRt;
                 $join->on('item_opening.io_item_id', '=', 'item.id')
                     ->where('item_opening.current_location_id', '=', $locationCode->location_id);
             })
-            ->leftJoin('item_opening_prod_area', function ($join) use ($locationCode) {
-                $join->on('item_opening_prod_area.item_id', '=', 'item.id')
-                    ->where('item_opening_prod_area.current_location_id', '=', $locationCode->location_id);
-            })
+            // ->leftJoin('item_opening_prod_area', function ($join) use ($locationCode) {
+            //     $join->on('item_opening_prod_area.item_id', '=', 'item.id')
+            //         ->where('item_opening_prod_area.current_location_id', '=', $locationCode->location_id);
+            // })
             ->where('item.status', 'Active');
 
         // Dynamic filter
@@ -1636,9 +1608,9 @@ use App\Models\Transaction\TestReportRt;
             ]);
         }
 
-        if ($piType == 'SQIN from Prod. Area') {
-            $query->where('item.item_type', 'film');
-        }
+        // if ($piType == 'SQIN from Prod. Area') {
+        //     $query->where('item.item_type', 'film');
+        // }
 
         if ($piType == 'Returnable - Manual') {
             $query->whereIn('item.item_type', [
@@ -2327,8 +2299,8 @@ use App\Models\Transaction\TestReportRt;
     function getReasonType()
     {
         return [
-            'Not Feasible' => "Not Feasible",
-            'Inquiry - Quotation Short Close' => "Inquiry - Quotation Short Close",
+            // 'Not Feasible' => "Not Feasible",
+            // 'Inquiry - Quotation Short Close' => "Inquiry - Quotation Short Close",
             // 'Material Inspection' => "Material Inspection",
             // 'Return Slip' => "Return Slip",
             // 'Order Short Close' => "Order Short Close",
@@ -3399,6 +3371,49 @@ function checkPdf($remotePdfUrl, $localFilePath, $returnurl) {
                     return true;
                 }
             }
+        }
+        return false;
+    }
+
+    function checkReportDuplication($model, $column_name, $number, $request = null, $custom_message = null, $exclude_id = null, $primary_key = null)
+    {
+        // // 1. Revision Check (Skip duplicate check for revision records)
+        if ($request && isset($request->process_type)) {
+            if ($request->process_type === 'Repair') {
+                return false;
+            }
+        }
+
+        // 2. Query model/table strictly on column_name and number (without year_id)
+        if (is_string($model) && class_exists($model)) {
+            $query = $model::where($column_name, $number);
+            if ($exclude_id !== null) {
+                $pk = $primary_key ?: (new $model)->getKeyName();
+                $query->where($pk, '!=', $exclude_id);
+            }
+        } else {
+            $query = DB::table($model)->where($column_name, $number);
+            if ($exclude_id !== null) {
+                $pk = $primary_key ?: 'id';
+                $query->where($pk, '!=', $exclude_id);
+            }
+        }
+            // 3. RT Fresh અપડેટ વખતે Repair (R1, R2) ને ડુપ્લિકેટમાંથી બાદ રાખવા
+        if ($request && isset($request->process_type)) {
+            $tableName = is_string($model) && class_exists($model) ? (new $model)->getTable() : $model;
+            if (Schema::hasColumn($tableName, 'process_type')) {
+                $query->where('process_type', '!=', 'Repair');
+            }
+        }
+
+        $exists = $query->exists();
+
+        if ($exists) {
+            $message = !empty($custom_message) ? $custom_message : "Duplicate Record Found.";
+            return [
+                'response_code'    => 0,
+                'response_message' => $message
+            ];
         }
         return false;
     }

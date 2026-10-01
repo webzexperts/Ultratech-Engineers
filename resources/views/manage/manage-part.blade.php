@@ -31,7 +31,7 @@
                         <tr>
                             <th class="action_col">Actions</th>
                             <th>Job Description</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>Drg. No.</th>
                             <th>Modified By</th>
                             <th>Modified On</th>

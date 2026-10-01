@@ -348,7 +348,7 @@ class EnclosureController extends Controller
             $enclosure_data = Enclosure::where('enclosure_id','=',$request->id)->update([
                 'enclosure_name'        => $request->enclosure_name,
                 'enclosure_type_value_fix'   => $request->enclosure_type_value_fix ?? null,
-                'current_location_id'   => $LocationData->location_id ?? null,
+                // 'current_location_id'   => $LocationData->location_id ?? null,
                 'enclosure_no'          => $request->enclosure_no,
                 'enclosure_layout'      => $layout_images != "" ? $layout_images : null,
                 'enclosure_layout_blob' => $layout_blobImage != "" ? $layout_blobImage : null,

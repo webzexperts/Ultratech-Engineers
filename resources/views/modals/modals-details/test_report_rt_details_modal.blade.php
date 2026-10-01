@@ -33,7 +33,7 @@
                             </div>
                             <!-- Identification -->
                             <div class="row g-2 mb-1">
-                                <div class="col-4"><label for="detail_identification" class="form-label">Identification </div>
+                                <div class="col-4"><label for="detail_identification" class="form-label">Identification</label></div>
                                 <div class="col-8">
                                     <input type="text" name="identification" id="detail_identification" class="form-control">
                                     <div class="invalid-tooltip">Enter Identification.</div>

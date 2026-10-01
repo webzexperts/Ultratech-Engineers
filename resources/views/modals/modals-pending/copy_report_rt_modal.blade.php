@@ -20,9 +20,9 @@
                                     <th>Customer</th>
                                     <th>NABL</th>
                                     <th>Type</th>
-                                    <th>Type of Job</th>
+                                    <!-- <th>Type of Job</th> -->
                                     <th>Job Desc.</th>
-                                    <th>Part No.</th>
+                                    <th>Part No. / Die No.</th>
                                     <th>Drg. No.</th>
                                     <th>Material</th>
                                     <th>Heat No.</th>

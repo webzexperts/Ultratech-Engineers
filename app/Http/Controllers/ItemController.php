@@ -55,22 +55,22 @@ class ItemController extends Controller
         ->editColumn('item_name', function($item_data){ 
             return $item_data->item_name;
         })
-        ->addColumn('sec_unit', function($item_data) {
-            return in_array($item_data->item_type, ['film', 'Industrial X-Ray Films']) ? 'SQIN' : '';
-        })
-        ->filterColumn('sec_unit', function ($query, $keyword) {
-            $globalSearch = request()->input('search.value');
-            $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
-            $lowerKeyword = strtolower(trim($searchValue));
-            if ($lowerKeyword !== '' && stripos('sqin', $lowerKeyword) !== false) {
-                $query->whereIn('item.item_type', ['film', 'Industrial X-Ray Films']);
-            } elseif ($lowerKeyword !== '') {
-                $query->whereRaw('1 = 0');
-            }
-        })
-        ->editColumn('conv_factor', function($item_data) {
-            return in_array($item_data->item_type, ['film', 'Industrial X-Ray Films']) ? ($item_data->conv_factor ?? '') : '';
-        })
+        // ->addColumn('sec_unit', function($item_data) {
+        //     return in_array($item_data->item_type, ['film', 'Industrial X-Ray Films']) ? 'SQIN' : '';
+        // })
+        // ->filterColumn('sec_unit', function ($query, $keyword) {
+        //     $globalSearch = request()->input('search.value');
+        //     $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
+        //     $lowerKeyword = strtolower(trim($searchValue));
+        //     if ($lowerKeyword !== '' && stripos('sqin', $lowerKeyword) !== false) {
+        //         $query->whereIn('item.item_type', ['film', 'Industrial X-Ray Films']);
+        //     } elseif ($lowerKeyword !== '') {
+        //         $query->whereRaw('1 = 0');
+        //     }
+        // })
+        // ->editColumn('conv_factor', function($item_data) {
+        //     return in_array($item_data->item_type, ['film', 'Industrial X-Ray Films']) ? ($item_data->conv_factor ?? '') : '';
+        // })
         ->editColumn('min_stock_level', function($item_data) {
             return $item_data->min_stock_level > 0 ? number_format((float)$item_data->min_stock_level, 3, '.','') : number_format((float) 0, 3, '.','');
         })
@@ -197,9 +197,11 @@ class ItemController extends Controller
                 'item_group_id' => $request->item_group_id ?? null,
                 'item_type' => $request->item_type,
                 'identification_req' => $request->identification_req ?? null,
-                'inter_location_transfer' => $request->inter_location_transfer ?? null,
+                // 'inter_location_transfer' => $request->inter_location_transfer ?? null,
+                'inter_location_transfer' => 'Allowed',
                 'unit_id' => $request->unit_id ?? null,
-                'conv_factor' => in_array($request->item_type, ['film', 'Industrial X-Ray Films']) ? ($request->conv_factor ?? null) : null,
+                // 'conv_factor' => in_array($request->item_type, ['film', 'Industrial X-Ray Films']) ? ($request->conv_factor ?? null) : null,
+                'conv_factor' => null,
                 'min_stock_level' => $request->min_stock_level ?? null,
                 'document_ref_no' => $request->document_ref_no ?? null,
                 'validity_date' => isset($request->validity_date) ? Date::createFromFormat('d/m/Y', $request->validity_date)->format('Y-m-d') : null,
@@ -313,10 +315,11 @@ class ItemController extends Controller
             $existing_item = Item::where('id', $request->id)->first();
             $item_issue_used = ItemIssueDetails::where('item_id', $request->id)->count();
             
-            $conv_factor = in_array($request->item_type, ['film', 'Industrial X-Ray Films']) ? ($request->conv_factor ?? null) : null;
-            if ($item_issue_used > 0 && $existing_item) {
-                $conv_factor = $existing_item->conv_factor;
-            }
+            // $conv_factor = in_array($request->item_type, ['film', 'Industrial X-Ray Films']) ? ($request->conv_factor ?? null) : null;
+            // if ($item_issue_used > 0 && $existing_item) {
+            //     $conv_factor = $existing_item->conv_factor;
+            // }
+            $conv_factor = null;
 
             $item_data = Item::where('id','=',$request->id)->update([
                 // 'item_code' => $request->item_code,
@@ -326,7 +329,8 @@ class ItemController extends Controller
                 'identification_req' => $request->identification_req ?? null,
                 'unit_id' => $request->unit_id ?? null,
                 'conv_factor' => $conv_factor,
-                'inter_location_transfer' => $request->inter_location_transfer ?? null,
+                // 'inter_location_transfer' => $request->inter_location_transfer ?? null,
+                'inter_location_transfer' => 'Allowed',
                 'min_stock_level' => $request->min_stock_level ?? null,
                 'document_ref_no' => $request->document_ref_no ?? null,
                 'validity_date' => isset($request->validity_date) ? Date::createFromFormat('d/m/Y', $request->validity_date)->format('Y-m-d') : null,

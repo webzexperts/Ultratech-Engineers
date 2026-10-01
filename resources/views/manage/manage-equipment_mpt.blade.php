@@ -39,9 +39,9 @@
                             <th>Sr. No.</th>
                             <th>Last Cal. Date</th>
                             <th>Next Cal. Date</th>
-                            <th>Current Location</th>
+                            <!-- <th>Current Location</th> -->
                             <th>Status</th>
-                            <th>Own Location</th>
+                            <!-- <th>Own Location</th> -->
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -98,9 +98,9 @@
                 { data: 'em_serial_no', name: 'equipment_mpt.em_serial_no', },
                 { data: 'em_last_cali_date', name: 'equipment_mpt.em_last_cali_date', },
                 { data: 'em_next_cali_due_date', name: 'equipment_mpt.em_next_cali_due_date', },
-                { data: 'current_location', name: 'current_location.location_name', },
+                // { data: 'current_location', name: 'current_location.location_name', },
                 { data: 'em_status', name: 'equipment_mpt.em_status', },
-                { data: 'own_location', name: 'own_location.location_name', },
+                // { data: 'own_location', name: 'own_location.location_name', },
                 { data: 'last_by', name: 'last_by', },
                 { data: 'last_on', name: 'equipment_mpt.last_on', },
                 { data: 'created_by', name: 'created_by', },

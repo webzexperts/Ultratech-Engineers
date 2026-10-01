@@ -186,7 +186,7 @@ function suggestFilmType(e, $this) {
                 if (data.response_code == 1) {
                     jQuery('#film_type_list').html(data.filmTypeList);
                 } else {
-                     toastr.error(data.response_message);
+                    toastr.error(data.response_message);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -195,9 +195,9 @@ function suggestFilmType(e, $this) {
                 if (errMessage.errors) {
                     countryValidator.showErrors(errMessage.errors);
                 } else if (jqXHR.status == 401) {
-                     toastr.error(jqXHR.statusText);
+                    toastr.error(jqXHR.statusText);
                 } else {
-                     toastr.error('Something went wrong!');
+                    toastr.error('Something went wrong!');
                     console.log(JSON.parse(jqXHR.responseText));
                 }
             }
@@ -205,7 +205,7 @@ function suggestFilmType(e, $this) {
     }
 }
 
-jQuery(document).on('click', '#film_type_list', function (e) {
+jQuery(document).on('click', '#FilmTypeModal #film_type_list', function (e) {
     var suggest = e.target.innerHTML;
     jQuery('#film_type_suggesion').val(suggest);
     var hidden = jQuery('#film_type_suggesion').val();
@@ -222,7 +222,7 @@ jQuery(document).on('click', '#film_type_list', function (e) {
 
 let lastVerifiedFilmType = '';
 
-jQuery(document).on('blur', '#film_type', function () {
+jQuery(document).on('blur', '#FilmTypeModal #film_type', function () {
     let film_type = jQuery(this).val().trim();
 
     if (film_type === '') return;
@@ -233,7 +233,7 @@ jQuery(document).on('blur', '#film_type', function () {
     }
 });
 
-jQuery(document).on('input', '#film_type', function () {
+jQuery(document).on('input', '#FilmTypeModal #film_type', function () {
     lastVerifiedFilmType = '';
 });
 
@@ -255,7 +255,7 @@ function checkFilmTypeName(film_type) {
 }
 
 function verifyFilmType() {
-    var FilmTypeName = jQuery('#film_type').val();
+    var FilmTypeName = jQuery('#FilmTypeModal #film_type').val();
     var suggestion_list = jQuery('#film_type_list').html;
 
     if (suggestion_list != '') {

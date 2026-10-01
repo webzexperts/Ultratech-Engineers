@@ -44,7 +44,7 @@
                             <th>Challan Date</th>
                             <th>Type Of Job</th>
                             <th>Job Description</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>Method</th>
                             <th>DC Qty.</th>
                             <th>Modified By</th>

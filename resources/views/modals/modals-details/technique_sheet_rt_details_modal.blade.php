@@ -148,6 +148,26 @@
                                     <div class="invalid-tooltip">Enter IQI Sensitivity.</div>
                                 </div>
                             </div>
+                            <!-- Test Technique -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="detail_test_technique" class="form-label">Test Technique</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="detail_test_technique" name="test_technique" onkeyup="suggestTestTechnique(event, this)" autocomplete="off">
+                                    <div id="detail_test_technique_list"></div>
+                                    <input type="hidden" name="test_technique_suggestion" id="detail_test_technique_suggestion">
+                                </div>
+                            </div>
+                            <!-- Film Position -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="detail_film_position" class="form-label">Film Position</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="detail_film_position" name="film_position" autocomplete="off">
+                                </div>
+                            </div>
                             <!-- Film Size -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="detail_film_id" class="form-label">Film Size <sup class="astric">*</sup></label></div>
@@ -176,26 +196,6 @@
                                         <option value="Quadra">Quadra</option>
                                     </select>
                                     <div class="invalid-tooltip">Select No. of Film.</div>
-                                </div>
-                            </div>
-                            <!-- Test Technique -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="detail_test_technique" class="form-label">Test Technique</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="detail_test_technique" name="test_technique" onkeyup="suggestTestTechnique(event, this)" autocomplete="off">
-                                    <div id="detail_test_technique_list"></div>
-                                    <input type="hidden" name="test_technique_suggestion" id="detail_test_technique_suggestion">
-                                </div>
-                            </div>
-                            <!-- Film Position -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="detail_film_position" class="form-label">Film Position</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="detail_film_position" name="film_position" autocomplete="off">
                                 </div>
                             </div>
                         </div>

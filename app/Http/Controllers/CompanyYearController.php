@@ -64,8 +64,35 @@ class CompanyYearController extends Controller
     /**
      * Return default company year data
      */
+    // public static function getDefaultYearData($forBlade = false){
+    //     $year_data = CompanyYear::where('id','=',session('default_year_id'))->first();
+    //     if($year_data == null){
+           
+    //         if($forBlade == false){
+    //             return response()->json([
+    //                 'response_code' => '0',
+    //                 'data' => $year_data,
+    //                 'response_message' => 'Company Year Data Not Available'
+    //             ]);
+    //         }else{
+    //              return null;
+    //         }
+            
+    //     }
+    //     return $year_data;
+    // }
+
     public static function getDefaultYearData($forBlade = false){
-        $year_data = CompanyYear::where('id','=',session('default_year_id'))->first();
+        $year_id = request()->input('year_id')?? request()->header('X-Year-Id')?? session('default_year_id');
+        $year_data = null;
+        if($year_id){
+            $year_data = CompanyYear::where('id','=',$year_id)->first();
+        }
+
+        if($year_data == null){
+            $year_data = CompanyYear::where('id','=',session('default_year_id'))->first();
+        }
+
         if($year_data == null){
            
             if($forBlade == false){
@@ -86,7 +113,8 @@ class CompanyYearController extends Controller
 
     public static function getTillYearIds(){
 
-        $year_data = CompanyYear::where('id','=',session('default_year_id'))->first();
+        // $year_data = CompanyYear::where('id','=',session('default_year_id'))->first();
+        $year_data = self::getDefaultYearData(true);
         $curr_year_id = 0;
         $year_ids = [];
         if($year_data != null){

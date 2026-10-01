@@ -25,10 +25,6 @@
                 <div class="table-responsive">
                 <table id="dyntable" class="table nowrap align-middle table-bordered cul-search" style="width:100%">
                     <thead>
-                        <?php $LocationData = getCurrentLocation(); 
-                        if($LocationData->location_type == 'HO'){ ?>
-                            <th>Location</th>
-                        <?php } ?>
                             <th>Item</th>
                             <th>Item Group</th>
                             <th>Main Group</th>
@@ -36,7 +32,7 @@
                             <th>Status</th>
                             <th>Unit</th>
                             <th>Current Stock</th>
-                            <th>Pend. Inter Location Receipt</th>
+                            {{-- <th>Pend. Inter Location Receipt</th> --}}
                             <th>Returnable (Supplier) </th>
                             <th>Returnable (Customer)</th>
                             <th>Total Stock</th>
@@ -68,12 +64,6 @@
 
             var columns = [];
 
-            @if($LocationData->location_type == 'HO')
-                columns.push({
-                    data: 'location_name',
-                    name: 'location.location_name'
-                });
-            @endif
 
             columns.push(
                 { data: 'item_name', name: 'item.item_name', },
@@ -83,7 +73,7 @@
                 { data: 'status' , name: 'item.status' },
                 { data: 'unit' , name: 'unit.unit' },
                 { data: 'current_stock' , name: 'current_stock' },
-                { data: 'pend_int_loc_qty' , name: 'pend_int_loc_qty' },
+                // { data: 'pend_int_loc_qty' , name: 'pend_int_loc_qty' },
                 { data: 'pend_sup_dc_qty' , name: 'pend_sup_dc_qty' },
                 { data: 'pen_return_qty' , name: 'pen_return_qty' },
                 { data: 'total_stock' , name: 'total_stock' },

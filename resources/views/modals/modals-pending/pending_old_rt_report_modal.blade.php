@@ -20,7 +20,7 @@
                                 <th>Type of Job</th>
                                 <th>Job Desc.</th>
                                 <th>Part No.</th>
-                                <th>Drg. No.</th>
+                                <th>Drg. No. / Die No.</th>
                                 <th>Heat No.</th>
                                 <th>Product Code</th>
                                 <th>Material</th>

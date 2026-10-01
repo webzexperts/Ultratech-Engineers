@@ -50,7 +50,7 @@
                                             <thead>
                                                 <tr>
                                                     <th class="action_detail_width">Actions</th>
-                                                    <th>Part No. <sup class="astric">*</sup></th>
+                                                    <th>Part No. / Die No. <sup class="astric">*</sup></th>
                                                     <th>Drg. No. <sup class="astric">*</sup></th>
                                                 </tr>
                                             </thead>

@@ -209,23 +209,24 @@ jQuery('#item_id').on('change', function () {
     let io_stock_qty = selected.data('io_stock_qty');
     let stock_rate_unit = selected.data('stock_rate_unit');
     let unit = selected.data('unit');
-    let conv_factor = selected.data('conv_factor') || 0;
+    // let conv_factor = selected.data('conv_factor') || 0;
+    let conv_factor = 0;
     let item_type = selected.data('item_type') || '';
     let item_id = selected.val();
 
-    // Dynamically manage "Production Area" option based on group
-    let issueTypeSelect = jQuery('#ItemIssueDetailsForm #issue_type');
-    let hasProdArea = issueTypeSelect.find('option[value="Production Area"]').length > 0;
-    if (selected.val() != "" && main_group == 'Industrial X-Ray Films') {
-        if (!hasProdArea) {
-            issueTypeSelect.append('<option value="Production Area">Production Area</option>');
-        }
-    } else {
-        if (hasProdArea) {
-            issueTypeSelect.find('option[value="Production Area"]').remove();
-        }
-    }
-    issueTypeSelect.trigger('change.select2');
+    // Dynamically manage "Production Area" option based on group (Commented - No SQIN)
+    // let issueTypeSelect = jQuery('#ItemIssueDetailsForm #issue_type');
+    // let hasProdArea = issueTypeSelect.find('option[value="Production Area"]').length > 0;
+    // if (selected.val() != "" && main_group == 'Industrial X-Ray Films') {
+    //     if (!hasProdArea) {
+    //         issueTypeSelect.append('<option value="Production Area">Production Area</option>');
+    //     }
+    // } else {
+    //     if (hasProdArea) {
+    //         issueTypeSelect.find('option[value="Production Area"]').remove();
+    //     }
+    // }
+    // issueTypeSelect.trigger('change.select2');
 
     if (selected.val() != "") {
         jQuery('#item_group').val(item_group);
@@ -234,7 +235,7 @@ jQuery('#item_id').on('change', function () {
         jQuery('#io_stock_qty').val(io_stock_qty ? parseFloat(io_stock_qty).toFixed(3) : parseFloat(0).toFixed(3));
         jQuery('#issue_stock_qty_unit').text(unit).addClass('ms-1');
         jQuery('#issue_qty_unit').text(unit).addClass('ms-1');
-        jQuery('#conv_factor').val(conv_factor);
+        // jQuery('#conv_factor').val(conv_factor);
         jQuery('#item_type').val(item_type);
         console.log(main_group);
         
@@ -255,15 +256,15 @@ jQuery('#item_id').on('change', function () {
             jQuery('#ItemIssueDetailsForm #sr_table_pk_id').addClass('skip-tab');
             setSelect2Readonly("#ItemIssueDetailsForm #sr_table_pk_id", true);
 
-            if (main_group == 'Industrial X-Ray Films') {
-                jQuery('#ItemIssueDetailsForm #issue_type').val('Production Area').trigger('change');
-                jQuery('#ItemIssueDetailsForm #issue_type').addClass('skip-tab');
-                setSelect2Readonly("#ItemIssueDetailsForm #issue_type", true);
-            } else {
+            // if (main_group == 'Industrial X-Ray Films') {
+            //     jQuery('#ItemIssueDetailsForm #issue_type').val('Production Area').trigger('change');
+            //     jQuery('#ItemIssueDetailsForm #issue_type').addClass('skip-tab');
+            //     setSelect2Readonly("#ItemIssueDetailsForm #issue_type", true);
+            // } else {
                 jQuery('#ItemIssueDetailsForm #issue_type').val('Consumption').trigger('change');
                 jQuery('#ItemIssueDetailsForm #issue_type').removeClass('skip-tab');
                 setSelect2Readonly("#ItemIssueDetailsForm #issue_type", false);
-            }
+            // }
             jQuery('#ItemIssueDetailsForm #wastage_reason_id').val('').trigger('change');
 
             jQuery('#issue_qty').prop('readonly', false).removeClass('skip-tab').removeAttr('tabindex');
@@ -296,7 +297,7 @@ jQuery('#item_id').on('change', function () {
         jQuery('#io_stock_qty').val('');
         jQuery('#issue_stock_qty_unit').text('').removeClass('ms-1');
         jQuery('#issue_qty_unit').text('').removeClass('ms-1');
-        jQuery('#conv_factor').val(0);
+        // jQuery('#conv_factor').val(0);
         jQuery('#item_type').val('');
         jQuery('#ItemIssueDetailsForm #sr_table_pk_id').empty().append('<option value="">Select Sr. No.</option>');
         jQuery('#ItemIssueDetailsForm #sr_table_pk_id').addClass('skip-tab');
@@ -478,8 +479,8 @@ $('#ItemIssueDetailsForm').on('submit', function (e) {
             var sr_no = formValue.sr_table_pk_id != "" && formValue.sr_table_pk_id != null ? thisModal.find('#sr_table_pk_id option[value="' + sr_table_pk_id + '"]').text() : "";
             var io_stock_qty = formValue.io_stock_qty != 0 ? parseFloat(formValue.io_stock_qty).toFixed(3) : parseFloat(0).toFixed(3);
             var remark = formValue.remark != null ? formValue.remark : '';
-            var conv_factor = formValue.conv_factor ? parseInt(formValue.conv_factor) : 0;
-            formValue.conv_factor = conv_factor;
+            // var conv_factor = formValue.conv_factor ? parseInt(formValue.conv_factor) : 0;
+            // formValue.conv_factor = conv_factor;
             formValue.item_type = formValue.item_type || '';
             formValue.sr_no = sr_no;
             var unit = thisModal.find('#issue_qty_unit').text();
@@ -555,7 +556,7 @@ $('#ItemIssueDetailsForm').on('submit', function (e) {
                 jQuery('#issue_qty').val('');
                 jQuery('#remark').val('');
                 jQuery('#sr_table_unique_id').val('');
-                jQuery('#conv_factor').val('');
+                // jQuery('#conv_factor').val('');
                 jQuery('#item_type').val('');
 
                 setTimeout(function () {
@@ -614,7 +615,7 @@ function fillItemIssueDetailsForm(formIndx, rawIndx) {
         );
     }
     thisForm.find("#item_id").val(itemId).trigger('change');
-    thisForm.find("#conv_factor").val(frmData.conv_factor || 0);
+    // thisForm.find("#conv_factor").val(frmData.conv_factor || 0);
     thisForm.find("#item_type").val(frmData.item_type || '');
     thisForm.find("#io_stock_qty").val(parseFloat(frmData.io_stock_qty || 0).toFixed(3));
     if (frmData.issue_detail_id != 0) {
@@ -658,17 +659,17 @@ function fillItemIssueDetailsForm(formIndx, rawIndx) {
     thisForm.find("#remark").val(frmData.remark != "" ? frmData.remark : "");
     let issueTypeSelect = jQuery('#ItemIssueDetailsForm #issue_type');
     let hasProdArea = issueTypeSelect.find('option[value="Production Area"]').length > 0;
-    if (frmData.main_group == 'Industrial X-Ray Films') {
-        if (!hasProdArea) {
-            issueTypeSelect.append('<option value="Production Area">Production Area</option>');
-        }
-        jQuery("#ItemIssueDetailsForm #issue_type").val('Production Area').trigger('change.select2');
-        jQuery('#ItemIssueDetailsForm #issue_type').addClass('skip-tab');
-        setSelect2Readonly("#ItemIssueDetailsForm #issue_type", true);
-    } else {
-        if (hasProdArea) {
-            issueTypeSelect.find('option[value="Production Area"]').remove();
-        }
+    // if (frmData.main_group == 'Industrial X-Ray Films') {
+    //     if (!hasProdArea) {
+    //         issueTypeSelect.append('<option value="Production Area">Production Area</option>');
+    //     }
+    //     jQuery("#ItemIssueDetailsForm #issue_type").val('Production Area').trigger('change.select2');
+    //     jQuery('#ItemIssueDetailsForm #issue_type').addClass('skip-tab');
+    //     setSelect2Readonly("#ItemIssueDetailsForm #issue_type", true);
+    // } else {
+        // if (hasProdArea) {
+        //     issueTypeSelect.find('option[value="Production Area"]').remove();
+        // }
         jQuery("#ItemIssueDetailsForm #issue_type").val(frmData.issue_type ? frmData.issue_type : "").trigger('change');
         if (frmData.main_group == 'General' || frmData.main_group == 'Material – MPT' || frmData.main_group == 'Chemical – DPT') {
             jQuery('#ItemIssueDetailsForm #issue_type').removeClass('skip-tab');
@@ -677,7 +678,7 @@ function fillItemIssueDetailsForm(formIndx, rawIndx) {
             jQuery('#ItemIssueDetailsForm #issue_type').addClass('skip-tab');
             setSelect2Readonly("#ItemIssueDetailsForm #issue_type", true);
         }
-    }
+    // }
     jQuery("#ItemIssueDetailsForm #wastage_reason_id").val(frmData.wastage_reason_id ? zeroToEmpty(frmData.wastage_reason_id) : "").trigger('change.select2');
 
 
@@ -978,6 +979,7 @@ function checkSequence() {
         } else {
             jQuery('#issue_sequence').addClass('file-loader');
             jQuery('#issue_sequence').parent().parent().parent('div.control-group').removeClass('error');
+            jQuery('#commonItemIssueForm #submitbtn').prop('disabled', true);
 
             var urL = "check-item_issue_number_duplication?for=add&issue_sequence=" + val;
 
@@ -998,14 +1000,17 @@ function checkSequence() {
                     if (data.response_code == 0) {
                         toastr.error(data.response_message);
                         jQuery('#commonItemIssueForm #issue_sequence').val('');
+                        jQuery('#commonItemIssueForm #submitbtn').prop('disabled', true);
                         const input = document.getElementById('issue_sequence'); input?.focus();
                     } else {
                         jQuery('#commonItemIssueForm #issue_number').val(data.latest_no);
                         jQuery('#commonItemIssueForm #issue_sequence').val(val);
+                        jQuery('#commonItemIssueForm #submitbtn').prop('disabled', false);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     jQuery('#issue_sequence').removeClass('file-loader');
+                    jQuery('#commonItemIssueForm #submitbtn').prop('disabled', false);
                     var errMessage = JSON.parse(jqXHR.responseText);
                     if (errMessage.errors) {
                         validator.showErrors(errMessage.errors);

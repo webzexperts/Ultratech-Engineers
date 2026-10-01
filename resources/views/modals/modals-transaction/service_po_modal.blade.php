@@ -97,6 +97,9 @@
                                 </div>
 
 
+                            </div>
+                            <div class="col-md-4">
+                                
                                 <div class="row g-2 ml-2 mb-1">
                                     <div class="col-4">
                                         <label class="form-label">Ref. No. & Date</label>
@@ -105,9 +108,7 @@
                                         <input type="text" class="form-control" id="ref_no_date" name="ref_no_date">  
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                
+                                {{-- 
                                 <div class="row g-2 ml-2 mb-1">
                                     <div class="col-4">
                                         <label class="form-label">Bill To <sup class="astric">*</sup></label>
@@ -143,6 +144,28 @@
                                         </div>
                                     </div>
                                 </div>
+                                --}}
+
+                                <!-- Bill To & For Location ની હવે Form માં જરૂર નથી, Controller માં store & update માં સીધું 1 જ સેવ થાય છે -->
+                                <!--
+                                <div style="display: none;">
+                                    <select name="bill_to_id" id="bill_to_id">
+                                        @forelse(getGSTBillLocations() as $location)
+                                            <option value="{{ $location->location_id }}" data-state_id="{{ $location->location_state_id }}" {{ $location->location_id == 1 ? 'selected' : '' }}>
+                                                {{ $location->location_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    <select name="for_location_id" id="for_location_id">
+                                        @forelse(getLocations() as $location)
+                                            <option value="{{ $location->location_id }}" {{ $location->location_id == 1 ? 'selected' : '' }}>
+                                                {{ $location->location_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                -->
                                 <div class="row g-2 ml-2 mb-1">
                                     <div class="col-4">
                                         <label class="form-label">Payment Terms</label>
@@ -226,7 +249,7 @@
                                         <div class="d-flex gap-4 align-items-center">
 
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="gst_type_fix_id" id="sgst_cgst" value="1" >
+                                                <input class="form-check-input" type="radio" name="gst_type_fix_id" id="sgst_cgst" value="1">
                                                 <label class="form-check-label" for="sgst_cgst">
                                                     SGST + CGST
                                                 </label>

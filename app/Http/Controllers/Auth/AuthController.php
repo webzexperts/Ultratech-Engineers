@@ -257,11 +257,16 @@ class AuthController extends Controller
 
     private function setDefaultLocationSession(): void
     {
-        $defaultLocationId = 1;
-        $location = Location::where('location_id', $defaultLocationId)->first();
+        // $defaultLocationId = 1;
+        // $location = Location::where('location_id', $defaultLocationId)->first();
+        // session([
+        //     'getLocationId' => $defaultLocationId,
+        //     'getLocationType' => $location ? $location->location_type : '',
+        // ]);  
+
         session([
-            'getLocationId' => $defaultLocationId,
-            'getLocationType' => $location ? $location->location_type : '',
+            'getLocationId' => 1,
+            'getLocationType' => 'HO',
         ]);
     }
 
@@ -270,6 +275,11 @@ class AuthController extends Controller
         $this->setDefaultLocationSession();
         return redirect('dashboard');
     }
+
+    // public function selectYear()
+    // {
+    //     return view('layouts.selectYear');
+    // }
     
   
     public function logout( Request $request ){

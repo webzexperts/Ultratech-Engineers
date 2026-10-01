@@ -36,8 +36,8 @@ class TechniqueSheetRtController extends Controller
             'technique_sheet_rt.technique_sheet_rt_date',
             'technique_sheet_rt.entry_type_fix',
             'customers.customer',
-            'type_of_job.type_of_job',
-            'job_descriptions.job_description',
+            //'type_of_job.type_of_job',
+            'technique_sheet_rt.job_desc',
             'technique_sheet_rt.part_no',
             'technique_sheet_rt.drg_no',
             'area_of_coverage.area_of_coverage',
@@ -47,8 +47,8 @@ class TechniqueSheetRtController extends Controller
             'technique_sheet_rt.last_on'
         ])
         ->leftJoin('customers', 'customers.id', '=', 'technique_sheet_rt.customer_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'technique_sheet_rt.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'technique_sheet_rt.job_desc_id')
+        //->leftJoin('type_of_job', 'type_of_job.id', '=', 'technique_sheet_rt.type_of_job_id')
+        //->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'technique_sheet_rt.job_desc_id')
         ->leftJoin('area_of_coverage', 'area_of_coverage.area_of_coverage_id', '=', 'technique_sheet_rt.area_of_coverage_id')
         ->where('technique_sheet_rt.year_id', $year_data->id)
         ->where('technique_sheet_rt.current_location_id', $location_data->location_id);
@@ -117,12 +117,18 @@ class TechniqueSheetRtController extends Controller
         $year_data = getCurrentYearData();
         $current_location_id = getCurrentLocation()->location_id;
 
+        if (!$request->filled('job_desc') && $request->filled('job_desc_id')) {
+            $request->merge([
+                'job_desc' => DB::table('job_descriptions')->where('id', $request->job_desc_id)->value('job_description')
+            ]);
+        }
+
         $request->validate([
             'technique_sheet_rt_sequence' => 'required',
             'technique_sheet_rt_date' => 'required',
             'customer_id' => 'required',
-            'type_of_job_id' => 'required',
-            'job_desc_id' => 'required',
+            'job_desc' => 'required',
+            'material_id' => 'required',
             // 'part_id' => 'required',
             'area_of_coverage_id' => 'required',
         ]);
@@ -143,6 +149,11 @@ class TechniqueSheetRtController extends Controller
         //     ]);
         // }
 
+         $checkDup = checkReportDuplication(TechniqueSheetRt::class, 'technique_sheet_rt_no', $ts_no, $request, "Duplicate Technique Sheet No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
+
         DB::beginTransaction();
         try {
             $existNumber = TechniqueSheetRt::where([
@@ -161,6 +172,11 @@ class TechniqueSheetRtController extends Controller
                 $ts_no = $request->technique_sheet_rt_no;
                 $ts_seq = $request->technique_sheet_rt_sequence;
             }
+
+            // $checkDup = checkReportDuplication(TechniqueSheetRt::class, 'technique_sheet_rt_no', $ts_no, $request, "Duplicate Technique Sheet No. Found.");
+            // if ($checkDup) {
+            //     return response()->json($checkDup);
+            // }
 
             // Image Sketch Processing
             $shootingSketchPath = null;
@@ -196,14 +212,20 @@ class TechniqueSheetRtController extends Controller
                 'technique_sheet_rt_no' => $ts_no,
                 'technique_sheet_rt_date' => isset($request->technique_sheet_rt_date) ? Date::createFromFormat('d/m/Y', $request->technique_sheet_rt_date)->format('Y-m-d') : null,
                 'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
+                'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
                 'test_report_rt_id' => !empty($request->test_report_rt_id) ? $request->test_report_rt_id : null,
                 'customer_id' => $request->customer_id,
-                'type_of_job_id' => $request->type_of_job_id,
-                'job_desc_id' => $request->job_desc_id,
+                'type_of_job_id' => $request->type_of_job_id ?? null,
+                'job_desc_id' => null,
+                'job_desc' => $request->job_desc,
                 'part_id' => null,
                 'part_no' => $request->part_no,
                 'drg_no' => $request->drg_no,
+                'material_id' => $request->material_id,
+                'product_code' => $request->product_code,
                 'area_of_coverage_id' => $request->area_of_coverage_id,
+                'welding_process' => $request->welding_process,
+                'joint_type' => $request->joint_type,
                 'source_used' => $request->source_used,
                 'source_size' => $request->source_size,
                 'xray_focal_size' => $request->xray_focal_size,
@@ -266,6 +288,7 @@ class TechniqueSheetRtController extends Controller
                         'total_sq_cm' => $row['total_sq_cm'],
                         'test_technique' => $row['test_technique'] ?? null,
                         'film_position' => $row['film_position'] ?? null,
+                        // 'exposure_time' => '1',
                     ]);
                 }
             }
@@ -351,6 +374,12 @@ class TechniqueSheetRtController extends Controller
         $year_data = getCurrentYearData();
         $current_location_id = getCurrentLocation()->location_id;
 
+        if (!$request->filled('job_desc') && $request->filled('job_desc_id')) {
+            $request->merge([
+                'job_desc' => DB::table('job_descriptions')->where('id', $request->job_desc_id)->value('job_description')
+            ]);
+        }
+
         $request->validate([
             'technique_sheet_rt_sequence' => [
                 'required',
@@ -364,8 +393,8 @@ class TechniqueSheetRtController extends Controller
             ],
             'technique_sheet_rt_date' => 'required',
             'customer_id' => 'required',
-            'type_of_job_id' => 'required',
-            'job_desc_id' => 'required',
+            'job_desc' => 'required',
+            'material_id' => 'required',
             // 'part_id' => 'required',
             'area_of_coverage_id' => 'required',
         ], [
@@ -373,8 +402,8 @@ class TechniqueSheetRtController extends Controller
             'technique_sheet_rt_sequence.required' => 'Enter Sr. No.',
             'technique_sheet_rt_date.required' => 'Enter Date.',
             'customer_id.required' => 'Select Customer.',
-            'type_of_job_id.required' => 'Select Type of Job.',
-            'job_desc_id.required' => 'Select Job Description.',
+            'job_desc.required' => 'Enter Job Description.',
+            'material_id.required' => 'Select Material.',
             'area_of_coverage_id.required' => 'Select Area of Coverage.',
         ]);
 
@@ -395,6 +424,11 @@ class TechniqueSheetRtController extends Controller
         //         'response_message' => 'Technique Sheet already exists for this Customer, Type of Job, Job Description, Part, and Area of Coverage combination.',
         //     ]);
         // }
+
+        $checkDup = checkReportDuplication(TechniqueSheetRt::class, 'technique_sheet_rt_no', $request->technique_sheet_rt_no, $request, "Duplicate Technique Sheet No. Found.", $request->id, 'technique_sheet_rt_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
 
         DB::beginTransaction();
         try {
@@ -447,14 +481,20 @@ class TechniqueSheetRtController extends Controller
                 'technique_sheet_rt_no' => $request->technique_sheet_rt_no,
                 'technique_sheet_rt_date' => isset($request->technique_sheet_rt_date) ? Date::createFromFormat('d/m/Y', $request->technique_sheet_rt_date)->format('Y-m-d') : null,
                 'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
+                'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
                 'test_report_rt_id' => !empty($request->test_report_rt_id) ? $request->test_report_rt_id : null,
                 'customer_id' => $request->customer_id,
-                'type_of_job_id' => $request->type_of_job_id,
-                'job_desc_id' => $request->job_desc_id,
+                'type_of_job_id' => $request->type_of_job_id ?? null,
+                'job_desc_id' => null,
+                'job_desc' => $request->job_desc,
                 'part_id' => null,
                 'part_no' => $request->part_no,
                 'drg_no' => $request->drg_no,
+                'material_id' => $request->material_id,
+                'product_code' => $request->product_code,
                 'area_of_coverage_id' => $request->area_of_coverage_id,
+                'welding_process' => $request->welding_process,
+                'joint_type' => $request->joint_type,
                 'source_used' => $request->source_used,
                 'source_size' => $request->source_size,
                 'xray_focal_size' => $request->xray_focal_size,
@@ -518,6 +558,7 @@ class TechniqueSheetRtController extends Controller
                             'total_sq_cm' => $row['total_sq_cm'],
                             'test_technique' => $row['test_technique'] ?? null,
                             'film_position' => $row['film_position'] ?? null,
+                            // 'exposure_time' => '1',
                         ]);
                     } elseif ($mode === 'Update') {
                         if (!empty($row['technique_sheet_rt_details_id'])) {
@@ -543,6 +584,7 @@ class TechniqueSheetRtController extends Controller
                                 'total_sq_cm' => $row['total_sq_cm'],
                                 'test_technique' => $row['test_technique'] ?? null,
                                 'film_position' => $row['film_position'] ?? null,
+                                // 'exposure_time' => '1',
                             ]);
                         }
                     } elseif ($mode === 'Delete') {
@@ -771,6 +813,99 @@ class TechniqueSheetRtController extends Controller
             'response_code' => 1,
         ]);
     }
+
+    public function existsProductCode(Request $request)
+    {
+        if ($request->term != "") {
+            $location_id = getCurrentLocation()->location_id;
+            $data = DB::table('technique_sheet_rt')
+                ->select('product_code')
+                ->where('current_location_id', $location_id)
+                ->where('product_code', 'LIKE', $request->term . '%')
+                ->whereNotNull('product_code')
+                ->where('product_code', '!=', '')
+                ->groupBy('product_code')
+                ->get();
+            if ($data->isNotEmpty()) {
+                $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
+                foreach ($data as $row) {
+                    if (trim($row->product_code) === '') continue;
+                    $output .= '<li parent-id="product_code" list-id="product_code_list" class="list-group-item" tabindex="0">' . e($row->product_code) . '</li>';
+                }
+                $output .= '</ul>';
+                return response()->json([
+                    'productCodeList' => $output,
+                    'response_code' => 1,
+                ]);
+            }
+        }
+        return response()->json([
+            'productCodeList' => '',
+            'response_code' => 1,
+        ]);
+    }
+
+    public function existsWeldingProcess(Request $request)
+    {
+        if ($request->term != "") {
+            $location_id = getCurrentLocation()->location_id;
+            $data = DB::table('technique_sheet_rt')
+                ->select('welding_process')
+                ->where('current_location_id', $location_id)
+                ->where('welding_process', 'LIKE', $request->term . '%')
+                ->whereNotNull('welding_process')
+                ->where('welding_process', '!=', '')
+                ->groupBy('welding_process')
+                ->get();
+            if ($data->isNotEmpty()) {
+                $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
+                foreach ($data as $row) {
+                    if (trim($row->welding_process) === '') continue;
+                    $output .= '<li parent-id="welding_process" list-id="welding_process_list" class="list-group-item" tabindex="0">' . e($row->welding_process) . '</li>';
+                }
+                $output .= '</ul>';
+                return response()->json([
+                    'weldingProcessList' => $output,
+                    'response_code' => 1,
+                ]);
+            }
+        }
+        return response()->json([
+            'weldingProcessList' => '',
+            'response_code' => 1,
+        ]);
+    }
+
+    public function existsJointType(Request $request)
+    {
+        if ($request->term != "") {
+            $location_id = getCurrentLocation()->location_id;
+            $data = DB::table('technique_sheet_rt')
+                ->select('joint_type')
+                ->where('current_location_id', $location_id)
+                ->where('joint_type', 'LIKE', $request->term . '%')
+                ->whereNotNull('joint_type')
+                ->where('joint_type', '!=', '')
+                ->groupBy('joint_type')
+                ->get();
+            if ($data->isNotEmpty()) {
+                $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
+                foreach ($data as $row) {
+                    if (trim($row->joint_type) === '') continue;
+                    $output .= '<li parent-id="joint_type" list-id="joint_type_list" class="list-group-item" tabindex="0">' . e($row->joint_type) . '</li>';
+                }
+                $output .= '</ul>';
+                return response()->json([
+                    'jointTypeList' => $output,
+                    'response_code' => 1,
+                ]);
+            }
+        }
+        return response()->json([
+            'jointTypeList' => '',
+            'response_code' => 1,
+        ]);
+    }
     public function getCopyList(Request $request)
     {
         $year_data = getCurrentYearData();
@@ -782,30 +917,27 @@ class TechniqueSheetRtController extends Controller
             'technique_sheet_rt.technique_sheet_rt_date',
             'customers.customer',
             'technique_sheet_rt.entry_type_fix',
-            'type_of_job.type_of_job',
-            'job_descriptions.job_description',
+            'technique_sheet_rt.job_type_fix',
+            //'type_of_job.type_of_job',
+            'technique_sheet_rt.job_desc as job_description',
             DB::raw('technique_sheet_rt.part_no as part_no'),
             DB::raw('technique_sheet_rt.drg_no as drg_no'),
             'materials.material',
             'test_report_rt.heat_no',
             'test_report_rt.rt_no',
-            'test_report_rt.product_code'
+            DB::raw("COALESCE(NULLIF(technique_sheet_rt.product_code, ''), test_report_rt.product_code, '') as product_code")
         ])
         ->leftJoin('customers', 'customers.id', '=', 'technique_sheet_rt.customer_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'technique_sheet_rt.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'technique_sheet_rt.job_desc_id')
+        //->leftJoin('type_of_job', 'type_of_job.id', '=', 'technique_sheet_rt.type_of_job_id')
+        //->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'technique_sheet_rt.job_desc_id')
         ->leftJoin('test_report_rt', 'test_report_rt.test_report_rt_id', '=', 'technique_sheet_rt.test_report_rt_id')
-        ->leftJoin('materials', 'materials.id', '=', 'test_report_rt.material_id')
+        ->leftJoin('materials', 'materials.id', '=', DB::raw('COALESCE(technique_sheet_rt.material_id, test_report_rt.material_id)'))
         ->where('technique_sheet_rt.current_location_id', $location_data->location_id)
         ->whereIn('technique_sheet_rt.year_id', getCompanyYearIdsToTill());
 
-        if ($request->filled('type_of_job_id')) {
-            $query->where('technique_sheet_rt.type_of_job_id', $request->type_of_job_id);
+        if ($request->filled('customer_id')) {
+            $query->where('technique_sheet_rt.customer_id', $request->customer_id);
         }
-
-        // if ($request->filled('customer_id')) {
-        //     $query->where('technique_sheet_rt.customer_id', $request->customer_id);
-        // }
 
         $list = $query->orderBy('technique_sheet_rt.technique_sheet_rt_id', 'desc')->get();
 
@@ -867,13 +999,15 @@ class TechniqueSheetRtController extends Controller
                 'test_report_rt.test_report_date',
                 'test_report_rt.test_report_no',
                 'test_report_rt.revision_number',
-                'type_of_job.type_of_job',
-                'job_descriptions.job_description',
+                //'type_of_job.type_of_job',
+                'test_report_rt.job_desc as job_description',
                 // 'part.part_no',
                 DB::raw("test_report_rt.part_no"),
 
                 'materials.material',   
-                'test_report_rt.sp_note'
+                'test_report_rt.sp_note',
+                'test_report_rt.job_type_fix',
+                'test_report_rt.process_type'
                
             ])
 
@@ -882,19 +1016,23 @@ class TechniqueSheetRtController extends Controller
             ->leftJoin('technique_sheet_rt', 'technique_sheet_rt.test_report_rt_id', '=', 'test_report_rt.test_report_rt_id')
 
             ->leftJoin('customers','customers.id','test_report_rt.customer_id') 
-            ->leftJoin('type_of_job','type_of_job.id','test_report_rt.type_of_job_id') 
-            ->leftJoin('job_descriptions','job_descriptions.id','test_report_rt.job_desc_id') 
+            //->leftJoin('type_of_job','type_of_job.id','test_report_rt.type_of_job_id') 
+            //->leftJoin('job_descriptions','job_descriptions.id','test_report_rt.job_desc_id') 
             // ->leftJoin('part','part.part_id','test_report_rt.part_id') 
             ->leftJoin('materials','materials.id','test_report_rt.material_id') 
 
             ->where('test_report_rt.current_location_id', $location_data->location_id)
             ->whereIn('test_report_rt.year_id', $yearIds);
 
-            if ($request->filled('type_of_job_id')) {
-                $pendingListQuery->where('test_report_rt.type_of_job_id', $request->type_of_job_id);
+            if ($request->filled('customer_id')) {
+                $pendingListQuery->where('test_report_rt.customer_id', $request->customer_id);
             }
 
-            $pendingList = $pendingListQuery->get();
+            if ($request->filled('job_type_fix')) {
+                $pendingListQuery->where('test_report_rt.job_type_fix', $request->job_type_fix);
+            }
+
+            $pendingList = $pendingListQuery->orderBy('test_report_no','desc')->orderBy('revision_number', 'desc')->get();
             foreach ($pendingList as $item) {
 
                 $item->test_report_date = $item->test_report_date ? Date::createFromFormat('Y-m-d', $item->test_report_date)->format('d/m/Y') : '';
@@ -923,13 +1061,22 @@ class TechniqueSheetRtController extends Controller
                     'test_report_rt.test_report_rt_id',
                     'test_report_rt.customer_id',
                     'test_report_rt.type_of_job_id',
+                    'test_report_rt.job_type_fix',
                     'test_report_rt.job_desc_id',
+                    'test_report_rt.job_desc',
                     'test_report_rt.part_id',
+                    'test_report_rt.part_no',
+                    'test_report_rt.drg_no',
+                    'test_report_rt.material_id',
+                    'test_report_rt.product_code',
                     'test_report_rt.area_of_coverage_id',
+                    'test_report_rt.welding_process',
+                    'test_report_rt.joint_type',
                     'test_report_rt.source_used',
                     'test_report_rt.source_size',
                     'test_report_rt.xray_focal_size',
                     'test_report_rt.lead_screen_thick',
+                    'test_report_rt.lead_screen_thick_back',
                     'test_report_rt.iqi',
                     'test_report_rt.film_processing',
                     'test_report_rt.test_technique',
@@ -1010,5 +1157,25 @@ class TechniqueSheetRtController extends Controller
                 'response_message' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Fresh Technique Sheet RT PDF generation every time (Combine / Regular)
+     */
+    public function printReport(Request $request)
+    {
+        if (!hasAccess("technique_sheet_rt", "print")) {
+            abort(401);
+        }
+
+        $id = base64_decode($request->id);
+        $name = sanitize_pdf_name($request->name);
+        $type = 'technique_sheet_rt';
+        $is_combine = $request->get('is_combine', $request->get('combine', 'yes'));
+
+        GeneratePdf($id, $name, $type, 'add', null, null, null, $is_combine);
+
+        $outputPath = asset('storage/reports/' . $type . '_reports_file/' . $name . '.pdf') . '?v=' . time();
+        return redirect($outputPath);
     }
 }
