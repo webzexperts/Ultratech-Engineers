@@ -697,8 +697,10 @@ function fetchPendingRtCustomerData(customerId, processType, isAutoSet) {
                             dc_date: reportMasterData.dc_date ? reportMasterData.dc_date.split('/').reverse().join('-') : null,
                             po_no: reportMasterData.po_no,
                             po_date: reportMasterData.po_date ? reportMasterData.po_date.split('/').reverse().join('-') : null,
-                            type_of_job: jQuery('#type_of_job_id option:selected').text().trim(),
-                            job_description: jQuery('#job_desc_id option:selected').text().trim(),
+                            // type_of_job: jQuery('#type_of_job_id option:selected').text().trim(),
+                            // job_description: jQuery('#job_desc_id option:selected').text().trim(),
+                            type_of_job: '',
+                            job_description: jQuery('#job_desc').val() || '',
                             part_no: reportMasterData.part_no,
                             drg_no: reportMasterData.drg_no,
                             material: jQuery('#material_id option:selected').text().trim(),
@@ -792,9 +794,8 @@ function fillPendingRtModalTable() {
         <th>DC Date</th>
         <th>PO No.</th>
         <th>PO Date</th>
-        <th>Type of Job</th>
         <th>Job Desc.</th>
-        <th>Part No.</th>
+        <th>Part No. / Die No.</th>
         <th>Drg. No.</th>
         <th>Material</th>
         <th>Heat No.</th>
@@ -842,9 +843,9 @@ function fillPendingRtModalTable() {
             <td>${item.dc_no || ''}</td>
             <td>${item.dc_date ? formatDateStr(item.dc_date) : ''}</td>
             <td>${item.po_no || ''}</td>
-            <td>${item.po_date ? formatDateStr(item.po_date) : ''}</td>
-            <td>${item.type_of_job || ''}</td>
-            <td>${item.job_description || ''}</td>
+            <td>${item.po_date ? formatDateStr(item.po_date) : ''}</td>` +
+            // `<td>${item.type_of_job || ''}</td>` +
+            `<td>${item.job_description || ''}</td>
             <td>${item.part_no || ''}</td>
             <td>${item.drg_no || ''}</td>
             <td>${item.material || ''}</td>
@@ -1000,8 +1001,10 @@ jQuery(document).on('change', '#material_inward_details_id', function () {
             setRadioReadonly('input[name="process_type"]', true);
             handleJobTypeChange();
 
-            jQuery('#type_of_job_id').val(selectedItem.type_of_job_id).trigger('change');
-            jQuery('#job_desc_id').val(selectedItem.job_desc_id).trigger('change');
+            // jQuery('#type_of_job_id').val(selectedItem.type_of_job_id).trigger('change');
+            // jQuery('#job_desc_id').val(selectedItem.job_desc_id).trigger('change');
+            jQuery('#type_of_job_id').val(selectedItem.type_of_job_id || '');
+            jQuery('#job_desc').val(selectedItem.job_description || selectedItem.job_desc || '');
             jQuery('#part_no').val(selectedItem.part_no || '');
             jQuery('#drg_no').val(selectedItem.drg_no || '');
             jQuery('#material_id').val(selectedItem.material_id).trigger('change');
@@ -1138,8 +1141,10 @@ function resetPendingInwardFields() {
     jQuery('#po_no').val('');
     jQuery('#po_date').val('');
     jQuery('#date_of_receipt').val('');
-    jQuery('#type_of_job_id').val('').trigger('change');
-    jQuery('#job_desc_id').val('').trigger('change');
+    // jQuery('#type_of_job_id').val('').trigger('change');
+    // jQuery('#job_desc_id').val('').trigger('change');
+    jQuery('#type_of_job_id').val('');
+    jQuery('#job_desc').val('');
     jQuery('#material_id').val('').trigger('change');
     jQuery('#area_of_coverage_id').val('').trigger('change');
     jQuery('#procedure_ref_id').val('').trigger('change');
@@ -1213,8 +1218,10 @@ function loadRevisionReportData(reportId, selectedItem) {
 
                 // 4. Master technical fields (with fallback to selectedItem from pending inward)
                 jQuery('#customer_client').val(d.customer_client || '');
-                jQuery('#type_of_job_id').val(zeroToEmpty(d.type_of_job_id || (selectedItem ? selectedItem.type_of_job_id : ''))).trigger('change');
-                jQuery('#job_desc_id').val(zeroToEmpty(d.job_desc_id || (selectedItem ? selectedItem.job_desc_id : ''))).trigger('change');
+                // jQuery('#type_of_job_id').val(zeroToEmpty(d.type_of_job_id || (selectedItem ? selectedItem.type_of_job_id : ''))).trigger('change');
+                // jQuery('#job_desc_id').val(zeroToEmpty(d.job_desc_id || (selectedItem ? selectedItem.job_desc_id : ''))).trigger('change');
+                jQuery('#type_of_job_id').val(zeroToEmpty(d.type_of_job_id || (selectedItem ? selectedItem.type_of_job_id : '')));
+                jQuery('#job_desc').val(d.job_description || d.job_desc || (selectedItem ? (selectedItem.job_description || selectedItem.job_desc) : '') || '');
                 jQuery('#part_no').val(d.part_no || (selectedItem ? selectedItem.part_no : '') || '');
                 jQuery('#drg_no').val(d.drg_no || (selectedItem ? selectedItem.drg_no : '') || '');
                 jQuery('#material_id').val(zeroToEmpty(d.material_id || (selectedItem ? selectedItem.material_id : ''))).trigger('change');
@@ -1273,6 +1280,7 @@ function loadRevisionReportData(reportId, selectedItem) {
                 jQuery('#lead_screen_thick_back').val(d.lead_screen_thick_back || '');
                 jQuery('#iqi').val(d.iqi || '');
                 jQuery('#film_processing').val(d.film_processing || 'MANUAL');
+                jQuery('#exposure_time').val(d.exposure_time || '');
                 jQuery('#test_technique').val(d.test_technique || '');
                 jQuery('#test_arrangement').val(d.test_arrangement || '');
                 jQuery('#test_class').val(d.test_class || '');
@@ -1521,8 +1529,10 @@ function resetTestReportRtForm() {
     jQuery('#revision_number').val('');
     jQuery('#revision_test_report_rt_id').val('');
     jQuery('#customer_client').val('');
-    jQuery('#type_of_job_id').val('').trigger('change');
-    jQuery('#job_desc_id').val('').trigger('change');
+    // jQuery('#type_of_job_id').val('').trigger('change');
+    // jQuery('#job_desc_id').val('').trigger('change');
+    jQuery('#type_of_job_id').val('');
+    jQuery('#job_desc').val('');
     jQuery('#part_no').val('');
     jQuery('#drg_no').val('');
     jQuery('#material_id').val('').trigger('change');
@@ -1544,6 +1554,7 @@ function resetTestReportRtForm() {
     jQuery('#position').val('');
     jQuery('#purpose_of_testing').val('');
     jQuery('#film_processing').val('MANUAL');
+    jQuery('#exposure_time').val('');
     jQuery('#joint_type').val('');
     loadRTCamerasDropdown('', '', '');
     setSelect2Readonly('#camera_ir_192_id', true);
@@ -1711,8 +1722,10 @@ function fetchAndFillTestReportRt(id) {
                     jQuery('#pending_btn').prop('disabled', true);
                 });
                 jQuery('#customer_client').val(d.customer_client || '');
-                jQuery('#type_of_job_id').val(zeroToEmpty(d.type_of_job_id)).trigger('change');
-                jQuery('#job_desc_id').val(zeroToEmpty(d.job_desc_id)).trigger('change');
+                // jQuery('#type_of_job_id').val(zeroToEmpty(d.type_of_job_id)).trigger('change');
+                // jQuery('#job_desc_id').val(zeroToEmpty(d.job_desc_id)).trigger('change');
+                jQuery('#type_of_job_id').val(zeroToEmpty(d.type_of_job_id));
+                jQuery('#job_desc').val(d.job_description || d.job_desc || '');
                 jQuery('#part_no').val(d.part_no || '');
                 jQuery('#drg_no').val(d.drg_no || '');
                 jQuery('#material_id').val(zeroToEmpty(d.material_id)).trigger('change');
@@ -1756,6 +1769,7 @@ function fetchAndFillTestReportRt(id) {
                 jQuery('#lead_screen_thick_back').val(d.lead_screen_thick_back || '');
                 jQuery('#iqi').val(d.iqi || '');
                 jQuery('#film_processing').val(d.film_processing || 'MANUAL');
+                jQuery('#exposure_time').val(d.exposure_time || '');
                 jQuery('#test_technique').val(d.test_technique || '');
                 jQuery('#test_arrangement').val(d.test_arrangement || '');
                 jQuery('#test_class').val(d.test_class || '');
@@ -2087,7 +2101,7 @@ jQuery('#ReportDetailsModal').on('shown.bs.modal', function () {
     }
     */
 
-    let isCurrentRevisionReport = (jQuery('#revision_number').val() && jQuery('#revision_number').val().toString().trim() !== '') || 
+    let isCurrentRevisionReport = (jQuery('#revision_number').val() && jQuery('#revision_number').val().toString().trim() !== '') ||
         (reportMasterData && reportMasterData.revision_number && reportMasterData.revision_number.toString().trim() !== '');
 
     var isMappedToRev = false;
@@ -2138,7 +2152,7 @@ jQuery('#ReportDetailsModal').on('shown.bs.modal', function () {
         setSelect2Readonly('#detail_film_result_id', true);
 
         thisForm.find('#detail_ug').prop('readonly', true).addClass('skip-tab');
-        thisForm.find('.plus-icon').addClass('disabled-icon').css({'pointer-events': 'none', 'opacity': '0.5'});
+        thisForm.find('.plus-icon').addClass('disabled-icon').css({ 'pointer-events': 'none', 'opacity': '0.5' });
     } else if ((inUse || isUsedInMs || isMappedToObs) && isEditRow) {
         jQuery('#copy_from_sr_no').prop('readonly', false).prop('disabled', false).removeClass('skip-tab');
         thisForm.find('#detail_sr_no').prop('readonly', false).prop('disabled', false).removeClass('skip-tab');
@@ -2160,7 +2174,7 @@ jQuery('#ReportDetailsModal').on('shown.bs.modal', function () {
         thisForm.find('#detail_exposure_time').prop('readonly', false).removeClass('skip-tab');
         thisForm.find('#finding').prop('readonly', false).removeClass('skip-tab');
         thisForm.find('#detail_ug').prop('readonly', false).removeClass('skip-tab');
-        thisForm.find('.plus-icon').removeClass('disabled-icon').css({'pointer-events': 'auto', 'opacity': '1'});
+        thisForm.find('.plus-icon').removeClass('disabled-icon').css({ 'pointer-events': 'auto', 'opacity': '1' });
 
         thisForm.find('#detail_source_id_fix').prop('disabled', true).addClass('skip-tab');
         setSelect2Readonly('#detail_source_id_fix', true);
@@ -2207,8 +2221,10 @@ jQuery('#ReportDetailsModal').on('shown.bs.modal', function () {
         setSelect2Readonly('#detail_film_result_id', false);
 
         thisForm.find('#detail_ug').prop('readonly', false).removeClass('skip-tab');
-        thisForm.find('.plus-icon').removeClass('disabled-icon').css({'pointer-events': 'auto', 'opacity': '1'});
+        thisForm.find('.plus-icon').removeClass('disabled-icon').css({ 'pointer-events': 'auto', 'opacity': '1' });
     }
+
+    handleJobTypeChange();
 
     if (isUsedInMs && isEditRow) {
         thisForm.find('#include_in_measurement_sheet').prop('disabled', true);
@@ -2223,7 +2239,12 @@ jQuery('#ReportDetailsModal').on('shown.bs.modal', function () {
         thisForm.find('#detail_sr_no').prop('readonly', true).prop('disabled', true).addClass('skip-tab').attr('tabindex', '-1');
         jQuery('#copy_from_sr_no').prop('readonly', true).prop('disabled', true).addClass('skip-tab').attr('tabindex', '-1');
         setTimeout(() => {
-            jQuery('#detail_identification').focus().select();
+            let currentJobType = jQuery('input[name="job_type_fix"]:checked').val() || 'Non-Welding';
+            if (currentJobType === 'Non-Welding') {
+                jQuery('#detail_location').focus().select();
+            } else {
+                jQuery('#detail_identification').focus().select();
+            }
         }, 150);
     } else {
         thisForm.find('#detail_sr_no').prop('readonly', false).prop('disabled', false).removeClass('skip-tab').removeAttr('tabindex');
@@ -2242,8 +2263,13 @@ jQuery(document).on('blur change', '#copy_from_sr_no', function () {
     let targetRow = test_report_rt_details_data.find(r => r.mode !== 'Delete' && r.sr_no == copySrNo);
     if (targetRow) {
         let currentSrNo = jQuery('#detail_sr_no').val();
+        let currentJobType = jQuery('input[name="job_type_fix"]:checked').val() || 'Non-Welding';
 
-        jQuery('#detail_identification').val(targetRow.identification || '');
+        if (currentJobType === 'Non-Welding') {
+            jQuery('#detail_identification').val('');
+        } else {
+            jQuery('#detail_identification').val(targetRow.identification || '');
+        }
         jQuery('#detail_location').val(targetRow.location || '');
         jQuery('#detail_source_id_fix').val(zeroToEmpty(targetRow.source_id_fix)).trigger('change').trigger('change.select2');
         jQuery('#detail_film_brand_id').val(zeroToEmpty(targetRow.detail_film_brand_id)).trigger('change').trigger('change.select2');
@@ -2324,6 +2350,7 @@ jQuery(document).on('click', '#addDetailRowBtn', function () {
     jQuery('#detail_optical_density').val(sessionLastOpticalDensity);
     jQuery('#submitDetailRowBtn').text('Add');
     _pendingEditRowData = null;
+    handleJobTypeChange();
     jQuery('#ReportDetailsModal').modal('show');
 });
 
@@ -2429,12 +2456,18 @@ function loadReportDetailByIndex(index) {
     }
 
     jQuery('#copy_from_sr_no').val('');
+    handleJobTypeChange();
 
     if (isRevision) {
         thisForm.find('#detail_sr_no').prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
         jQuery('#copy_from_sr_no').prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
         setTimeout(() => {
-            jQuery('#detail_identification').focus().select();
+            let currentJobType = jQuery('input[name="job_type_fix"]:checked').val() || 'Non-Welding';
+            if (currentJobType === 'Non-Welding') {
+                jQuery('#detail_location').focus().select();
+            } else {
+                jQuery('#detail_identification').focus().select();
+            }
         }, 100);
     } else {
         thisForm.find('#detail_sr_no').prop('readonly', false).removeClass('skip-tab').removeAttr('tabindex');
@@ -2671,6 +2704,7 @@ jQuery('#submitDetailRowBtn').on('click', function (e) {
             jQuery('#iqi_sensitivity').val('');
             jQuery('#copy_from_sr_no').val('');
             jQuery('#ReportDetailsForm').removeClass('was-validated');
+            handleJobTypeChange();
             setTimeout(() => {
                 jQuery('#detail_sr_no').focus().select();
             }, 250);
@@ -3062,12 +3096,37 @@ jQuery(document).on('mousedown focus click', '#commonTestReportRtForm .trans-dat
 
 function handleJobTypeChange() {
     let jobType = jQuery('input[name="job_type_fix"]:checked').val() || 'Non-Welding';
+    let isRevisionLocked = false;
+    let detailsModal = jQuery('#ReportDetailsModal');
+    if (detailsModal.length) {
+        let isEditRow = detailsModal.find('#form_type').val() === 'edit';
+        let isMappedToRev = (typeof reportMasterData !== 'undefined' && reportMasterData && (reportMasterData.is_mapped_to_rev == true || reportMasterData.is_mapped_to_rev == 1));
+        if (isMappedToRev && isEditRow) {
+            isRevisionLocked = true;
+        }
+    }
+
     if (jobType === 'Non-Welding') {
         jQuery('#welding_process, #joint_type, #welder_name, #welder_id, #position, #purpose_of_testing').val('').prop('readonly', true).css('pointer-events', 'none').addClass('skip-tab').attr('tabindex', '-1');
         jQuery('#welding_process_suggestion, #joint_type_suggestion, #welder_name_suggestion, #welder_id_suggestion, #position_suggestion, #purpose_of_testing_suggestion').val('');
         jQuery('#welding_process_list, #joint_type_list, #welder_name_list, #welder_id_list, #position_list, #purpose_of_testing_list').empty();
+        jQuery('#detail_identification')
+            .val('')
+            .prop('readonly', true)
+            .attr('readonly', 'readonly')
+            .css('pointer-events', 'none')
+            .addClass('skip-tab')
+            .attr('tabindex', '-1');
     } else {
         jQuery('#welding_process, #joint_type, #welder_name, #welder_id, #position, #purpose_of_testing').prop('readonly', false).css('pointer-events', 'auto').removeClass('skip-tab').removeAttr('tabindex');
+        if (!isRevisionLocked) {
+            jQuery('#detail_identification')
+                .prop('readonly', false)
+                .removeAttr('readonly')
+                .css('pointer-events', 'auto')
+                .removeClass('skip-tab')
+                .removeAttr('tabindex');
+        }
     }
 }
 
@@ -3373,6 +3432,7 @@ jQuery(document).on('change', '#rss_no', function () {
                 jQuery('#lead_screen_thick_back').val('');
                 jQuery('#iqi').val(s.iqi || '');
                 jQuery('#film_processing').val(s.film_processing || 'MANUAL');
+                jQuery('#exposure_time').val(s.exposure_time || '');
                 jQuery('#test_technique').val(s.test_technique || '');
                 jQuery('#test_arrangement').val(s.test_arrangement || '');
                 jQuery('#test_class').val(s.test_class || '');
@@ -3762,12 +3822,15 @@ var copyReportsData = [];
 
 // Copy button click to open modal
 jQuery(document).on('click', '#copy_report_btn', function () {
-    let typeOfJobId = jQuery('#type_of_job_id').val();
+    // let typeOfJobId = jQuery('#type_of_job_id').val();
+    // let typeOfJobId = '';
+    let customerId = jQuery('#commonTestReportRtForm #customer_id').val() || jQuery('#customer_id').val() || '';
 
     jQuery.ajax({
         url: 'get-test_report_rt_copy_list',
         type: 'GET',
-        data: { type_of_job_id: typeOfJobId },
+        // data: { type_of_job_id: typeOfJobId },
+        data: { customer_id: customerId },
         dataType: 'json',
         success: function (data) {
             if (data.response_code == 1) {
@@ -3807,9 +3870,9 @@ function fillCopyReportModalTable() {
             <td>${item.test_report_date || ''}</td>
             <td>${item.customer || ''}</td>
             <td>${item.nabl_type_fix || ''}</td>
-            <td>${item.job_type_fix || ''}</td>
-            <td>${item.type_of_job || ''}</td>
-            <td>${item.job_description || ''}</td>
+            <td>${item.job_type_fix || ''}</td>` +
+            // `<td>${item.type_of_job || ''}</td>` +
+            `<td>${item.job_description || ''}</td>
             <td>${item.part_no || ''}</td>
             <td>${item.drg_no || ''}</td>
             <td>${item.material || ''}</td>
@@ -3898,7 +3961,8 @@ jQuery(document).on('click', '#submitCopyReportRtBtn', function () {
             let copyDetails = resultDetails.isConfirmed;
 
             if (!copyMaster && !copyDetails) {
-                jQuery('#type_of_job_id').focus();
+                // jQuery('#type_of_job_id').focus();
+                jQuery('#job_desc').focus();
                 return;
             }
 
@@ -3936,6 +4000,7 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
                     jQuery('#lead_screen_thick_back').val(d.lead_screen_thick_back || '');
                     jQuery('#iqi').val(d.iqi || '');
                     jQuery('#film_processing').val(d.film_processing || 'MANUAL');
+                    jQuery('#exposure_time').val(d.exposure_time || '');
                     jQuery('#test_technique').val(d.test_technique || '');
                     jQuery('#test_arrangement').val(d.test_arrangement || '');
                     jQuery('#test_class').val(d.test_class || '');
@@ -4038,7 +4103,8 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
         complete: function () {
             hideLoader();
             setTimeout(function () {
-                jQuery('#type_of_job_id').focus();
+                // jQuery('#type_of_job_id').focus();
+                jQuery('#job_desc').focus();
             }, 200);
         }
     });
@@ -4147,9 +4213,9 @@ function fillCopyRssModalTable() {
             </td>
             <td>${item.technique_sheet_rt_no || ''}</td>
             <td>${item.technique_sheet_rt_date || ''}</td>
-            <td>${item.customer || ''}</td>
-            <td>${item.type_of_job || ''}</td>
-            <td>${item.job_description || ''}</td>
+            <td>${item.customer || ''}</td>` +
+            // `<td>${item.type_of_job || ''}</td>` +
+            `<td>${item.job_description || ''}</td>
             <td>${item.part_no || ''}</td>
             <td>${item.drg_no || ''}</td>
             <td>${item.area_of_coverage || ''}</td>

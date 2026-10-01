@@ -64,7 +64,14 @@
                 filename: 'Pending Item Return from Customer List',
                 title:"",
                 className: 'export_pending_item_return_from_customer d-none',
-                exportOptions: {  modifier: { page: 'all' } },
+                exportOptions: {
+                    columns: function(idx, data, node) {
+                        return table.column(idx).visible();
+                    },
+                    modifier: {
+                        page: 'all'
+                    }
+                },
                 action: newexportaction
             }],
             ajax: {

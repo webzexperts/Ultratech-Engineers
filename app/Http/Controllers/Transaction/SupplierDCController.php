@@ -43,8 +43,9 @@ class SupplierDCController extends Controller
             'item_group.item_group',
             'item.item_type',
             'sr.name_for_display',
-            \DB::raw("IF(supplier_dc.sup_dc_type_id = 'SQIN from Prod. Area', 'SQIN', unit.unit) as unit"),
+            // \DB::raw("IF(supplier_dc.sup_dc_type_id = 'SQIN from Prod. Area', 'SQIN', unit.unit) as unit"),
             'supplier_dc_details.sr_table_unique_id',
+            'unit.unit as unit',
             'supplier_dc_details.sr_table_pk_id',
             'supplier_dc_details.return_qty',
             'supplier_dc_details.aerb_no',
@@ -255,6 +256,11 @@ class SupplierDCController extends Controller
                 $sup_dc_sequence = $request->sup_dc_sequence;
             }
 
+            $checkDup = checkReportDuplication(SupplierDC::class, 'sup_dc_number', $sup_dc_number, $request, "Duplicate Supplier DC No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
+
             $page_id = getMenuIdBassedOnDisplayName('supplier_dc');
             $assign_format_no = getAssignFormateNoForTransaction(
                 $LocationData->location_id,
@@ -385,17 +391,18 @@ class SupplierDCController extends Controller
                                  'previous_movement_approval_blob' => $previousMoveBlob,
                                  'previous_validity' => $previousVal,
                                  'remark'     => $row['remark'] ?? null,
-                                 'stock_effect_type' => ($request->sup_dc_type_id == 'SQIN from Prod. Area') ? 'prod. area' : 'main stock',
+                                 // 'stock_effect_type' => ($request->sup_dc_type_id == 'SQIN from Prod. Area') ? 'prod. area' : 'main stock',
+                                 'stock_effect_type' => 'main stock',
                                  'for_calibration' => $row['for_calibration'] ?? 'No',
                                  'previous_status_transaction_id' => null,
                                  'current_status_transaction_id'  => null,
                              ]);
                         
-                            if ($sup_dc_details_data->stock_effect_type == 'prod. area') {
-                                stockEffectSQIN($LocationData->location_id, $row['item_id'], $row['item_id'], $row['return_qty'], 0, 'Insert', 'D', 'Supplier DC', $sup_dc_details_data->sup_dcd_id);
-                            } else {
+                            // if ($sup_dc_details_data->stock_effect_type == 'prod. area') {
+                            //     stockEffectSQIN($LocationData->location_id, $row['item_id'], $row['item_id'], $row['return_qty'], 0, 'Insert', 'D', 'Supplier DC', $sup_dc_details_data->sup_dcd_id);
+                            // } else {
                                 stockEffect($LocationData->location_id, $row['item_id'],$row['item_id'],$row['return_qty'],0,$amount,0,'Insert','D','Supplier DC', $sup_dc_details_data->sup_dcd_id, $row['sr_table_unique_id'] ?? null, $row['sr_table_pk_id'] ?? null);
-                            }
+                            // }
                             if($request->sup_dc_type_id == "Returnable - Service PO"){
                                 if(!empty($row['sr_table_pk_id'])){
                                     changeStatusAndLocationForSrNo($row['sr_table_unique_id'], $row['sr_table_pk_id'], 'Outside', 'Service PO', $LocationData->location_id, 'Insert', $sup_dc_details_data);
@@ -589,6 +596,12 @@ class SupplierDCController extends Controller
             'sup_dc_sequence.required' => 'Enter DC No.',
         ]);
 
+        $checkDup = checkReportDuplication(SupplierDC::class, 'sup_dc_number', $request->sup_dc_number, $request, "Duplicate Supplier DC No. Found.", $request->id, 'sup_dc_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
+
+
         try
         {           
 
@@ -607,8 +620,8 @@ class SupplierDCController extends Controller
                 'sp_note'  => $request->sp_note,
                 'prepared_by_user_id' => $request->prepared_by_user_id,
                 // 'assign_format_no'  => $assign_format_no ?? null,
-                'current_location_id' => $current_location_id ?? null,
-                'year_id'           => $year_data->id,
+                // 'current_location_id' => $current_location_id ?? null,
+                // 'year_id'           => $year_data->id,
                 'company_id'        => Auth::user()->company_id,
                 'last_on'               => Carbon::now('Asia/Kolkata'),
                 'last_by'               => Auth::id(),
@@ -733,11 +746,11 @@ class SupplierDCController extends Controller
                              'current_status_transaction_id'  => null,
                          ]);
 
-                        if ($ctVal['stock_effect_type'] == 'prod. area') {
-                            stockEffectSQIN($current_location_id, $ctVal['item_id'], $ctVal['item_id'], $ctVal['return_qty'], 0, 'Insert', 'D', 'Supplier DC', $request->id);
-                        } else {
+                        // if ($ctVal['stock_effect_type'] == 'prod. area') {
+                        //     stockEffectSQIN($current_location_id, $ctVal['item_id'], $ctVal['item_id'], $ctVal['return_qty'], 0, 'Insert', 'D', 'Supplier DC', $request->id);
+                        // } else {
                             stockEffect($current_location_id, $ctVal['item_id'],$ctVal['item_id'],$ctVal['return_qty'],0,$amount,0,'Insert','D','Supplier DC',$request->id, $ctVal['sr_table_unique_id'] ?? null, $ctVal['sr_table_pk_id'] ?? null);
-                        }
+                        // }
 
                         if(!empty($ctVal['sr_table_pk_id'])){
                             if($request->sup_dc_type_id =="Returnable - Service PO"){
@@ -807,7 +820,9 @@ class SupplierDCController extends Controller
                             }
                                             
 
-                            $stock_effect_type = $ctVal['stock_effect_type'] ?? $olddata->stock_effect_type ?? (($request->sup_dc_type_id == 'SQIN from Prod. Area') ? 'prod. area' : 'main stock');
+                            // $stock_effect_type = $ctVal['stock_effect_type'] ?? $olddata->stock_effect_type ?? (($request->sup_dc_type_id == 'SQIN from Prod. Area') ? 'prod. area' : 'main stock');
+                            // $ctVal['stock_effect_type'] = $stock_effect_type;
+                            $stock_effect_type = 'main stock';
                             $ctVal['stock_effect_type'] = $stock_effect_type;
 
                             SupplierDCDetails::where('sup_dcd_id', $ctVal['sup_dcd_id'])->update([
@@ -828,11 +843,11 @@ class SupplierDCController extends Controller
                                 'stock_effect_type' => $ctVal['stock_effect_type'],
                             ]);
                             // dd($olddata->amount , $ctVal['amount']);
-                            if ($ctVal['stock_effect_type'] == 'prod. area') {
-                                stockEffectSQIN($current_location_id, $ctVal['item_id'], $olddata->item_id, $ctVal['return_qty'], $olddata->return_qty, 'Update', 'D', 'Supplier DC', $ctVal['sup_dcd_id']);
-                            } else {
+                            // if ($ctVal['stock_effect_type'] == 'prod. area') {
+                            //     stockEffectSQIN($current_location_id, $ctVal['item_id'], $olddata->item_id, $ctVal['return_qty'], $olddata->return_qty, 'Update', 'D', 'Supplier DC', $ctVal['sup_dcd_id']);
+                            // } else {
                                 stockEffect($current_location_id,$ctVal['item_id'], $olddata->item_id,$ctVal['return_qty'],$olddata->return_qty,$ctVal['return_qty'] * $olddata->rate_unit,$olddata->amount,'Update','D','Supplier DC',$ctVal['sup_dcd_id'], $ctVal['sr_table_unique_id'] ?? $olddata->sr_table_unique_id ?? null, $ctVal['sr_table_pk_id'] ?? $olddata->sr_table_pk_id ?? null);
-                            }
+                            // }
 
                             
                         }
@@ -857,11 +872,11 @@ class SupplierDCController extends Controller
                             $olddata = SupplierDCDetails::where('sup_dcd_id',$ctVal['sup_dcd_id'])->select('amount','rate_unit','item_id','return_qty','stock_effect_type')
                             ->first();
 
-                            if ($olddata->stock_effect_type == 'prod. area') {
-                                stockEffectSQIN($current_location_id, $ctVal['item_id'], $ctVal['item_id'], 0, $olddata->return_qty, 'Delete', 'D', 'Supplier DC', $ctVal['sup_dcd_id']);
-                            } else {
+                            // if ($olddata->stock_effect_type == 'prod. area') {
+                            //     stockEffectSQIN($current_location_id, $ctVal['item_id'], $ctVal['item_id'], 0, $olddata->return_qty, 'Delete', 'D', 'Supplier DC', $ctVal['sup_dcd_id']);
+                            // } else {
                                 stockEffect($current_location_id,$ctVal['item_id'],$ctVal['item_id'],0,$olddata->return_qty,0,$olddata->amount,'Delete','D','Supplier DC',$ctVal['sup_dcd_id'], $ctVal['sr_table_unique_id'] ?? $olddata->sr_table_unique_id ?? null, $ctVal['sr_table_pk_id'] ?? $olddata->sr_table_pk_id ?? null);
-                            }
+                            // }
 
 
 
@@ -980,11 +995,11 @@ class SupplierDCController extends Controller
             if($SupplierDCDetails->isNotEmpty()){
                 foreach($SupplierDCDetails as $item){
 
-                    if ($item->stock_effect_type == 'prod. area') {
-                        stockEffectSQIN($LocationData, $item->item_id, $item->item_id, 0, $item->return_qty, 'Delete', 'D', 'Supplier DC', $item->sup_dcd_id);
-                    } else {
+                    // if ($item->stock_effect_type == 'prod. area') {
+                    //     stockEffectSQIN($LocationData, $item->item_id, $item->item_id, 0, $item->return_qty, 'Delete', 'D', 'Supplier DC', $item->sup_dcd_id);
+                    // } else {
                         stockEffect($LocationData,$item->item_id,$item->item_id,0,$item->return_qty,0,$item->amount,'Delete','D','Supplier DC',$item->sup_dcd_id, $item->sr_table_unique_id ?? null, $item->sr_table_pk_id ?? null);
-                    }
+                    // }
 
                     if($item->sr_table_unique_id != null || $item->sr_table_unique_id != ''){
 
@@ -1087,16 +1102,34 @@ class SupplierDCController extends Controller
 
         $itemTypes = getItemType();
 
+        // $dc_data = DB::table('pending_service_po_qty as pend')
+        // ->select(['service_po.ser_po_id','service_po.ser_po_number','service_po.ser_po_date','service_po.purpose','service_po.ref_no_date','bill_to.location_name as bill_to','for_location.location_name as for_location','item.item_name','item_group.item_group','item.item_type as main_group','pend.pending_qty','unit.unit','service_po_details.remark','admin.person_name as prepared_by','sr.name_for_display','pend.ser_pod_id','service_po_details.for_calibration'])
+        // ->leftJoin('service_po_details','service_po_details.ser_pod_id','=','pend.ser_pod_id')
+        // ->leftJoin('service_po', 'service_po.ser_po_id', '=', 'service_po_details.ser_pod_po_id')    
+        // ->leftJoin('item','item.id','=','service_po_details.item_id')  
+        // ->leftJoin('item_group', 'item_group.id', '=', 'item.item_group_id')
+        // ->leftJoin('admin', 'admin.id', '=', 'service_po.prepared_by_user_id')
+        // ->leftJoin('unit','unit.id','=','item.unit_id')  
+        // ->leftJoin('location as bill_to', 'bill_to.location_id', '=', 'service_po.bill_to_id')
+        // ->leftJoin('location as for_location', 'for_location.location_id', '=', 'service_po.for_location_id')
+        //   ->leftJoin('item_sr_no_name_for_display as sr', function($join) {
+        //     $join->on('sr.sr_table_pk_id', '=', 'service_po_details.sr_table_pk_id')
+        //         ->on('sr.sr_table_unique_id', '=', 'service_po_details.sr_table_unique_id');
+        // })
+        // ->where('service_po.supplier_id',$request->supplier_id)
+        // ->Where('service_po.for_location_id', $current_location->location_id)
+        // ->whereIn('service_po.year_id',$yearIds)  
+        // ->where('pend.pending_qty', '>', 0)
+        // ->get();
+
         $dc_data = DB::table('pending_service_po_qty as pend')
-        ->select(['service_po.ser_po_id','service_po.ser_po_number','service_po.ser_po_date','service_po.purpose','service_po.ref_no_date','bill_to.location_name as bill_to','for_location.location_name as for_location','item.item_name','item_group.item_group','item.item_type as main_group','pend.pending_qty','unit.unit','service_po_details.remark','admin.person_name as prepared_by','sr.name_for_display','pend.ser_pod_id','service_po_details.for_calibration'])
+        ->select(['service_po.ser_po_id','service_po.ser_po_number','service_po.ser_po_date','service_po.purpose','service_po.ref_no_date','item.item_name','item_group.item_group','item.item_type as main_group','pend.pending_qty','unit.unit','service_po_details.remark','admin.person_name as prepared_by','sr.name_for_display','pend.ser_pod_id','service_po_details.for_calibration'])
         ->leftJoin('service_po_details','service_po_details.ser_pod_id','=','pend.ser_pod_id')
         ->leftJoin('service_po', 'service_po.ser_po_id', '=', 'service_po_details.ser_pod_po_id')    
         ->leftJoin('item','item.id','=','service_po_details.item_id')  
         ->leftJoin('item_group', 'item_group.id', '=', 'item.item_group_id')
         ->leftJoin('admin', 'admin.id', '=', 'service_po.prepared_by_user_id')
         ->leftJoin('unit','unit.id','=','item.unit_id')  
-        ->leftJoin('location as bill_to', 'bill_to.location_id', '=', 'service_po.bill_to_id')
-        ->leftJoin('location as for_location', 'for_location.location_id', '=', 'service_po.for_location_id')
           ->leftJoin('item_sr_no_name_for_display as sr', function($join) {
             $join->on('sr.sr_table_pk_id', '=', 'service_po_details.sr_table_pk_id')
                 ->on('sr.sr_table_unique_id', '=', 'service_po_details.sr_table_unique_id');

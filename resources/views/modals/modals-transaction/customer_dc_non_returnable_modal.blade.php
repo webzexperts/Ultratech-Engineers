@@ -88,9 +88,9 @@
                                             <th scope="col">PO No.</th>
                                             <th scope="col">PO Date</th>
                                             <th scope="col">Type of Test</th>
-                                            <th scope="col">Type of Job</th>
+                                            <!-- <th scope="col">Type of Job</th> -->
                                             <th scope="col">Job Description</th>
-                                            <th scope="col">Part No.</th>
+                                            <th scope="col">Part No. / Die No.</th>
                                             <th scope="col">Drg. No.</th>
                                             <th scope="col">Material</th>
                                             <th scope="col">Heat No.</th>
@@ -104,7 +104,7 @@
                                     </thead>
                                     <tbody>
                                          <tr id="noDetails">
-                                            <td colspan="20" class="text-center" id="noDetailsCell">
+                                            <td colspan="19" class="text-center" id="noDetailsCell">
                                                 No Material Outward Details Added
                                             </td>
                                          </tr>

@@ -21,7 +21,7 @@ function partDetailsRow(index, in_use = false) {
             <td>
                 <div class="position-relative">
                     <input type="text" class="form-control part_no" id="part_no_${index}" required >
-                    <div class="invalid-tooltip">Enter Part No.</div>
+                    <div class="invalid-tooltip">Enter Part No. / Die No.</div>
                 </div>
             </td>
             <td>
@@ -256,7 +256,7 @@ $('#commonPartForm').on('submit', function (e) {
         var drg_no = jQuery("#drg_no_" + index).val();
 
         if (!part_no || !part_no.trim()) {
-            toastr.error('Enter Part No.');
+            toastr.error('Enter Part No. / Die No.');
             jQuery("#part_no_" + index).focus();
             error = true;
             return false;
@@ -276,7 +276,7 @@ $('#commonPartForm').on('submit', function (e) {
 
         var combo = part_no.toUpperCase() + '|' + drg_no.toUpperCase();
         if (addedParts.includes(combo)) {
-            toastr.error('Duplicate Part No. & Drg. No. Found.');
+            toastr.error('Duplicate Part No. / Die No. & Drg. No. Found.');
             jQuery("#part_no_" + index).focus();
             error = true;
             return false;
@@ -529,12 +529,12 @@ jQuery(document).on('change', '#PartModal #job_desc_id', function () {
 function getPart($this = null) {
     var formUrl = "get-part";
     let selectedJobId = jQuery('#inqd_job_description_id').val() || jQuery('#MaterialInwardDetailsForm #inward_job_desc_id').val() || '';
-    
+
     if (selectedJobId === "") {
         if ($this != null) {
             jQuery($this).each(function () {
                 let $dropdown = jQuery(this);
-                $dropdown.empty().append(`<option value="">Select Part No.</option>`).val('').trigger('change.select2');
+                $dropdown.empty().append(`<option value="">Select Part No. / Die No.</option>`).val('').trigger('change.select2');
             });
         }
         return;
@@ -577,7 +577,7 @@ function getPart($this = null) {
                     }
                 });
 
-                var stgDrpHtml = `<option value="">Select Part No.</option>`;
+                var stgDrpHtml = `<option value="">Select Part No. / Die No.</option>`;
                 for (let indx in data.part) {
                     let partData = data.part[indx];
                     if (selectedJobId == "" || partData.job_desc_id == selectedJobId) {
@@ -588,15 +588,15 @@ function getPart($this = null) {
 
                 jQuery($this).each(function () {
                     let $dropdown = jQuery(this);
-                    
+
                     let existingVals = [];
-                    $dropdown.find('option').each(function() {
+                    $dropdown.find('option').each(function () {
                         let val = jQuery(this).val();
                         if (val) existingVals.push(String(val));
                     });
 
                     $dropdown.empty().append(stgDrpHtml);
-                    
+
                     if (previousSelectedPart &&
                         $dropdown.find('option[value="' + previousSelectedPart + '"]').length > 0) {
                         $dropdown.val(previousSelectedPart).trigger('change');
@@ -661,7 +661,7 @@ function checkDuplicatePart(index) {
     });
 
     if (hasTableDuplicate) {
-        toastr.error('Duplicate Job Description, Part No. & Drg. No. Found.');
+        toastr.error('Duplicate Job Description, Part No. / Die No. & Drg. No. Found.');
         jQuery('#part_no_' + index).val('');
         jQuery('#drg_no_' + index).val('');
         delete lastVerifiedParts[index];

@@ -44,7 +44,7 @@
                                 <th>Date</th>
                                 <th>Used In</th>
                                 <th>Ref. No.</th>
-                                <th>Current Location</th>
+                                <!-- <th>Current Location</th> -->
                                 <th>Customer</th>
                                 <th>Supplier</th>
                                 <th>Application No.</th>
@@ -139,7 +139,7 @@
                 },
                 { data: 'module_name', name: 'module_name' },
                 { data: 'doc_no', name: 'doc_no', render: function(d){ return d ? d : ''; } },
-                { data: 'from_location', name: 'from_location', render: function(d){ return d ? d : '-'; } },
+                // { data: 'from_location', name: 'from_location', render: function(d){ return d ? d : '-'; } },
                 { data: 'customer_name', name: 'customer_name', render: function(d){ return d ? d : ''; } },
                 { data: 'supplier_name', name: 'supplier_name', render: function(d){ return d ? d : ''; } },
                 { data: 'application_no', name: 'application_no', render: function(d){ return d ? d : ''; } },

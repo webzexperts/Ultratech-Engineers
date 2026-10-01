@@ -77,7 +77,10 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="row g-2 mb-1 position-relative">
+                                
+                            </div>
+                            <div class="col-md-4">
+                                <div class="row g-2 ml-2 mb-1 position-relative">
                                     <div class="col-4">
                                         <label for="identification_req" class="form-label">Identification Req.</label>
                                     </div>
@@ -89,9 +92,6 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                
                                 <div class="row g-2 ml-2 mb-1 position-relative">
                                     <div class="col-4">
                                         <label for="unit_id" class="form-label">Unit <sup class="astric">*</sup></label>
@@ -117,6 +117,7 @@
                                     </div>
                                 </div>
 
+                                {{-- 
                                 <div class="row g-2 ml-2 mb-1 position-relative" id="conv_factor_div">
                                     <div class="col-4">
                                         <label for="conv_factor" class="form-label">Conv. Factor <sup class="astric" id="conv_factor_astric" style="display:none;"> *</sup></label>
@@ -125,12 +126,14 @@
                                         <input type="text" name="conv_factor" id="conv_factor" class="form-control isNumberKeyNotDot" readonly tabindex="-1">
                                         <span class="text-nowrap ms-2">SQIN</span>
                                         <div class="invalid-tooltip">
-                                            Enter Conv. Factor.
+                                             Enter Conv. Factor.
                                         </div>
                                     </div>
                                 </div>
+                                --}}
+                                <input type="hidden" name="conv_factor" id="conv_factor" value="">
 
-                                <div class="row g-2 ml-2 mb-1 position-relative">
+                                {{-- <div class="row g-2 ml-2 mb-1 position-relative">
                                     <div class="col-4">
                                         <label for="inter_location_transfer" class="form-label">Inter Location Transfer <sup class="astric">*</sup></label>
                                     </div>
@@ -144,7 +147,7 @@
                                             Select Inter Location Transfer.
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
 
                                 <div class="row ml-2 g-2 mb-1">
                                     <div class="col-4">

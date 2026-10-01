@@ -143,7 +143,8 @@
                                     <input type="hidden" name="customer_client_suggestion" id="customer_client_suggestion">
                                 </div>
                             </div>
-                            <!-- Type of Job -->
+                            <!-- Type of Job (Commented Out) -->
+                            <!--
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
                                     <label for="type_of_job_id" class="form-label">Type of Job <sup class="astric">*</sup></label>
@@ -162,7 +163,11 @@
                                     </div>
                                 </div>
                             </div>
+                            -->
+                            <input type="hidden" name="type_of_job_id" id="type_of_job_id" value="">
+
                             <!-- Job Description -->
+                            <!--
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
                                     <label for="job_desc_id" class="form-label">Job Description <sup class="astric">*</sup></label>
@@ -176,6 +181,19 @@
                                         @endforelse
                                     </select>
                                     <div class="invalid-tooltip">Select Job Description.</div>
+                                </div>
+                            </div>
+                            -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="job_desc" class="form-label">Job Description <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <div class="d-flex gap-2">
+                                        <input type="text" class="form-control" name="job_desc" id="job_desc" required>
+                                        <div class="invalid-tooltip">Enter Job Description.</div>
+                                        <button type="button" class="btn btn-success btn-sm ms-1" id="copy_report_btn">Copy</button>
+                                    </div>
                                 </div>
                             </div>
                             <!-- Part No. -->
@@ -198,13 +216,13 @@
                             <!-- New Part No. Textbox with suggestion -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
-                                    <label for="part_no" class="form-label">Part No.</label>
+                                    <label for="part_no" class="form-label">Part No. / Die No.</label>
                                 </div>
                                 <div class="col-8">
                                     <input type="text" class="form-control" id="part_no" name="part_no" oninput="suggestPartNo(event, this)" autocomplete="off">
                                     <div id="part_no_list"></div>
                                     <input type="hidden" name="part_no_suggestion" id="part_no_suggestion">
-                                    <div class="invalid-tooltip">Enter Part No.</div>
+                                    <div class="invalid-tooltip">Enter Part No. / Die No.</div>
                                 </div>
                             </div>
 
@@ -641,12 +659,31 @@
                                 </div>
                             </div>
                             <!-- Film Processing -->
-                            <div class="row g-2 mb-1">
+                            <!-- <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
                                     <label for="film_processing" class="form-label">Film Processing</label>
                                 </div>
                                 <div class="col-8">
                                     <input type="text" class="form-control skip-tab" id="film_processing" name="film_processing" value="MANUAL" tabindex="-1" readonly>
+                                </div>
+                            </div> -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="film_processing" class="form-label">Film Processing</label>
+                                </div>
+                                <div class="col-8">
+                                    <!-- <input type="text" class="form-control skip-tab" id="film_processing" name="film_processing" value="MANUAL" tabindex="-1" readonly> -->
+                                    <div class="row g-1">
+                                        <div class="col">
+                                            <input type="text" class="form-control skip-tab" id="film_processing" name="film_processing" value="MANUAL" tabindex="-1" readonly>
+                                        </div>
+                                        <div class="col-auto ms-1">
+                                            <span class="text-nowrap" style="font-size: 13px;">Exp. Time </span>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control" id="exposure_time" name="exposure_time">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <!-- Test Technique -->

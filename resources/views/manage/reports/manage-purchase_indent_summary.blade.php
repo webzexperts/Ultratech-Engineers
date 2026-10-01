@@ -66,7 +66,7 @@
                         <tr>
                             <th>Indent No.</th>
                             <th>Date</th>
-                            <th>To Location</th>
+                            {{-- <th>To Location</th> --}}
                             <th>Item</th>
                             <th>Item Group</th>
                             <th>Main Group</th>
@@ -152,7 +152,7 @@
                 columns: [
                     { data: 'pi_no', name: 'purchase_indent.pi_no', },
                     { data: 'pi_date', name: 'purchase_indent.pi_date', },
-                    { data: 'to_location', name: 'to_location.location_name', },
+                    // { data: 'to_location', name: 'to_location.location_name', },
                     { data: 'item_name', name: 'item.item_name', },
                     { data: 'item_group', name: 'item_group.item_group', },
                     { data: 'main_group', name: 'item.item_type', },

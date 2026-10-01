@@ -42,7 +42,7 @@
                                 <th>PO No.</th>
                                 <th>PO Date</th>
                                 <th>Job Description</th>
-                                <th>Part No.</th>
+                                <th>Part No. / Die No.</th>
                                 <th>OA Qty.</th>
                                 <th>Unit</th>
                                 <th>Planning Qty.</th>

@@ -55,11 +55,11 @@
                                 </div>
                             </div>
 
-                            <div class="row g-2 mb-1">
-                                <div class="col-4"><label for="type_of_job_id" class="form-label">Type of Job <sup class="astric">*</sup></label></div>
+                            <div class="row g-2 mb-1" style="display: none;">
+                                <div class="col-4"><label for="type_of_job_id" class="form-label">Type of Job</label></div>
                                 <div class="col-8">
                                     <div class="otherselectwidth">
-                                        <select class="js-example-basic-single suggest_type_of_job" name="type_of_job_id" id="type_of_job_id" required>
+                                        <select class="js-example-basic-single suggest_type_of_job" name="type_of_job_id" id="type_of_job_id">
                                             <option value="">Select Type of Job</option>
                                             @forelse(getTypeOfJob() as $toj)
                                                 <option value="{{ $toj->id }}">{{ $toj->type_of_job }}</option>
@@ -75,21 +75,10 @@
                             </div>
 
                             <div class="row g-2 mb-1">
-                                <div class="col-4"><label for="inward_job_desc_id" class="form-label">Job Description <sup class="astric">*</sup></label></div>
+                                <div class="col-4"><label for="job_desc" class="form-label">Job Description <sup class="astric">*</sup></label></div>
                                 <div class="col-8">
-                                    <div class="otherselectwidth">
-                                        <select class="js-example-basic-single suggest_job_description" name="job_desc_id" id="inward_job_desc_id" required>
-                                            <option value="">Select Job Description</option>
-                                            @forelse(getMiJobDescription() as $jd)
-                                                <option value="{{ $jd->id }}" data-parts="{{ json_encode($jd->parts) }}">{{ $jd->job_description }}</option>
-                                            @empty
-                                            @endforelse
-                                        </select>
-                                        <div class="invalid-tooltip">Select Job Description.</div>
-                                        @if(hasAccess("job_description","add"))
-                                            <i class="plus-icon bx bx-plus-medical" onclick="addedJobDescription(true)" data-bs-target="#JobDescriptionModal"></i>
-                                        @endif
-                                    </div>
+                                    <input type="text" name="job_desc" id="job_desc" class="form-control" maxlength="255" required autocomplete="off">
+                                    <div class="invalid-tooltip">Enter Job Description.</div>
                                 </div>
                             </div>
 
@@ -108,7 +97,7 @@
                              </div> -->
 
                              <div class="row g-2 mb-1">
-                                 <div class="col-4"><label for="part_no" class="form-label">Part No.</label></div>
+                                 <div class="col-4"><label for="part_no" class="form-label">Part No. / Die No.</label></div>
                                  <div class="col-8">
                                      <input type="text" name="part_no" id="part_no" class="form-control" onkeyup="suggestInwardPartNo(event, this)" maxlength="155" autocomplete="off">
                                      <div id="inward_part_no_list"></div>

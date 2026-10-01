@@ -87,9 +87,8 @@ function fetchAndFillServicePO(id) {
 
                 jQuery('#ServicePOModal').find('#purpose').val(data.ser_po_data.purpose != "" ? data.ser_po_data.purpose : "");
 
-                jQuery('#ServicePOModal').find('#bill_to_id').val(data.ser_po_data.bill_to_id != "" ? data.ser_po_data.bill_to_id : "").trigger('change.select2');
-
-                jQuery('#ServicePOModal').find('#for_location_id').val(data.ser_po_data.for_location_id != "" ? data.ser_po_data.for_location_id : "").trigger('change.select2');
+                // jQuery('#ServicePOModal').find('#bill_to_id').val(data.ser_po_data.bill_to_id != "" ? data.ser_po_data.bill_to_id : "").trigger('change.select2');
+                // jQuery('#ServicePOModal').find('#for_location_id').val(data.ser_po_data.for_location_id != "" ? data.ser_po_data.for_location_id : "").trigger('change.select2');
 
                 jQuery('#ServicePOModal').find('#sp_note').val(data.ser_po_data.sp_note != "" ? data.ser_po_data.sp_note : "");
 
@@ -268,8 +267,10 @@ jQuery('#resetbtn').on('click', function () {
         jQuery('#ser_po_sequence').prop('readonly', false).focus();
         jQuery('#ServicePOModal').find("#supplier_id").val('').trigger('change');
         jQuery('#ServicePOModal').find("#kind_attn_id").val('').trigger('change.select2');
-        jQuery('#ServicePOModal').find('#bill_to_id').val('').trigger('change');
-        jQuery('#ServicePOModal').find('#for_location_id').val('').trigger('change');
+        // jQuery('#ServicePOModal').find('#bill_to_id').val('').trigger('change');
+        // jQuery('#ServicePOModal').find('#for_location_id').val('').trigger('change');
+        // jQuery('#ServicePOModal').find('#bill_to_id').val('1').trigger('change');
+        // jQuery('#ServicePOModal').find('#for_location_id').val('1').trigger('change');
 
         getLatestServicePONo();
     } else {
@@ -302,8 +303,10 @@ jQuery('#ServicePOModal').on('click', '#add_new', function () {
     service_po_details_data = [];
     jQuery("#totalAmount").text("0.00");
     jQuery('#ServicePOModal').find("#supplier_id").val('').trigger('change');
-    jQuery('#ServicePOModal').find('#bill_to_id').val('').trigger('change');
-    jQuery('#ServicePOModal').find('#for_location_id').val('').trigger('change');
+    // jQuery('#ServicePOModal').find('#bill_to_id').val('').trigger('change');
+    // jQuery('#ServicePOModal').find('#for_location_id').val('').trigger('change');
+    // jQuery('#ServicePOModal').find('#bill_to_id').val('1').trigger('change');
+    // jQuery('#ServicePOModal').find('#for_location_id').val('1').trigger('change');
     jQuery('#ServicePOModal').find('#add_new').hide();
     jQuery('#ServicePOModal').find('#preview_btn').hide();
 });
@@ -346,18 +349,40 @@ function getSupplierKindAttn() {
                     // } else {
                     //     jQuery("#terms_and_conditions").val('');
                     // }
+
+                    // Supplier-wise LNR for GST Type (Only in Add Mode)
+                    let isEditMode = jQuery('#ServicePOModal').find('#id').val() != '';
+                    if (!isEditMode) {
+                        if (data.LnrData && data.LnrData.gst_type_fix_id) {
+                            // If previous Service PO exists for this supplier, select that supplier's LNR
+                            jQuery('#ServicePOModal')
+                                .find('input[name="gst_type_fix_id"][value="' + data.LnrData.gst_type_fix_id + '"]')
+                                .prop('checked', true)
+                                .trigger('change');
+                        } else {
+                            // First time for this supplier: default to None (value: 3)
+                            jQuery('#ServicePOModal')
+                                .find('input[name="gst_type_fix_id"][value="3"]')
+                                .prop('checked', true)
+                                .trigger('change');
+                        }
+                    }
                 }
             }
         });
     } else {
         $modal.find('#kind_attn_id').val('').trigger('change.select2');
         $modal.find("#terms_and_conditions").val('');
-
+        let isEditMode = $modal.find('#id').val() != '';
+        if (!isEditMode) {
+            $modal.find('input[name="gst_type_fix_id"][value="3"]').prop('checked', true).trigger('change');
+        }
     }
 }
 
 /* GST Fill As Per Supplier + Bill To */
-
+// જૂનો State-Matching કોડ કૉમેન્ટ કર્યો છે, હવે Supplier-wise LNR ચાલશે:
+/*
 jQuery('#supplier_id , #bill_to_id').on('change.select2 change', function () {
     $sup_state = jQuery("#supplier_id").find('option:selected').data('state-id');
     $bill_state = jQuery("#bill_to_id").find('option:selected').data('state_id');
@@ -370,6 +395,7 @@ jQuery('#supplier_id , #bill_to_id').on('change.select2 change', function () {
         jQuery('input[name="gst_type_fix_id"][value="2"]').prop('checked', true).trigger('change');
     }
 });
+*/
 
 /* Fill Item Group And Main Group */
 jQuery('#ServicePODetailsForm #item_id').on('change', function () {
@@ -1047,8 +1073,10 @@ $('#commonServicePOForm').on('submit', function (e) {
                             $("#kind_attn_id").val('').trigger('change');
                             $("#purpose").val('');
                             $("#ref_no_date").val('');
-                            $("#bill_to_id").val('').trigger('change');
-                            $("#for_location_id").val('').trigger('change');
+                            // $("#bill_to_id").val('').trigger('change');
+                            // $("#for_location_id").val('').trigger('change');
+                            // $("#bill_to_id").val('1').trigger('change');
+                            // $("#for_location_id").val('1').trigger('change');
                             service_po_details_data = [];
                             selectedRows = {};
                             jQuery('#ServicePODetailTable tbody').empty();
@@ -1146,9 +1174,11 @@ function checkSequence() {
             jQuery('#ser_po_sequence').parent().parent().parent('div.control-group').addClass('error');
             jQuery('#ser_po_sequence').focus();
             jQuery('#ser_po_sequence').val('');
+            jQuery('#ServicePOModal').find('#submitbtn, #updatebtn').prop('disabled', false);
 
         } else {
             jQuery('#ser_po_sequence').addClass('file-loader');
+            jQuery('#ServicePOModal').find('#submitbtn, #updatebtn').prop('disabled', true);
             jQuery('#ser_po_sequence').parent().parent().parent('div.control-group').removeClass('error');
 
             var urL = "check-service_po_number_duplication?for=add&ser_po_sequence=" + val;
@@ -1171,13 +1201,16 @@ function checkSequence() {
                         toastr.error(data.response_message);
                         jQuery('#commonServicePOForm #ser_po_sequence').val('');
                         const input = document.getElementById('ser_po_sequence'); input?.focus();
+                        jQuery('#ServicePOModal').find('#submitbtn, #updatebtn').prop('disabled', false);
                     } else {
                         jQuery('#commonServicePOForm #ser_po_number').val(data.latest_no);
                         jQuery('#commonServicePOForm #ser_po_sequence').val(val);
+                        jQuery('#ServicePOModal').find('#submitbtn, #updatebtn').prop('disabled', false);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     jQuery('#ser_po_sequence').removeClass('file-loader');
+                    jQuery('#ServicePOModal').find('#submitbtn, #updatebtn').prop('disabled', false);
                     var errMessage = JSON.parse(jqXHR.responseText);
                     if (errMessage.errors) {
                         validator.showErrors(errMessage.errors);
@@ -1194,6 +1227,7 @@ function checkSequence() {
     } else {
         jQuery('#ser_po_number').val('');
         jQuery('#ser_po_sequence').val('');
+        jQuery('#ServicePOModal').find('#submitbtn, #updatebtn').prop('disabled', false);
     }
 
 }

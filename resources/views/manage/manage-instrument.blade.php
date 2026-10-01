@@ -42,9 +42,9 @@
                             <th>Frequency (Days)</th>
                             <th>Last Cal. Date</th>
                             <th>Next Cal. Due</th>
-                            <th>Current Location</th>
+                            <!-- <th>Current Location</th> -->
                             <th>Status</th>
-                            <th>Own Location</th>
+                            <!-- <th>Own Location</th> -->
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -105,9 +105,9 @@
                 { data: 'ins_cali_freq', name: 'instrument.ins_cali_freq', },
                 { data: 'ins_last_cali_date', name: 'instrument.ins_last_cali_date', },
                 { data: 'ins_next_cali_due_date', name: 'instrument.ins_next_cali_due_date', },
-                { data: 'current_location', name: 'current_location.location_name', },
+                // { data: 'current_location', name: 'current_location.location_name', },
                 { data: 'ins_status', name: 'instrument.ins_status', },
-                { data: 'own_location', name: 'own_location.location_name', },
+                // { data: 'own_location', name: 'own_location.location_name', },
                 { data: 'last_by', name: 'last_by', },
                 { data: 'last_on', name: 'instrument.last_on', },
                 { data: 'created_by', name: 'created_by', },

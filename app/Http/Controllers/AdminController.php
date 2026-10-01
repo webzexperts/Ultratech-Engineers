@@ -190,7 +190,8 @@ class AdminController extends Controller
                 //'signature_image' => $signatureImage,
                 'password'    => Hash::make($request->password),
                 'status'      => $request->status,
-                'allow_production_back_days_entry'  => $request->allow_production_back_days_entry ?? 0,
+                // 'allow_production_back_days_entry'  => $request->allow_production_back_days_entry ?? 0,
+                'allow_production_back_days_entry'  => 0,
                 'company_id'  => 1,
                 'created_on'  => Carbon::now('Asia/Kolkata')->toDateTimeString(),
                 'created_by'  => Auth::user()->id

@@ -16,7 +16,7 @@
                                     <th class="radio_column"></th>
                                     <th>Inward No.</th>
                                     <th>Inward Date</th>
-                                    <th>Part No.</th>
+                                    <th>Part No. / Die No.</th>
                                     <th>Drg. No.</th>
                                     <th>Heat No.</th>
                                     <th>RT No.</th>

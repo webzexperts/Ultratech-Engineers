@@ -331,7 +331,7 @@ jQuery('#resetbtn').on('click', function () {
 jQuery('#OADetailsModal').on('change', '#oad_job_desc_id', function () {
     let parts = $(this).find(':selected').data('parts');
     let $partSelect = $('#OADetailsModal').find('#oad_part_id');
-    $partSelect.empty().append('<option value="">Select Part No.</option>');
+    $partSelect.empty().append('<option value="">Select Part No. / Die No.</option>');
     // $partSelect.empty().append('<option value="">Select Part</option>');
     if (parts && parts.length > 0) {
         $.each(parts, function (i, part) {
@@ -902,7 +902,7 @@ $('#addPendigOAForm').on('submit', function (e) {
 
     // No checkbox selected
     if (chkArr.length === 0) {
-         toastr.error('Select At least One Quotation From Pending');
+        toastr.error('Select At least One Quotation From Pending');
 
         jQuery('#full-page-loader')
             .removeClass('loader-progress-whole-page')

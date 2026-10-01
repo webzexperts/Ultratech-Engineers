@@ -50,6 +50,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                {{--
                                 @php
                                     $locations  = getOtherLocations();
                                     $hoCount    = $locations->where('location_type', 'HO')->count();
@@ -76,6 +77,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                --}}
                             </div>
                         </div>
                     </div>

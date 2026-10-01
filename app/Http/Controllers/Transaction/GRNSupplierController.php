@@ -429,6 +429,11 @@ class GRNSupplierController extends Controller
                 $grn_sequence = $request->grn_sequence;
             }
 
+            $checkDup = checkReportDuplication(GRNSupplier::class, 'grn_number', $grn_number, $request, "Duplicate GRN Supplier No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
+
             $page_id = getMenuIdBassedOnDisplayName('grn_supplier');
             $assign_format_no = getAssignFormateNoForTransaction(
                 $LocationData->location_id,
@@ -813,6 +818,11 @@ class GRNSupplierController extends Controller
             'grn_sequence.required' => 'Enter GRN No.',
         ]);
 
+        $checkDup = checkReportDuplication(GRNSupplier::class, 'grn_number', $request->grn_number, $request, "Duplicate GRN Supplier No. Found.", $request->id, 'grn_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
+
         try
         {
             $year_data = getCurrentYearData();
@@ -835,8 +845,8 @@ class GRNSupplierController extends Controller
                 'amount_in_word'    => $amount_in_word ?? null,
                 'prepared_by_user_id' => $request->prepared_by_user_id,
               //  'assign_format_no'  => $assign_format_no ?? null,
-                'current_location_id' => $LocationData->location_id ?? null,
-                'year_id'           => $year_data->id,
+                // 'current_location_id' => $LocationData->location_id ?? null,
+                // 'year_id'           => $year_data->id,
                 'company_id'        => Auth::user()->company_id,
                 'last_on'               => Carbon::now('Asia/Kolkata'),
                 'last_by'               => Auth::id(),
@@ -1241,15 +1251,28 @@ class GRNSupplierController extends Controller
 
         $itemTypes = getItemType();
 
-        $po_data = DB::table('pending_purchase_order_qty as pend')->select(['purchase_order_details.pod_id','purchase_order.po_id','purchase_order.po_number','purchase_order.po_date','purchase_order.ref_no_date','bill_to.location_name as bill_to','ship_to.location_name as ship_to','item.item_name','item_group.item_group','item.item_type as main_group','pend.pending_qty','unit.unit','purchase_order_details.pod_del_date','purchase_order_details.pod_remark','admin.person_name as prepared_by',])
+        // $po_data = DB::table('pending_purchase_order_qty as pend')->select(['purchase_order_details.pod_id','purchase_order.po_id','purchase_order.po_number','purchase_order.po_date','purchase_order.ref_no_date','bill_to.location_name as bill_to','ship_to.location_name as ship_to','item.item_name','item_group.item_group','item.item_type as main_group','pend.pending_qty','unit.unit','purchase_order_details.pod_del_date','purchase_order_details.pod_remark','admin.person_name as prepared_by',])
+        // ->leftJoin('purchase_order_details','purchase_order_details.pod_id','=','pend.pod_id')
+        // ->leftJoin('purchase_order', 'purchase_order.po_id', '=', 'purchase_order_details.pod_po_id')    
+        // ->leftJoin('item','item.id','=','purchase_order_details.pod_item_id')  
+        // ->leftJoin('item_group', 'item_group.id', '=', 'item.item_group_id')
+        // ->leftJoin('admin', 'admin.id', '=', 'purchase_order.prepared_by_user_id')
+        // ->leftJoin('unit','unit.id','=','item.unit_id')  
+        // ->leftJoin('location as bill_to', 'bill_to.location_id', '=', 'purchase_order.bill_to_location_id')
+        // ->leftJoin('location as ship_to', 'ship_to.location_id', '=', 'purchase_order.ship_to_location_id')
+        // ->where('purchase_order.po_supplier_id',$request->grn_supplier_id)
+        // ->whereIn('purchase_order.year_id',$yearIds)  
+        // ->Where('purchase_order.ship_to_location_id', $current_location->location_id)
+        // ->where('pend.pending_qty', '>', 0)
+        // ->get();
+
+        $po_data = DB::table('pending_purchase_order_qty as pend')->select(['purchase_order_details.pod_id','purchase_order.po_id','purchase_order.po_number','purchase_order.po_date','purchase_order.ref_no_date','item.item_name','item_group.item_group','item.item_type as main_group','pend.pending_qty','unit.unit','purchase_order_details.pod_del_date','purchase_order_details.pod_remark','admin.person_name as prepared_by',])
         ->leftJoin('purchase_order_details','purchase_order_details.pod_id','=','pend.pod_id')
         ->leftJoin('purchase_order', 'purchase_order.po_id', '=', 'purchase_order_details.pod_po_id')    
         ->leftJoin('item','item.id','=','purchase_order_details.pod_item_id')  
         ->leftJoin('item_group', 'item_group.id', '=', 'item.item_group_id')
         ->leftJoin('admin', 'admin.id', '=', 'purchase_order.prepared_by_user_id')
         ->leftJoin('unit','unit.id','=','item.unit_id')  
-        ->leftJoin('location as bill_to', 'bill_to.location_id', '=', 'purchase_order.bill_to_location_id')
-        ->leftJoin('location as ship_to', 'ship_to.location_id', '=', 'purchase_order.ship_to_location_id')
         ->where('purchase_order.po_supplier_id',$request->grn_supplier_id)
         ->whereIn('purchase_order.year_id',$yearIds)  
         ->Where('purchase_order.ship_to_location_id', $current_location->location_id)

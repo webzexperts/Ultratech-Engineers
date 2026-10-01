@@ -69,8 +69,8 @@
                             <th>PO Date</th>
                             <th>Supplier</th>
                             <th>Ref. No. & Date</th>
-                            <th>Bill To</th>
-                            <th>Ship To</th>
+                            {{-- <th>Bill To</th> --}}
+                            {{-- <th>Ship To</th> --}}
                             <th>Item</th>
                             <th>Item Group</th>
                             <th>Main Group</th>
@@ -129,7 +129,7 @@
                     className: 'export_purchase_order_summary d-none',
                     exportOptions: {
                             columns: function(idx, data, node) {
-                                return idx !== 0 && table.column(idx).visible();
+                                return table.column(idx).visible();
                             },
                             modifier: {
                                 page: 'all'
@@ -161,8 +161,8 @@
                     { data: 'po_date', name: 'purchase_order.po_date', },
                     { data: 'supplier_name', name: 'suppliers.supplier_name', },
                     { data: 'ref_no_date', name: 'purchase_order.ref_no_date', },
-                    { data: 'bill_to_location_name', name: 'bill_to_location.location_name', },
-                    { data: 'ship_to_location_name', name: 'ship_to_location.location_name', },
+                    // { data: 'bill_to_location_name', name: 'bill_to_location.location_name', },
+                    // { data: 'ship_to_location_name', name: 'ship_to_location.location_name', },
                     { data: 'item_name', name: 'item.item_name', },
                     { data: 'item_group', name: 'item_group.item_group', },
                     { data: 'main_group', name: 'item.item_type', },

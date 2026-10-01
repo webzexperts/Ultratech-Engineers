@@ -17,8 +17,10 @@
                                 <th>PO No.</th>
                                 <th>PO Date</th>
                                 <th>Ref. No. & Date</th>
+                                {{-- 
                                 <th>Bill To</th>
                                 <th>Ship To</th>
+                                --}}
                                 <th>Item</th>
                                 <th>Item Group</th>
                                 <th>Main Group</th>
