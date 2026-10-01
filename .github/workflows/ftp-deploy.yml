@@ -3,7 +3,7 @@ name: Deploy to FTP
 on:
   push:
     branches:
-      - sitastesting   # change if needed
+      - ultratech-staging   # change if needed
   workflow_dispatch:
 jobs:
   deploy:
@@ -19,8 +19,8 @@ jobs:
           username: ${{ secrets.FTP_USERNAME_TESTING }}
           password: ${{ secrets.FTP_PASSWORD_TESTING }}
           port: 21
-          server-dir: /public_html/
-          local-dir: ./
+          server-dir: /public_html/app/
+          local-dir: ./app/
           
           exclude: |
             **/.git*
