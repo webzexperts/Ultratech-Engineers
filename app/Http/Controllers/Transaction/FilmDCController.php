@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
+use Exception;
 
 class FilmDCController extends Controller
 {
@@ -35,8 +37,7 @@ class FilmDCController extends Controller
         $year_data = getCurrentYearData();
         $current_location = getCurrentLocation()->location_id;
 
-        $dc_data = DB::table('film_dc')
-            ->select([
+        $dc_data = FilmDc::select([
                 'film_dc.film_dc_id',
                 'film_dc.film_dc_sequence',
                 'film_dc.film_dc_no',
@@ -48,22 +49,27 @@ class FilmDCController extends Controller
                 'film_dc.customer_client',
                 'film_dc.total_qty',
                 'film_dc.total_square_inch',
-                DB::raw("(
-                    SELECT GROUP_CONCAT(
-                        DISTINCT IF(film_dc.film_size_unit_fix = 'cm', IFNULL(NULLIF(f.film_size_cm, ''), f.film_size_inch), IFNULL(NULLIF(f.film_size_inch, ''), f.film_size_cm))
-                        ORDER BY f.film_id SEPARATOR ', '
-                    )
-                    FROM film_dc_details fdd
-                    LEFT JOIN film f ON f.film_id = fdd.film_id
-                    WHERE fdd.film_dc_id = film_dc.film_dc_id
-                ) as film_size_for_print"),
+                'film_dc_details.film_id',
+                'film_dc_details.dc_quantity',
+                'film_dc_details.test_report_no',
+                'film_dc_details.test_report_date',
+                DB::raw("
+                    CASE
+                        WHEN film_dc.film_size_unit_fix = 'cm'
+                            THEN f.film_size_cm
+                        ELSE f.film_size_inch
+                    END AS film_size_for_print
+                "),
                 'created_user.person_name as created_by_name',
                 'last_user.person_name as last_by_name',
+                'film_dc.sp_note',
                 'film_dc.created_on',
                 'film_dc.created_by',
                 'film_dc.last_by',
                 'film_dc.last_on',
             ])
+            ->leftJoin('film_dc_details', 'film_dc_details.film_dc_id', '=', 'film_dc.film_dc_id')
+            ->leftJoin('film as f','f.film_id','=','film_dc_details.film_id')
             ->leftJoin('customers', 'customers.id', '=', 'film_dc.customer_id')
             ->leftJoin('admin as created_user', 'created_user.id', '=', 'film_dc.created_by')
             ->leftJoin('admin as last_user', 'last_user.id', '=', 'film_dc.last_by')
@@ -82,6 +88,15 @@ class FilmDCController extends Controller
             })
             ->editColumn('from_type_id', function ($row) {
                 return $row->from_type_id;
+            })
+             ->filterColumn('film_dc_details.test_report_no', function ($query, $keyword) {
+                applynumberprefix($query, $keyword, 'film_dc_details.test_report_no');
+            })
+             ->editColumn('test_report_date', function ($row) {
+                return $row->test_report_date ? Date::createFromFormat('Y-m-d', $row->test_report_date)->format(DATE_FORMAT) : '';
+            })
+            ->filterColumn('film_dc_details.test_report_date', function ($q, $k) {
+                applyDate($q, $k, 'film_dc_details.test_report_date');
             })
             ->filterColumn('film_size_for_print', function ($query, $keyword) {
                 $query->whereExists(function ($subQuery) use ($keyword) {
@@ -170,11 +185,17 @@ class FilmDCController extends Controller
                 $dc_seq = $request->film_dc_sequence;
                 $dc_no = $request->film_dc_no;
             }
+            $checkDup = checkReportDuplication(FilmDc::class, 'film_dc_no', $dc_no, $request, "Duplicate Film DC No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
 
             $page_id = getMenuIdBassedOnDisplayName('film_dc');
             $assign_format_no = $page_id ? getAssignFormateNoForTransaction($location_data->location_id, $page_id->id, $request->film_dc_date) : null;
 
-            $film_dc_id = DB::table('film_dc')->insertGetId([
+            // $film_dc_id = DB::table('film_dc')->insertGetId([
+            $film_dc_data = FilmDc::create([
+
                 'current_location_id' => $location_data->location_id,
                 'film_dc_sequence'    => $dc_seq,
                 'film_dc_no'          => $dc_no,
@@ -237,8 +258,9 @@ class FilmDCController extends Controller
                     ? floatval($row['total_sq_cm'])
                     : ($sqCm * $dcQty);
 
-                DB::table('film_dc_details')->insert([
-                    'film_dc_id'        => $film_dc_id,
+                $film_dc_details_data = FilmDcDetails::create([
+                // DB::table('film_dc_details')->insert([
+                    'film_dc_id'        => $film_dc_data->film_dc_id,
                     'test_report_rt_id' => $row['test_report_rt_id'] ?? null,
                     'test_report_no'    => $row['test_report_no'] ?? null,
                     'test_report_date'  => $formatted_report_date,
@@ -257,11 +279,36 @@ class FilmDCController extends Controller
 
             DB::commit();
 
+            $get_customer = FilmDc::select('customers.customer')
+            ->leftJoin('customers', 'customers.id', '=', 
+            'film_dc.customer_id')
+            ->where('film_dc.customer_id', $film_dc_data->customer_id)
+            ->first();
+
+            $film_dc_no = !empty($film_dc_data->film_dc_no) ? '_' . str_replace('/', '_', $film_dc_data->film_dc_no) : "";
+
+            $customer = !empty($get_customer)
+                ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $get_customer->customer)
+                : "";
+
+            $pdf_name = 'Film_DC'.$film_dc_no.$customer;
+
+            GeneratePdf($film_dc_data->film_dc_id,$pdf_name,'film_dc','add');
+
+            $encodedId = base64_encode($film_dc_data->film_dc_id);
+
+            if (hasAccess("film_dc", "print")) {
+                $url = url("/check-file_exists?id={$encodedId}&name={$pdf_name}&type=film_dc");
+            } else {
+               $url = "";
+            }
+
             return response()->json([
                 'response_code'    => '1',
+                'url' => $url,
                 'response_message' => getResponseMessage('store_success'),
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
                 'response_code'    => '0',
@@ -342,6 +389,7 @@ class FilmDCController extends Controller
                 'film_brand_id'     => $d->film_brand_id,
                 'film_brand'        => $d->film_brand ?? '',
                 'film_type_id'      => $d->film_type_id ?? null,
+                'film_type'         => $d->film_type ?? ($d->film_type_id && isset($filmTypes[$d->film_type_id]) ? $filmTypes[$d->film_type_id] : ''),
                 'film_id'           => $d->film_id,
                 'film_size_inch'    => $filmSize,
                 'sq_in'             => $sqIn,
@@ -366,18 +414,33 @@ class FilmDCController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
-            'id'               => 'required',
-            'film_dc_sequence' => 'required',
-            'film_dc_date'     => 'required',
-            'customer_id'      => 'required',
-            'job_type_fix'     => 'required',
-            'from_type_id'     => 'required',
+        $year_data = getCurrentYearData();
+        $LocationData = getCurrentLocation();
+
+        $validated = $request->validate([
+            'film_dc_sequence' => [
+                'required',
+                'max:155',
+                Rule::unique('film_dc')
+                    ->where(function ($query) use ($year_data, $LocationData) {
+                        $query->where('year_id', $year_data->id)
+                            ->where('current_location_id', $LocationData->location_id);
+                    })
+                    ->ignore($request->id, 'film_dc_id'),
+            ],
+        ], [
+            'film_dc_sequence.unique'   => "Duplicate Film DC No. Found.",
+            'film_dc_sequence.required' => 'Enter Film DC No.',
         ]);
+
+        $checkDup = checkReportDuplication(FilmDc::class, 'film_dc_no', $request->film_dc_no, $request, "Duplicate Film DC No. Found.", $request->id, 'film_dc_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
 
         DB::beginTransaction();
         try {
-            $filmDc = DB::table('film_dc')->where('film_dc_id', $request->id)->first();
+            $filmDc = FilmDc::where('film_dc_id', $request->id)->first();
             if (!$filmDc) {
                 return response()->json([
                     'response_code'    => '0',
@@ -385,7 +448,7 @@ class FilmDCController extends Controller
                 ]);
             }
 
-            DB::table('film_dc')->where('film_dc_id', $request->id)->update([
+            FilmDc::where('film_dc_id', $request->id)->update([
                 'film_dc_sequence'    => $request->film_dc_sequence,
                 'film_dc_no'          => $request->film_dc_no,
                 'film_dc_date'        => Date::createFromFormat('d/m/Y', $request->film_dc_date)->format('Y-m-d'),
@@ -409,9 +472,9 @@ class FilmDCController extends Controller
 
                 if ($mode === 'Delete') {
                     if ($detailId) {
-                        DB::table('film_dc_details')->where('film_dc_detail_id', $detailId)->delete();
+                        FilmDcDetails::where('film_dc_detail_id', $detailId)->delete();
                     }
-                } elseif ($mode === 'Update' || $mode === 'New') {
+                } elseif ($mode === 'Update' || $mode === 'Insert') {
                     $formatted_report_date = null;
                     if (!empty($row['test_report_date'])) {
                         $formatted_report_date = Date::createFromFormat('d/m/Y', $row['test_report_date'])->format('Y-m-d');
@@ -466,20 +529,46 @@ class FilmDCController extends Controller
                     ];
 
                     if ($detailId) {
-                        DB::table('film_dc_details')->where('film_dc_detail_id', $detailId)->update($data);
+                        FilmDcDetails::where('film_dc_detail_id', $detailId)->update($data);
                     } else {
-                        DB::table('film_dc_details')->insert($data);
+                        FilmDcDetails::create($data);
                     }
                 }
             }
 
             DB::commit();
 
+            $get_customer = FilmDc::select('customers.customer')
+            ->leftJoin('customers', 'customers.id', '=', 
+            'film_dc.customer_id')
+            ->where('film_dc.customer_id', $request->customer_id)
+            ->first();
+
+            $film_dc_no = !empty($request->film_dc_no) ? '_' . str_replace('/', '_', $request->film_dc_no) : "";
+
+            $customer = !empty($get_customer)
+                ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $get_customer->customer)
+                : "";
+
+            $pdf_name = 'Film_DC'.$film_dc_no.$customer;
+
+            GeneratePdf($request->id,$pdf_name,'film_dc','add');
+
+            $encodedId = base64_encode($request->id);
+
+            if (hasAccess("film_dc", "print")) {
+                $url = url("/check-file_exists?id={$encodedId}&name={$pdf_name}&type=film_dc");
+            } else {
+               $url = "";
+            }
+
+
             return response()->json([
                 'response_code'    => '1',
+                'url' => $url,
                 'response_message' => getResponseMessage('update_success'),
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
                 'response_code'    => '0',
@@ -515,7 +604,7 @@ class FilmDCController extends Controller
                 'response_code'    => '1',
                 'response_message' => getResponseMessage('delete_success'),
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
                 'response_code'    => '0',
@@ -587,9 +676,9 @@ class FilmDCController extends Controller
                 $query->where('tr.job_type_fix', $jobType);
             }
 
-if (!empty($filmSizeUnit)) {
-    $query->where('tr.film_size_unit_fix', $filmSizeUnit);
-}
+            if (!empty($filmSizeUnit)) {
+                $query->where('tr.film_size_unit_fix', $filmSizeUnit);
+            }
 
             $customers = $query->select('customers.id', 'customers.customer')
                 ->distinct()
@@ -745,6 +834,7 @@ if (!empty($filmSizeUnit)) {
                 'trd.film_brand_id',
                 'trd.film_type_id',
                 'fb.film_brand',
+                'ft.film_type',
                 'trd.film_id',
                 'f.film_size_inch',
                 'f.film_size_cm',
@@ -755,6 +845,7 @@ if (!empty($filmSizeUnit)) {
             ->join('test_report_rt as tr', 'tr.test_report_rt_id', '=', 'trd.test_report_rt_id')
             ->leftJoin('film as f', 'f.film_id', '=', 'trd.film_id')
             ->leftJoin('film_brand as fb', 'fb.film_brand_id', '=', 'trd.film_brand_id')
+            ->leftJoin('film_type as ft', 'ft.film_type_id', '=', 'trd.film_type_id')
             ->whereIn('trd.test_report_rt_id', $reportIds)
             ->where(function ($q) {
                 $q->where('trd.include_in_measurement_sheet', 'Yes')
@@ -772,6 +863,7 @@ if (!empty($filmSizeUnit)) {
                 'trd.film_type_id',
                 'trd.film_id',
                 'fb.film_brand',
+                'ft.film_type',
                 'f.film_size_inch',
                 'f.film_size_cm',
                 'f.sq_in',
@@ -780,7 +872,7 @@ if (!empty($filmSizeUnit)) {
             ->get();
 
         foreach ($details as $row) {
-            $row->mode = 'New';
+            $row->mode = 'Insert';
             $row->remark = '';
             $row->die_no = !empty($row->part_no) ? $row->part_no : (!empty($row->product_code) ? $row->product_code : '');
             $row->test_report_date = (!empty($row->test_report_date) && $row->test_report_date != "0000-00-00")

@@ -33,8 +33,8 @@ function fetchAndFillOffer(id) {
                 var d = data.offer_data;
                 jQuery('#OfferModal').find('#id').val(d.offer_id != "" ? d.offer_id : "");
 
-                // let url = checkFileRoute + "?id=" + d.offer_id + "&name=" + d.pdf_name + "&type=offer";
-                // jQuery('#preview_btn').attr('href', url).show();
+                let url = checkFileRoute + "?id=" + d.offer_id + "&name=" + d.pdf_name + "&type=offer";
+                jQuery('#preview_btn').attr('href', url).show();
 
                 jQuery('#OfferModal').find('#offer_sequence').val(d.offer_sequence ?? "").focus();
                 jQuery('#OfferModal').find('#offer_no').val(d.offer_no ?? "");
@@ -110,7 +110,7 @@ function fetchAndFillOffer(id) {
                 if (form) form.classList.remove('was-validated');
                 jQuery('#OfferModal').find('#submitbtn').prop('disabled', false);
                 jQuery('#OfferModal').find('#add_new').show();
-                // jQuery('#OfferModal').find('#preview_btn').show();
+                jQuery('#OfferModal').find('#preview_btn').show();
             } else {
                 console.log(data.response_message);
             }
@@ -135,7 +135,7 @@ jQuery('#OfferModal').on('show.bs.modal', function (e) {
         resetParentForm(true);
     } else {
         jQuery('#OfferModal').find('#add_new').show();
-        // jQuery('#OfferModal').find('#preview_btn').show();
+        jQuery('#OfferModal').find('#preview_btn').show();
     }
 });
 
@@ -215,7 +215,7 @@ function resetParentForm(fetchLatest = false) {
     filterTestsByNabl();
 
     jQuery('#OfferModal').find('#add_new').hide();
-    // jQuery('#OfferModal').find('#preview_btn').hide();
+    jQuery('#OfferModal').find('#preview_btn').hide();
 
     if (fetchLatest) {
         getLatestOfferNo();

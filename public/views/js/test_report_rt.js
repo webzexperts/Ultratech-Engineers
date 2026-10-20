@@ -98,7 +98,8 @@ function fillReportDetailTable() {
             let in_use = (reportMasterData && (reportMasterData.in_use == true || reportMasterData.in_use == 1)) ? true : false;
             let isMappedToObs = (reportMasterData && (reportMasterData.is_used_in_os == 1 || reportMasterData.is_used_in_os == true)) ? true : false;
             let isUsedInMs = (reportMasterData && (reportMasterData.is_used_in_ms == 1 || reportMasterData.is_used_in_ms == true)) ? true : false;
-            let actionDropdown = (in_use || isMappedToObs || isRevision || isMapTorevRtDetails) ? DetailsActionDropdown('editReportDetails') : DetailsActionDropdown('editReportDetails', 'removeReportDetails');
+            let isUsedInFdc = (reportMasterData && (reportMasterData.is_used_in_fdc == 1 || reportMasterData.is_used_in_fdc == true)) ? true : false;
+            let actionDropdown = (in_use || isMappedToObs || isUsedInMs || isUsedInFdc || isRevision || isMapTorevRtDetails) ? DetailsActionDropdown('editReportDetails') : DetailsActionDropdown('editReportDetails', 'removeReportDetails');
 
             let rowHtml = `<tr>
                 <td>
@@ -1908,7 +1909,7 @@ function fetchAndFillTestReportRt(id) {
                 jQuery('#add_new').show();
 
                 let hasRevisionBuilt = (d.has_revision == 1 || d.has_revision == true);
-                let isUsedReport = (d.is_used_in_ms == 1 || d.is_used_in_os || d.in_use == 1);
+                let isUsedReport = (d.is_used_in_ms == 1 || d.is_used_in_os || d.is_used_in_fdc == 1 || d.in_use == 1);
                 let isUsedMasterResult = (d.is_used_in_os || d.has_next_revision || d.in_use == 1);
                 let isNabl = (d.nabl_type_fix === 'NABL');
 
@@ -2076,6 +2077,7 @@ jQuery('#ReportDetailsModal').on('shown.bs.modal', function () {
     let inUse = (reportMasterData && (reportMasterData.in_use == true || reportMasterData.in_use == 1)) ? true : false;
     let isUsedInMs = (reportMasterData && (reportMasterData.is_used_in_ms == true || reportMasterData.is_used_in_ms == 1)) ? true : false;
     let isMappedToObs = (reportMasterData && (reportMasterData.is_used_in_os == 1 || reportMasterData.is_used_in_os == true)) ? true : false;
+    let isUsedInFdc = (reportMasterData && (reportMasterData.is_used_in_fdc == 1 || reportMasterData.is_used_in_fdc == true)) ? true : false;
     /*
     OLD CODE:
     var isMappedToRev = (reportMasterData && reportMasterData.has_revision == true) ? true : false;
@@ -2153,7 +2155,7 @@ jQuery('#ReportDetailsModal').on('shown.bs.modal', function () {
 
         thisForm.find('#detail_ug').prop('readonly', true).addClass('skip-tab');
         thisForm.find('.plus-icon').addClass('disabled-icon').css({ 'pointer-events': 'none', 'opacity': '0.5' });
-    } else if ((inUse || isUsedInMs || isMappedToObs) && isEditRow) {
+    } else if ((inUse || isUsedInMs || isMappedToObs || isUsedInFdc) && isEditRow) {
         jQuery('#copy_from_sr_no').prop('readonly', false).prop('disabled', false).removeClass('skip-tab');
         thisForm.find('#detail_sr_no').prop('readonly', false).prop('disabled', false).removeClass('skip-tab');
         thisForm.find('#detail_identification').prop('readonly', false).removeClass('skip-tab');
@@ -2429,7 +2431,8 @@ function loadReportDetailByIndex(index) {
     let inUse = (reportMasterData && (reportMasterData.in_use == true || reportMasterData.in_use == 1)) ? true : false;
     let isUsedInMs = (reportMasterData && (reportMasterData.is_used_in_ms == true || reportMasterData.is_used_in_ms == 1)) ? true : false;
     let isMappedToObs = (reportMasterData && (reportMasterData.is_used_in_os == 1 || reportMasterData.is_used_in_os == true)) ? true : false;
-    if (inUse || isUsedInMs || isMappedToObs) {
+    let isUsedInFdc = (reportMasterData && (reportMasterData.is_used_in_fdc == 1 || reportMasterData.is_used_in_fdc == true)) ? true : false;
+    if (inUse || isUsedInMs || isMappedToObs || isUsedInFdc) {
         setSelect2Readonly('#detail_source_id_fix', true);
         setSelect2Readonly('#detail_film_id', true);
         setSelect2Readonly('#detail_no_of_film_fix', true);
@@ -2449,7 +2452,7 @@ function loadReportDetailByIndex(index) {
         thisForm.find('#detail_film_result_id').removeClass('skip-tab');
     }
 
-    if (isUsedInMs) {
+    if (isUsedInMs || isUsedInFdc) {
         thisForm.find('#include_in_measurement_sheet').prop('disabled', true);
     } else {
         thisForm.find('#include_in_measurement_sheet').prop('disabled', false);

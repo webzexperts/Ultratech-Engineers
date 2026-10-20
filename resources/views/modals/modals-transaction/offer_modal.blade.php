@@ -314,9 +314,9 @@
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary" id="submitbtn">Submit</button>
                 <button type="button" class="btn btn-warning" id="resetbtn">Reset</button>
-                {{-- @if(hasAccess("offer","print"))
+                @if(hasAccess("offer","print"))
                     <a type="button" class="btn btn-secondary" target="_blank" id="preview_btn" style="display:none;">Preview</a>
-                @endif --}}
+                @endif
                 @if(hasAccess("offer","add"))
                     <button type="button" class="btn btn-info" id="add_new" style="display:none;">Add New</button>
                 @endif
