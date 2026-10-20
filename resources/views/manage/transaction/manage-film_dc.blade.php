@@ -33,12 +33,15 @@
                             <th>DC No.</th>
                             <th>DC Date</th>
                             <th>DC From Type</th>
+                            <th>Job Type</th>
                             <th>Customer Name</th>
                             <th>Customer Client</th>
-                            <th>Job Type</th>
                             <!-- <th>Total SQIN</th> -->
+                            <th>Report No.</th>
+                            <th>Report Date</th>
                             <th>Film Size</th>
                             <th>DC Qty.</th>
+                            <th>Sp. Note</th>
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -69,7 +72,7 @@
         "processing": false,
         "serverSide": true,
         "scrollX": true,
-        "order": [[2, 'desc'], [13, 'desc']],
+        "order": [[2, 'desc'], [16, 'desc']],
         dom: 'Blfrtip',
         buttons: [{
             extend: 'excel',
@@ -100,12 +103,17 @@
             { data: 'film_dc_no', name: 'film_dc.film_dc_no' },
             { data: 'film_dc_date', name: 'film_dc.film_dc_date' },
             { data: 'from_type_id', name: 'film_dc.from_type_id' },
+            { data: 'job_type_fix', name: 'film_dc.job_type_fix' },
             { data: 'customer_name', name: 'customers.customer' },
             { data: 'customer_client', name: 'film_dc.customer_client' },
-            { data: 'job_type_fix', name: 'film_dc.job_type_fix' },
+            { data: 'test_report_no', name: 'film_dc_details.test_report_no' },
+            { data: 'test_report_date', name: 'film_dc_details.test_report_date' },
+
             { data: 'film_size_for_print', name: 'film_size_for_print' },
-            { data: 'total_qty', name: 'film_dc.total_qty' },
-           // { data: 'total_square_inch', name: 'film_dc.total_square_inch' },
+            { data: 'dc_quantity', name: 'dc_quantity' },
+            { data: 'sp_note', name: 'sp_note' },
+            // { data: 'total_qty', name: 'film_dc.total_qty' },
+            // { data: 'total_square_inch', name: 'film_dc.total_square_inch' },
             { data: 'last_by_name', name: 'last_user.person_name' },
             { data: 'last_on', name: 'film_dc.last_on' },
             { data: 'created_by_name', name: 'created_user.person_name' },

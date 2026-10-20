@@ -38,6 +38,10 @@ jQuery(document).ready(function () {
         dropdownParent: jQuery('#FilmDCDetailModal')
     });
 
+    jQuery('#detail_film_type_id').select2({
+        dropdownParent: jQuery('#FilmDCDetailModal')
+    });
+
     jQuery('#detail_film_id').select2({
         dropdownParent: jQuery('#FilmDCDetailModal')
     });
@@ -318,6 +322,8 @@ jQuery(document).ready(function () {
         let filmId = jQuery('#detail_film_id').val();
         let filmBrandId = jQuery('#detail_film_brand_id').val();
         let filmBrandName = jQuery('#detail_film_brand_id option:selected').text();
+        let filmTypeId = jQuery('#detail_film_type_id').val();
+        let filmTypeName = jQuery('#detail_film_type_id option:selected').text();
         let filmSizeInch = filmOpt.data('size_inch') || filmOpt.data('size') || filmOpt.text();
         let filmSizeCm = filmOpt.data('size_cm') || filmOpt.text();
         let filmSizeDisplay = (unit === 'cm' ? filmSizeCm : filmSizeInch);
@@ -337,6 +343,8 @@ jQuery(document).ready(function () {
             part_no: jQuery('#detail_die_no').val() || '',
             film_brand_id: filmBrandId ? parseInt(filmBrandId) : null,
             film_brand: filmBrandId ? filmBrandName : '',
+            film_type_id: filmTypeId ? parseInt(filmTypeId) : null,
+            film_type: filmTypeId ? filmTypeName : '',
             film_id: filmId ? parseInt(filmId) : null,
             film_size_inch: filmSizeDisplay,
             film_size_cm: filmSizeCm,
@@ -346,7 +354,7 @@ jQuery(document).ready(function () {
             total_sq_in: totalSqIn,
             total_sq_cm: totalSqCm,
             remark: jQuery('#detail_remark').val() || '',
-            mode: (mode === 'edit' && allDetailsData[rowIndex] && allDetailsData[rowIndex].film_dc_detail_id) ? 'Update' : 'New'
+            mode: (mode === 'edit' && allDetailsData[rowIndex] && allDetailsData[rowIndex].film_dc_detail_id) ? 'Update' : 'Insert'
         };
 
         if (mode === 'add') {
@@ -435,9 +443,15 @@ jQuery(document).ready(function () {
                             }
                         };
                         if (res.url && res.url !== '') {
-                            jQuery('#preview_btn').attr('href', res.url).show();
+                            jQuery('#preview_btn').attr('href', res.url).attr('tabindex', '0').show();
+                            setTimeout(function () {
+                                jQuery('#preview_btn').focus();
+                            }, 100);
                             toastSuccessPreview(res.response_message || 'Record Updated.', res.url, redirectFn);
                         } else {
+                            setTimeout(function () {
+                                jQuery('#preview_btn').focus();
+                            }, 100);
                             toastSuccess(res.response_message || 'Record Updated.', redirectFn);
                         }
                     } else {
@@ -451,7 +465,7 @@ jQuery(document).ready(function () {
                             }, 150);
                         };
                         if (res.url && res.url !== '') {
-                            jQuery('#preview_btn').attr('href', res.url).show();
+                            jQuery('#preview_btn').attr('href', res.url).attr('tabindex', '0').show();
                             toastSuccessPreview(res.response_message || 'Record Inserted.', res.url, nextFn);
                         } else {
                             toastSuccess(res.response_message || 'Record Inserted.', nextFn);
@@ -478,14 +492,88 @@ jQuery(document).ready(function () {
     jQuery('#resetbtn').on('click', function () {
         if (_isEditMode && currentEditId) {
             openEditMode(currentEditId);
+            setTimeout(function () {
+                jQuery('#preview_btn').focus();
+            }, 300);
         } else {
             resetToAddMode();
         }
     });
 
-    // 19. Add New Button Handler
+    // 19. Add Insert Button Handler
     jQuery('#add_new').on('click', function () {
         resetToAddMode();
+    });
+
+    // 20. Tab & Enter Key Focus Navigation Fixes
+    jQuery('#film_dc_sequence').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            jQuery('#film_dc_date').focus().select();
+        }
+    });
+
+    jQuery('#film_dc_date').on('keydown', function (e) {
+        if (e.key === 'Tab' && !e.shiftKey) {
+            if (_isEditMode || jQuery('input[name="job_type_fix"]').hasClass('skip-tab')) {
+                e.preventDefault();
+                jQuery('#customer_client').focus();
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (_isEditMode || jQuery('input[name="job_type_fix"]').hasClass('skip-tab')) {
+                jQuery('#customer_client').focus();
+            } else {
+                jQuery('input[name="job_type_fix"]:checked').focus();
+            }
+        }
+    });
+
+    jQuery('input[name="job_type_fix"], input[name="from_type_id"], input[name="film_size_unit_fix"]').on('focus', function () {
+        if (_isEditMode || jQuery(this).hasClass('skip-tab')) {
+            jQuery('#customer_client').focus();
+        }
+    });
+
+    jQuery('#customer_client').on('keydown', function (e) {
+        if (e.key === 'Tab' && e.shiftKey) {
+            if (_isEditMode || jQuery('input[name="job_type_fix"]').hasClass('skip-tab')) {
+                e.preventDefault();
+                jQuery('#film_dc_date').focus();
+            }
+        }
+    });
+
+    jQuery('#resetbtn').on('keydown', function (e) {
+        if (e.key === 'Tab' && !e.shiftKey) {
+            if (jQuery('#preview_btn').is(':visible')) {
+                e.preventDefault();
+                jQuery('#preview_btn').focus();
+            }
+        }
+    });
+
+    jQuery('#preview_btn').on('keydown', function (e) {
+        if (e.key === 'Tab') {
+            if (!e.shiftKey) {
+                if (jQuery('#add_new').is(':visible')) {
+                    e.preventDefault();
+                    jQuery('#add_new').focus();
+                }
+            } else {
+                e.preventDefault();
+                jQuery('#resetbtn').focus();
+            }
+        }
+    });
+
+    jQuery('#add_new').on('keydown', function (e) {
+        if (e.key === 'Tab' && e.shiftKey) {
+            if (jQuery('#preview_btn').is(':visible')) {
+                e.preventDefault();
+                jQuery('#preview_btn').focus();
+            }
+        }
     });
 });
 
@@ -515,7 +603,10 @@ function updateFormLockState() {
         setRadioReadonly('input[name="from_type_id"]', true);
         setRadioReadonly('input[name="job_type_fix"]', true);
         setRadioReadonly('input[name="film_size_unit_fix"]', true);
-        jQuery('#customer_id').prop('disabled', true);
+        jQuery('input[name="from_type_id"], input[name="job_type_fix"], input[name="film_size_unit_fix"]')
+            .addClass('skip-tab')
+            .attr('tabindex', '-1');
+        jQuery('#customer_id').prop('disabled', true).addClass('skip-tab');
         if (typeof setSelect2Readonly === 'function') {
             setSelect2Readonly('#customer_id', true);
         }
@@ -523,7 +614,10 @@ function updateFormLockState() {
         setRadioReadonly('input[name="from_type_id"]', true);
         setRadioReadonly('input[name="job_type_fix"]', true);
         setRadioReadonly('input[name="film_size_unit_fix"]', true);
-        jQuery('#customer_id').prop('disabled', true);
+        jQuery('input[name="from_type_id"], input[name="job_type_fix"], input[name="film_size_unit_fix"]')
+            .addClass('skip-tab')
+            .attr('tabindex', '-1');
+        jQuery('#customer_id').prop('disabled', true).addClass('skip-tab');
         if (typeof setSelect2Readonly === 'function') {
             setSelect2Readonly('#customer_id', true);
         }
@@ -531,7 +625,10 @@ function updateFormLockState() {
         setRadioReadonly('input[name="from_type_id"]', false);
         setRadioReadonly('input[name="job_type_fix"]', false);
         setRadioReadonly('input[name="film_size_unit_fix"]', false);
-        jQuery('#customer_id').prop('disabled', false);
+        jQuery('input[name="from_type_id"], input[name="job_type_fix"], input[name="film_size_unit_fix"]')
+            .removeClass('skip-tab')
+            .removeAttr('tabindex');
+        jQuery('#customer_id').prop('disabled', false).removeClass('skip-tab');
         if (typeof setSelect2Readonly === 'function') {
             setSelect2Readonly('#customer_id', false);
         }
@@ -553,6 +650,7 @@ function openDetailModalAddMode() {
     jQuery('#detail_test_report_rt_id').val('');
 
     jQuery('#detail_film_brand_id').val('').trigger('change.select2');
+    jQuery('#detail_film_type_id').val('').trigger('change.select2');
     jQuery('#detail_film_id').val('').trigger('change.select2');
 
     updateFilmSizeLabels();
@@ -600,6 +698,7 @@ function openDetailModalEditMode(index) {
     updateFilmSizeLabels();
 
     jQuery('#detail_film_brand_id').val(item.film_brand_id || '').trigger('change.select2');
+    jQuery('#detail_film_type_id').val(item.film_type_id || '').trigger('change.select2');
     jQuery('#detail_film_id').val(item.film_id || '').trigger('change.select2');
 
     calculateDetailModalSqIn();
@@ -666,7 +765,7 @@ function resetToAddMode() {
     }
 
     jQuery('#submitbtn').show().prop('disabled', false).text('Submit');
-    jQuery('#preview_btn').hide();
+    jQuery('#preview_btn').hide().removeAttr('href').removeAttr('tabindex');
     jQuery('#add_new').hide();
     jQuery('#pending_btn').prop('disabled', true);
     jQuery('#addDetailRowBtn').prop('disabled', true);
@@ -686,7 +785,7 @@ function resetToAddMode() {
     renderDetailsGrid();
 
     setTimeout(() => {
-        jQuery('#film_dc_sequence').focus().select();
+        jQuery('#film_dc_sequence').focus();
     }, 150);
 }
 
@@ -706,7 +805,7 @@ function openEditMode(id) {
     jQuery('#customer_id').prop('disabled', false);
 
     jQuery('#submitbtn').show().prop('disabled', false).text('Update');
-    jQuery('#preview_btn').show();
+    jQuery('#preview_btn').attr('tabindex', '0').show();
     jQuery('#add_new').show();
 
     jQuery.ajax({
@@ -747,6 +846,12 @@ function openEditMode(id) {
                 renderDetailsGrid();
 
                 updateFormLockState();
+
+                let dc_no_fmt = h.film_dc_no ? '_' + h.film_dc_no.replace(/\//g, '_') : '';
+                let cust_name_fmt = (h.customer || h.customer_name) ? '_' + (h.customer || h.customer_name).replace(/[^A-Za-z0-9_]/g, '_') : '';
+                let pdfName = 'Film_DC' + dc_no_fmt + cust_name_fmt;
+                let previewUrl = (typeof checkFileRoute !== 'undefined' ? checkFileRoute : '/check-file_exists') + "?id=" + btoa(id) + "&name=" + pdfName + "&type=film_dc";
+                jQuery('#preview_btn').attr('href', previewUrl).attr('tabindex', '0').show();
 
                 jQuery('#FilmDCModal').modal('show');
             } else {
@@ -1032,6 +1137,7 @@ function renderDetailsGrid() {
             <td>${item.test_report_date || ''}</td>
             <td>${item.die_no || item.part_no || ''}</td>
             <td>${item.film_brand || ''}</td>
+            <td>${item.film_type || ''}</td>
             <td>${item.film_size_inch || ''}</td>
             <td>${Math.round(qty)}</td>
             <td>${item.remark || ''}</td>
@@ -1040,7 +1146,7 @@ function renderDetailsGrid() {
     });
 
     if (visibleIndex === 0) {
-        tbody.append('<tr id="noDetails"><td colspan="8" class="text-center" id="noDetailsCell">No Film DC Details Added</td></tr>');
+        tbody.append('<tr id="noDetails"><td colspan="9" class="text-center" id="noDetailsCell">No Film DC Details Added</td></tr>');
     }
 
     calculateSummary();

@@ -142,6 +142,7 @@
                                             <th scope="col">Report Date</th>
                                             <th scope="col">Part No. / Die No.</th>
                                             <th scope="col">Film Brand</th>
+                                            <th scope="col">Film Type</th>
                                             <th scope="col" class="th_film_size_unit">Film Size (Inch)</th>
                                             <th scope="col">DC Qty.</th>
                                             <th scope="col">Remark</th>
@@ -149,7 +150,7 @@
                                     </thead>
                                     <tbody id="details_tbody">
                                          <tr id="noDetails">
-                                            <td colspan="8" class="text-center" id="noDetailsCell">
+                                            <td colspan="9" class="text-center" id="noDetailsCell">
                                                 No Film DC Details Added
                                             </td>
                                          </tr>

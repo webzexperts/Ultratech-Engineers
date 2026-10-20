@@ -16,6 +16,7 @@
                     <input type="hidden" name="detail_sq_cm" id="detail_sq_cm" value="0">
                     <input type="hidden" name="detail_film_size_inch" id="detail_film_size_inch">
                     <input type="hidden" name="detail_film_brand_name" id="detail_film_brand_name">
+                    <input type="hidden" name="detail_film_type_name" id="detail_film_type_name">
 
                     <div class="row g-2">
                         <!-- Column 1 -->
@@ -64,6 +65,23 @@
                                         @endforelse
                                     </select>
                                     <div class="invalid-tooltip">Select Film Brand.</div>
+                                </div>
+                            </div>
+
+                            <!-- Film Type -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="detail_film_type_id" class="form-label">Film Type <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8">
+                                    <select class="js-example-basic-single" name="film_type_id" id="detail_film_type_id" required>
+                                        <option value="">Select Film Type</option>
+                                        @forelse(getFilmTypes() as $ft)
+                                            <option value="{{ $ft->film_type_id }}">{{ $ft->film_type }}</option>
+                                        @empty
+                                        @endforelse
+                                    </select>
+                                    <div class="invalid-tooltip">Select Film Type.</div>
                                 </div>
                             </div>
                         </div>

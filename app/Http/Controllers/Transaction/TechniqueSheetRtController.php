@@ -149,10 +149,6 @@ class TechniqueSheetRtController extends Controller
         //     ]);
         // }
 
-         $checkDup = checkReportDuplication(TechniqueSheetRt::class, 'technique_sheet_rt_no', $ts_no, $request, "Duplicate Technique Sheet No. Found.");
-            if ($checkDup) {
-                return response()->json($checkDup);
-            }
 
         DB::beginTransaction();
         try {
@@ -172,11 +168,11 @@ class TechniqueSheetRtController extends Controller
                 $ts_no = $request->technique_sheet_rt_no;
                 $ts_seq = $request->technique_sheet_rt_sequence;
             }
-
-            // $checkDup = checkReportDuplication(TechniqueSheetRt::class, 'technique_sheet_rt_no', $ts_no, $request, "Duplicate Technique Sheet No. Found.");
-            // if ($checkDup) {
-            //     return response()->json($checkDup);
-            // }
+            
+            $checkDup = checkReportDuplication(TechniqueSheetRt::class, 'technique_sheet_rt_no', $ts_no, $request, "Duplicate Technique Sheet No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
 
             // Image Sketch Processing
             $shootingSketchPath = null;

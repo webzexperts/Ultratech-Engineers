@@ -677,6 +677,7 @@ class TestReportRtController extends Controller
             $usage = DB::select('CALL test_report_rt_used_list(?)', [$request->id]);
             $in_use_ms = false;
             $in_use_os = false;
+            $in_use_fdc = false;
 
             if (!empty($usage)) {
                 foreach ($usage as $u) {
@@ -687,7 +688,20 @@ class TestReportRtController extends Controller
                     if (strpos($tbl, 'observation') !== false) {
                         $in_use_os = true;
                     }
+                    if (strpos($tbl, 'film') !== false) {
+                        $in_use_fdc = true;
+                    }
                 }
+            }
+
+            if (!$in_use_fdc) {
+                $in_use_fdc = DB::table('film_dc_details')->where('test_report_rt_id', $request->id)->exists();
+            }
+            if (!$in_use_ms) {
+                $in_use_ms = DB::table('measurement_sheet_details')->where('test_report_rt_id', $request->id)->exists();
+            }
+            if (!$in_use_os) {
+                $in_use_os = DB::table('observation_sheet_details')->where('test_report_rt_id', $request->id)->exists();
             }
 
             $baseReportId = !empty($report_data->revision_test_report_rt_id) ? $report_data->revision_test_report_rt_id : $request->id;
@@ -731,9 +745,10 @@ class TestReportRtController extends Controller
 
 
             // $report_data->in_use = ($in_use_ts || $in_use_ms) ? 1 : 0;
-            $report_data->in_use = (!empty($usage)) ? 1 : 0;
+            $report_data->in_use = (!empty($usage) || $in_use_ms || $in_use_os || $in_use_fdc) ? 1 : 0;
             $report_data->is_used_in_ms = $in_use_ms ? 1 : 0;
             $report_data->is_used_in_os = $in_use_os ? 1 : 0;
+            $report_data->is_used_in_fdc = $in_use_fdc ? 1 : 0;
             $report_data->has_revision = $has_revision ? 1 : 0;
             $report_data->has_next_revision = $hasNextRevision ? 1 : 0;
             $details = DB::select('CALL test_report_rt_details(?)', [$request->id]);
@@ -1062,6 +1077,35 @@ class TestReportRtController extends Controller
                 }
             }
 
+            $is_used_in_fdc = DB::table('film_dc_details')
+                ->where('test_report_rt_id', $request->id)
+                ->exists();
+
+            if ($is_used_in_fdc) {
+                $dispatched_dc_qty = (float) DB::table('film_dc_details')
+                    ->where('test_report_rt_id', $request->id)
+                    ->sum('dc_quantity');
+
+                $new_film_qty = 0;
+                if (!empty($details)) {
+                    foreach ($details as $row) {
+                        if (empty($row) || ($row['mode'] ?? '') === 'Delete') continue;
+                        $inc = $row['include_in_measurement_sheet'] ?? 'Yes';
+                        if ($inc === 'Yes' || $inc === '1') {
+                            $new_film_qty += floatval($row['film_qty'] ?? 0);
+                        }
+                    }
+                }
+
+                if ($new_film_qty < $dispatched_dc_qty) {
+                    DB::rollBack();
+                    return response()->json([
+                        'response_code'    => '0',
+                        'response_message' => "You Can't Update, Film Quantity is Less Than Dispatched Film DC Quantity (" . round($dispatched_dc_qty) . ").",
+                    ]);
+                }
+            }
+
             // Calculate total_no_of_films_rev & total_area_in_sq_rev for Repair joints (record_type_id == 2)
             $revTotals = $this->calculateRevisionTotals($details, $request->film_size_unit_fix ?? 'inch');
             $allSummaries = $this->calculateAllHeaderSummaries($details, $request->film_size_unit_fix ?? 'inch');
@@ -1372,6 +1416,13 @@ class TestReportRtController extends Controller
                 return response()->json([
                     'response_code'    => '0',
                     'response_message' => "You Can't Delete, Test Report (RT) Is Used In " . $usage[0]->table_name . ".",
+                ]);
+            }
+            $is_used_in_fdc = DB::table('film_dc_details')->where('test_report_rt_id', $request->id)->exists();
+            if ($is_used_in_fdc) {
+                return response()->json([
+                    'response_code'    => '0',
+                    'response_message' => "You Can't Delete, Test Report (RT) Is Used In Film DC.",
                 ]);
             }
 
