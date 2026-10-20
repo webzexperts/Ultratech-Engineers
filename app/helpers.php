@@ -92,7 +92,7 @@
     */
     function getJsVersion()
     {
-        return "0.0.01";
+        return "0.0.02";
     } 
 
     /**
@@ -100,7 +100,7 @@
     */
     function getCssVersion()
     {
-        return "0.0.01";
+        return "0.0.02";
     }
 
     // function getLatestSequence($modal,$sequence)

@@ -1414,8 +1414,14 @@ function fetchAndFillTestReportDpt(id) {
 
 // Edit Mode Load Trigger
 jQuery(document).on('click', '.edit-test_report_dpt', function () {
-    var data = table.row(jQuery(this).parents('tr')).data();
-    fetchAndFillTestReportDpt(data['id']);
+    // var data = table.row(jQuery(this).parents('tr')).data();
+    // fetchAndFillTestReportDpt(data['id']);
+    var id = $(this).data('id');
+    if (!id && typeof table !== 'undefined') {
+        var data = table.row($(this).parents('tr')).data();
+        if (data) id = data.id;
+    }
+    if (id) fetchAndFillTestReportDpt(id);
 });
 
 jQuery('#TestReportDptModal').on('hidden.bs.modal', function () {
@@ -1591,7 +1597,7 @@ jQuery(document).on('click', '#submitbtn', function (e) {
 });
 
 // Duplication verification on report sequence
-jQuery('#test_report_sequence').on('blur', function () {
+jQuery('#test_report_sequence').on('change', function () {
     let seq = jQuery(this).val();
     if (!seq) return;
 

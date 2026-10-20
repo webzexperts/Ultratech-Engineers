@@ -31,22 +31,7 @@
                                     </div>
                                 </div>
 
-                                <!-- 2. Source: (•) From Film DC  ( ) Manual -->
-                                <div class="row g-2 mb-1">
-                                    <div class="col-4"></div>
-                                    <div class="col-8">
-                                        <div class="d-flex gap-3 align-items-center flex-wrap">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="source_type" id="source_film_dc" value="From Film DC" checked>
-                                                <label class="form-check-label" for="source_film_dc">From Film DC</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="source_type" id="source_manual" value="Manual">
-                                                <label class="form-check-label" for="source_manual">Manual</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                
 
                                 <!-- 3. Customer -->
                                 <div class="row g-2 mb-1">
@@ -114,6 +99,24 @@
 
                             <!-- ---------------- COLUMN 2 (MIDDLE) ---------------- -->
                             <div class="col-md-4">
+
+                                <!-- 2. Source: (•) From Film DC  ( ) Manual -->
+                                <div class="row g-2 ml-2 mb-1">
+                                    <div class="col-4"></div>
+                                    <div class="col-8">
+                                        <div class="d-flex gap-3 align-items-center flex-wrap">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="source_type" id="source_film_dc" value="From Film DC" checked>
+                                                <label class="form-check-label" for="source_film_dc">From Film DC</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="source_type" id="source_manual" value="Manual">
+                                                <label class="form-check-label" for="source_manual">Manual</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- 1. Job Type : (•) Casting  ( ) Fabrication -->
                                 <div class="row g-2 ml-2 mb-1">
                                     <div class="col-4">
@@ -122,12 +125,12 @@
                                     <div class="col-8">
                                         <div class="d-flex gap-3 align-items-center flex-wrap">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_casting" value="Casting" checked>
-                                                <label class="form-check-label" for="job_type_casting">Casting</label>
+                                                <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_casting" value="Non-Welding" checked>
+                                                <label class="form-check-label" for="job_type_non-welding">Non-Welding</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_fabrication" value="Fabrication">
-                                                <label class="form-check-label" for="job_type_fabrication">Fabrication</label>
+                                                <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_fabrication" value="Welding">
+                                                <label class="form-check-label" for="job_type_welding">Welding</label>
                                             </div>
                                         </div>
                                     </div>
