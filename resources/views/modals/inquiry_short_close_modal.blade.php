@@ -36,7 +36,7 @@
                                 <th>Process At</th>
                                 <th>Type of Job</th>
                                 <th>Job Description</th>
-                                <th>Part No.</th>
+                                <th>Part No. / Die No.</th>
                                 <th>Qty.</th>
                                 <th>Remark</th>
                                 <th>Sp. Note</th>

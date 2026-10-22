@@ -388,7 +388,7 @@ class PartController extends Controller
                 return response()->json([
                     'part' => $users_count,
                     'response_code' => '1',
-                    'response_message' => 'Duplicate Part No. & Drg. No. Found.',
+                    'response_message' => 'Duplicate Part No. / Die No. & Drg. No. Found.',
                 ]);
             }
             else

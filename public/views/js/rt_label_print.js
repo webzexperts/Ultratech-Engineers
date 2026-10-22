@@ -8,7 +8,7 @@ jQuery(document).ready(function () {
             paging: true,
             searching: true,
             dom: 'blfrtip',
-            order: [[1, 'asc']],
+            order: [[1, 'desc']],
             columnDefs: [
                 { orderable: false, targets: 0 }
             ],
@@ -78,7 +78,7 @@ jQuery(document).ready(function () {
                             sZeroRecords: "No Test Report (RT) Available"
                         },
                         dom: 'blfrtip',
-                        order: [[1, 'asc']],
+                        order: [[1, 'desc']],
                         columnDefs: [
                             { orderable: false, targets: 0 }
                         ],

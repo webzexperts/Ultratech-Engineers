@@ -15,9 +15,9 @@
                                 <th>DC No. & Date</th>
                                 <th>PO No. & Date</th>
                                 <th>Type of Test</th>
-                                <th>Type of Job</th>
+                                <!-- <th>Type of Job</th> -->
                                 <th>Job Description</th>
-                                <th>Part No.</th>
+                                <th>Part No. / Die No.</th>
                                 <th>Drg. No.</th>
                                 <th>Material</th>
                                 <th>Heat No.</th>

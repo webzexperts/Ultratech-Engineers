@@ -185,8 +185,8 @@ class RTCameraController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         $LocationData = getCurrentLocation()->location_id;
+        dd($request->all(),$LocationData);
 
         $movement_images = '';
         $movement_blobImage = '';
@@ -489,8 +489,8 @@ class RTCameraController extends Controller
                 'item_id' => $request->item_id ?? null,
                 'name_for_display' =>  $name_for_display,
                 // 'rt_status' => $request->rt_status ?? null,
-                'own_location_id' => $LocationData,
-                'current_location_id' => $LocationData,
+                // 'own_location_id' => $LocationData,
+                // 'current_location_id' => $LocationData,
                 'company_id' => Auth::user()->company_id,
                 'last_on'       => Carbon::now('Asia/Kolkata'),
                 'last_by'       => Auth::id(),

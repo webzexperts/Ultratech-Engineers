@@ -20,7 +20,7 @@
                                 <th>Unit</th>
                                 <th>Type of Job</th>
                                 <th>Job Description</th>
-                                <th>Part No.</th>
+                                <th>Part No. / Die No.</th>
                                 <th>Customer</th>
                                 <th>Customer Code</th>
                                 <th>PO No.</th>

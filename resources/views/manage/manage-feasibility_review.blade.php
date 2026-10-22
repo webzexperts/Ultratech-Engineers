@@ -41,7 +41,7 @@
                             <th>Type of Test</th>
                             <th>Type of Job</th>
                             <th>Job Description</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>Result</th>
                             {{-- <th>Sugg. Method</th> --}}
                             <th>Reason</th>

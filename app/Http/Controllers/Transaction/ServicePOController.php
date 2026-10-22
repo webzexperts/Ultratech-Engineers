@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use Illuminate\Validation\Rule;
-use PhpOffice\PhpSpreadsheet\Calculation\Web\Service;
+use Exception;
 
 class ServicePOController extends Controller
 {
@@ -242,6 +242,11 @@ class ServicePOController extends Controller
                 $ser_po_sequence = $request->ser_po_sequence;
             }
 
+            $checkDup = checkReportDuplication(ServicePO::class, 'ser_po_number', $ser_po_number, $request, "Duplicate Service PO No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
+
 
             $page_id = getMenuIdBassedOnDisplayName('service_po');
             $assign_format_no = getAssignFormateNoForTransaction($LocationData->location_id, $page_id->id,$request->ser_po_date);
@@ -257,8 +262,10 @@ class ServicePOController extends Controller
                 'kind_attn_id'         => $request->kind_attn_id,
                 'purpose'              => $request->purpose,
                 'ref_no_date'          => $request->ref_no_date,
-                'bill_to_id'           => $request->bill_to_id,
-                'for_location_id'      => $request->for_location_id,
+                // 'bill_to_id'           => $request->bill_to_id,
+                // 'for_location_id'      => $request->for_location_id,
+                'bill_to_id'           => 1,
+                'for_location_id'      => 1,
                 'terms_and_conditions' => $request->terms_and_conditions,
                 'sp_note'              => $request->sp_note,
                 'payment_terms'        => $request->payment_terms,
@@ -346,7 +353,7 @@ class ServicePOController extends Controller
                 'response_message' => getResponseMessage('store_success'),
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
 
             report($e);
             DB::rollBack();
@@ -485,6 +492,12 @@ class ServicePOController extends Controller
                 'ser_po_sequence.unique'   => 'Duplicate Service PO No. Found.',
                 'ser_po_sequence.required' => 'Enter Service PO No.',
             ]);
+
+        $checkDup = checkReportDuplication(ServicePO::class, 'ser_po_number', $request->ser_po_number, $request, "Duplicate Service PO No. Found.", $request->id, 'ser_po_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
+        
         try
         {
             $page_id = getMenuIdBassedOnDisplayName('service_po');
@@ -502,8 +515,10 @@ class ServicePOController extends Controller
                 'kind_attn_id'         => $request->kind_attn_id,
                 'purpose'              => $request->purpose,
                 'ref_no_date'          => $request->ref_no_date,
-                'bill_to_id'           => $request->bill_to_id,
-                'for_location_id'      => $request->for_location_id,
+                // 'bill_to_id'           => $request->bill_to_id,
+                // 'for_location_id'      => $request->for_location_id,
+                'bill_to_id'           => 1,
+                'for_location_id'      => 1,
                 'terms_and_conditions' => $request->terms_and_conditions,
                 'payment_terms'        => $request->payment_terms,
                 'sp_note'              => $request->sp_note,
@@ -520,8 +535,8 @@ class ServicePOController extends Controller
                 'amount_in_word'       => $amount_in_word ?? null,
                 'prepared_by_user_id'  => $request->prepared_by_user_id,
                 // 'assign_format_no'     => $assign_format_no,
-                'current_location_id'  => $LocationData->location_id ?? null,
-                'year_id'              => $year_data->id,
+                // 'current_location_id'  => $LocationData->location_id ?? null,
+                // 'year_id'              => $year_data->id,
                 'company_id'           => Auth::user()->company_id,
                 'last_on'              => Carbon::now('Asia/Kolkata'),
                 'last_by'              => Auth::id(),
@@ -666,7 +681,7 @@ class ServicePOController extends Controller
                 ]);
             }
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             report($e);
             DB::rollBack();
@@ -731,7 +746,7 @@ class ServicePOController extends Controller
                 'response_message' => getResponseMessage('delete_success'),
             ]);
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             report($e);
             DB::rollBack(); 
@@ -778,7 +793,8 @@ class ServicePOController extends Controller
     {
         $supplierId = $request->supplier_id;
 
-        $LnrData = ServicePO::select('terms_and_conditions')->where('supplier_id', $supplierId)->orderby('ser_po_id', 'desc')->first();
+        // $LnrData = ServicePO::select('terms_and_conditions')->where('supplier_id', $supplierId)->orderby('ser_po_id', 'desc')->first();
+        $LnrData = ServicePO::select('terms_and_conditions', 'gst_type_fix_id')->where('supplier_id', $supplierId)->orderby('ser_po_id', 'desc')->first();
 
         $Kind_attn = SupplierDetails::select(
             'supd_details_id',

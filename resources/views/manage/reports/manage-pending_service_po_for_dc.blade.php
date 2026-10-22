@@ -30,8 +30,8 @@
                             <th>Supplier</th>
                             <th>Purpose</th>
                             <th>Ref. No. & Date</th>
-                            <th>Bill To</th>
-                            <th>For Location</th>
+                            <!-- <th>Bill To</th>
+                            <th>For Location</th> -->
                             <th>Item</th>
                             <th>Item Group</th>
                             <th>Main Group</th>
@@ -61,14 +61,21 @@
             "processing": false,
             "serverSide": true,
             "scrollX": true,
-            "order": [[1, 'asc'],[15, 'asc']],
+            "order": [[1, 'asc'],[13, 'asc']],
             dom: 'Blrtip',
             buttons: [{
                 extend:'excel',
                 filename: 'Pending Service PO for DC List',
                 title:"",
                 className: 'export_pending_service_po_for_dc d-none',
-                exportOptions: {  modifier: { page: 'all' } },
+                exportOptions: {
+                    columns: function(idx, data, node) {
+                        return table.column(idx).visible();
+                    },
+                    modifier: {
+                        page: 'all'
+                    }
+                },
                 action: newexportaction
             }],
             ajax: {
@@ -91,8 +98,8 @@
                 { data: 'supplier_name', name: 'suppliers.supplier_name' },
                 { data: 'purpose', name: 'service_po.purpose' },
                 { data: 'ref_no_date', name: 'service_po.ref_no_date' },
-                { data: 'bill_to', name: 'bill_to.location_name' },
-                { data: 'for_location', name: 'for_location.location_name' },
+                // { data: 'bill_to', name: 'bill_to.location_name' },
+                // { data: 'for_location', name: 'for_location.location_name' },
                 { data: 'item_name', name: 'item.item_name' },
                 { data: 'item_group', name: 'item_group.item_group' },
                 { data: 'main_group', name: 'item.item_type' },

@@ -37,9 +37,11 @@
                             <th>Main Group</th>
                             <th>Ide. Req.</th>
                             <th>Unit</th>
+                            {{-- 
                             <th>Sec. Unit</th>
                             <th>Conv. Factor</th>
-                            <th>Inter Tran.</th>
+                            --}}
+                            {{-- <th>Inter Tran.</th> --}}
                             <th>MSL</th>
                             <th>Doc. Ref. No.</th>
                             <th>Validity</th>
@@ -99,9 +101,9 @@
                 { data: 'item_type', name: 'item.item_type', },
                 { data: 'identification_req', name: 'identification_req', },
                 { data: 'unit', name: 'unit.unit', },
-                { data: 'sec_unit', name: 'sec_unit', },
-                { data: 'conv_factor', name: 'item.conv_factor', defaultContent: '' },
-                { data: 'inter_location_transfer', name: 'item.inter_location_transfer', },
+                // { data: 'sec_unit', name: 'sec_unit', },
+                // { data: 'conv_factor', name: 'item.conv_factor', defaultContent: '' },
+                // { data: 'inter_location_transfer', name: 'item.inter_location_transfer', },
                 { data: 'min_stock_level', name: 'min_stock_level', },
                 { data: 'document_ref_no', name: 'document_ref_no', },
                 { data: 'validity_date', name: 'item.validity_date', },

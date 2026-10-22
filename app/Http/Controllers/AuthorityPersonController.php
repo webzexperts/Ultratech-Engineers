@@ -424,7 +424,7 @@ class AuthorityPersonController extends Controller
                 'validity'         => isset($request->validity) ? Date::createFromFormat('d/m/Y', $request->validity)->format('Y-m-d') : null,
                 'pms_no' => $request->pms_no ?? null,
                 'authority_person_type_value_fix' => $request->authority_person_type_value_fix ?? null,
-                'current_location_id' => $request->current_location_id ?? null,
+                // 'current_location_id' => $request->current_location_id ?? null,
                 'last_on'        => Carbon::now('Asia/Kolkata')->toDateTimeString(),
                 'last_by'        => Auth::user()->id
             ];

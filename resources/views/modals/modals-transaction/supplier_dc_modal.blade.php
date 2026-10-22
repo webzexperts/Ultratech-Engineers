@@ -54,12 +54,12 @@
                                                 </label>
                                             </div>
 
-                                            <div class="form-check text-nowrap">
+                                            {{-- <div class="form-check text-nowrap">
                                                 <input class="form-check-input" type="radio" name="sup_dc_type_id" id="non_returnable_cut_films" value="SQIN from Prod. Area">
                                                 <label class="form-check-label" for="non_returnable_cut_films">
                                                     SQIN from Prod. Area
                                                 </label>
-                                            </div>
+                                            </div> --}}
 
                                             <div class="form-check text-nowrap">
                                                 <input class="form-check-input" type="radio" name="sup_dc_type_id" id="returnable_manual" value="Returnable - Manual">

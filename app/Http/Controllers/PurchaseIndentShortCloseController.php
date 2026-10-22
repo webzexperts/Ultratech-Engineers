@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Validation\Rule;
+use Exception;
 
 class PurchaseIndentShortCloseController extends Controller
 {
@@ -255,7 +256,7 @@ class PurchaseIndentShortCloseController extends Controller
                 ]);
             }
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             report($e);
             DB::rollBack();
@@ -278,7 +279,7 @@ class PurchaseIndentShortCloseController extends Controller
                 'response_message' => getResponseMessage('delete_success'),
             ]);
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             report($e);
             if(isset($e->errorInfo[1]) && $e->errorInfo[1] == 1451)
@@ -331,7 +332,7 @@ class PurchaseIndentShortCloseController extends Controller
         $data = $data->map(function ($row) {
 
             if ($row->pi_date) {
-                $row->pi_date = \Carbon\Carbon::parse($row->pi_date)->format('d/m/Y');
+                $row->pi_date = Carbon::parse($row->pi_date)->format('d/m/Y');
             }
 
             $row->main_group = config('app.item_type.' . ($row->main_group ?? '')) ?? '';

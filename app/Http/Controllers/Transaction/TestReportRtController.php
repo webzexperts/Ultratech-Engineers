@@ -46,8 +46,9 @@ class TestReportRtController extends Controller
             'material_inward.dc_date',
             'material_inward.po_no',
             'material_inward.po_date',
-            'type_of_job.type_of_job',
-            'job_descriptions.job_description',
+            // 'type_of_job.type_of_job',
+            // 'job_descriptions.job_description',
+            'test_report_rt.job_desc as job_description',
             'test_report_rt.part_no',
             'test_report_rt.drg_no',
             'materials.material',
@@ -61,8 +62,8 @@ class TestReportRtController extends Controller
             'test_report_rt.last_on'
         ])
         ->leftJoin('customers', 'customers.id', '=', 'test_report_rt.customer_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_rt.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_rt.job_desc_id')
+        // ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_rt.type_of_job_id')
+        // ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_rt.job_desc_id')
         ->leftJoin('part', 'part.part_id', '=', 'test_report_rt.part_id')
         ->leftJoin('materials', 'materials.id', '=', 'test_report_rt.material_id')
         ->leftJoin('material_inward_details', 'material_inward_details.material_inward_details_id', '=', 'test_report_rt.material_inward_details_id')
@@ -112,6 +113,19 @@ class TestReportRtController extends Controller
                 $q->where('test_report_rt.drg_no', 'like', "%{$keyword}%");
             });
         })
+        ->filterColumn('test_report_rt.job_type_fix', function ($query, $keyword) {
+            $globalSearch = request()->input('search.value');
+            $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
+            $lowerKeyword = strtolower(trim($searchValue));
+            if ($lowerKeyword === 'welding') {
+                $query->where('test_report_rt.job_type_fix', '=', 'Welding');
+            } elseif ($lowerKeyword === 'non-welding' || $lowerKeyword === 'non welding') {
+                $query->where('test_report_rt.job_type_fix', '=', 'Non-Welding');
+            } else {
+                $query->where('test_report_rt.job_type_fix', 'like', "{$lowerKeyword}%");
+            }
+        })
+
         ->addColumn('options', function($report) {
             $action = '<div class="dropdown d-inline-block">
                 <button class="btn btn-soft-secondary btn-sm dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -167,11 +181,14 @@ class TestReportRtController extends Controller
             'test_report_sequence' => 'required',
             'test_report_date' => 'required',
             'customer_id' => 'required',
-            'type_of_job_id' => 'required',
-            'job_desc_id' => 'required',
+            // 'type_of_job_id' => 'required',
+            // 'job_desc_id' => 'required',
+            'job_desc' => 'required',
             // 'part_no' => 'required',
             'material_id' => 'required',
             'area_of_coverage_id' => 'required',
+        ], [
+            'job_desc.required' => 'Enter Job Description.',
         ]);
 
         $receiptDate = !empty($request->date_of_receipt) ? Carbon::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null;
@@ -237,6 +254,11 @@ class TestReportRtController extends Controller
                     $report_no = $request->test_report_no;
                     $report_seq = $request->test_report_sequence;
                 }
+            }
+
+            $checkDup = checkReportDuplication(TestReportRt::class, 'test_report_no', $report_no, $request, "Duplicate Test Report No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
             }
 
             $shootingSketchPath = null;
@@ -376,8 +398,11 @@ class TestReportRtController extends Controller
                 'process_type' => $request->process_type ?? '',
                 'from_type_id_fix' => $request->from_type_id_fix,
                 'customer_client' => $request->customer_client,
-                'type_of_job_id' => $request->type_of_job_id,
-                'job_desc_id' => $request->job_desc_id,
+                // 'type_of_job_id' => $request->type_of_job_id,
+                // 'job_desc_id' => $request->job_desc_id,
+                'type_of_job_id' => $request->type_of_job_id ?? null,
+                'job_desc_id' => null,
+                'job_desc' => $request->job_desc,
                 'part_id' => null,
                 'part_no' => $request->part_no,
                 'drg_no' => $request->drg_no,
@@ -414,6 +439,7 @@ class TestReportRtController extends Controller
                 'lead_screen_thick_back' => $request->lead_screen_thick_back,
                 'iqi' => $request->iqi,
                 'film_processing' => $request->film_processing,
+                'exposure_time' => $request->exposure_time,
                 'test_technique' => $request->test_technique,
                 'test_arrangement' => $request->test_arrangement,
                 'test_class' => $request->test_class,
@@ -457,7 +483,7 @@ class TestReportRtController extends Controller
                 'assign_format_no'      => $assign_format_no,
                 'company_id' => Auth::user()->company_id,
                 'year_id' => $year_data->id,
-                'current_location_id' => $location_data->location_id,
+                //'current_location_id' => $location_data->location_id,
                 'created_by' => Auth::id(),
                 'created_on' => Carbon::now('Asia/Kolkata')->toDateTimeString(),
             ]);
@@ -651,6 +677,7 @@ class TestReportRtController extends Controller
             $usage = DB::select('CALL test_report_rt_used_list(?)', [$request->id]);
             $in_use_ms = false;
             $in_use_os = false;
+            $in_use_fdc = false;
 
             if (!empty($usage)) {
                 foreach ($usage as $u) {
@@ -661,7 +688,20 @@ class TestReportRtController extends Controller
                     if (strpos($tbl, 'observation') !== false) {
                         $in_use_os = true;
                     }
+                    if (strpos($tbl, 'film') !== false) {
+                        $in_use_fdc = true;
+                    }
                 }
+            }
+
+            if (!$in_use_fdc) {
+                $in_use_fdc = DB::table('film_dc_details')->where('test_report_rt_id', $request->id)->exists();
+            }
+            if (!$in_use_ms) {
+                $in_use_ms = DB::table('measurement_sheet_details')->where('test_report_rt_id', $request->id)->exists();
+            }
+            if (!$in_use_os) {
+                $in_use_os = DB::table('observation_sheet_details')->where('test_report_rt_id', $request->id)->exists();
             }
 
             $baseReportId = !empty($report_data->revision_test_report_rt_id) ? $report_data->revision_test_report_rt_id : $request->id;
@@ -705,9 +745,10 @@ class TestReportRtController extends Controller
 
 
             // $report_data->in_use = ($in_use_ts || $in_use_ms) ? 1 : 0;
-            $report_data->in_use = (!empty($usage)) ? 1 : 0;
+            $report_data->in_use = (!empty($usage) || $in_use_ms || $in_use_os || $in_use_fdc) ? 1 : 0;
             $report_data->is_used_in_ms = $in_use_ms ? 1 : 0;
             $report_data->is_used_in_os = $in_use_os ? 1 : 0;
+            $report_data->is_used_in_fdc = $in_use_fdc ? 1 : 0;
             $report_data->has_revision = $has_revision ? 1 : 0;
             $report_data->has_next_revision = $hasNextRevision ? 1 : 0;
             $details = DB::select('CALL test_report_rt_details(?)', [$request->id]);
@@ -770,6 +811,11 @@ class TestReportRtController extends Controller
             return response()->json(['response_code' => '0', 'response_message' => 'Record Does Not Exist']);
         }
 
+        $checkDup = checkReportDuplication(TestReportRt::class, 'test_report_no', $request->test_report_no, $request, "Duplicate Test Report No. Found.", $request->id, 'test_report_rt_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
+
 
          $isRevision = $request->filled('revision_number') || !empty($report->revision_number);   
         // $isRevision = !empty($report->revision_test_report_rt_id)
@@ -778,8 +824,9 @@ class TestReportRtController extends Controller
         $rules = [
             'test_report_date' => 'required',
             'customer_id' => 'required',
-            'type_of_job_id' => 'required',
-            'job_desc_id' => 'required',
+            // 'type_of_job_id' => 'required',
+            // 'job_desc_id' => 'required',
+            'job_desc' => 'required',
             // 'part_no' => 'required',
             'material_id' => 'required',
             'area_of_coverage_id' => 'required',
@@ -1030,6 +1077,35 @@ class TestReportRtController extends Controller
                 }
             }
 
+            $is_used_in_fdc = DB::table('film_dc_details')
+                ->where('test_report_rt_id', $request->id)
+                ->exists();
+
+            if ($is_used_in_fdc) {
+                $dispatched_dc_qty = (float) DB::table('film_dc_details')
+                    ->where('test_report_rt_id', $request->id)
+                    ->sum('dc_quantity');
+
+                $new_film_qty = 0;
+                if (!empty($details)) {
+                    foreach ($details as $row) {
+                        if (empty($row) || ($row['mode'] ?? '') === 'Delete') continue;
+                        $inc = $row['include_in_measurement_sheet'] ?? 'Yes';
+                        if ($inc === 'Yes' || $inc === '1') {
+                            $new_film_qty += floatval($row['film_qty'] ?? 0);
+                        }
+                    }
+                }
+
+                if ($new_film_qty < $dispatched_dc_qty) {
+                    DB::rollBack();
+                    return response()->json([
+                        'response_code'    => '0',
+                        'response_message' => "You Can't Update, Film Quantity is Less Than Dispatched Film DC Quantity (" . round($dispatched_dc_qty) . ").",
+                    ]);
+                }
+            }
+
             // Calculate total_no_of_films_rev & total_area_in_sq_rev for Repair joints (record_type_id == 2)
             $revTotals = $this->calculateRevisionTotals($details, $request->film_size_unit_fix ?? 'inch');
             $allSummaries = $this->calculateAllHeaderSummaries($details, $request->film_size_unit_fix ?? 'inch');
@@ -1047,8 +1123,11 @@ class TestReportRtController extends Controller
                 'process_type' => $request->process_type ?? '',
                 'from_type_id_fix' => $request->from_type_id_fix ?? ($report->from_type_id_fix ?? 1),
                 'customer_client' => $request->customer_client,
-                'type_of_job_id' => $request->type_of_job_id,
-                'job_desc_id' => $request->job_desc_id,
+                // 'type_of_job_id' => $request->type_of_job_id,
+                // 'job_desc_id' => $request->job_desc_id,
+                'type_of_job_id' => $request->type_of_job_id ?? null,
+                'job_desc_id' => null,
+                'job_desc' => $request->job_desc,
                 'part_id' => null,
                 'part_no' => $request->part_no,
                 'drg_no' => $request->drg_no,
@@ -1085,6 +1164,7 @@ class TestReportRtController extends Controller
                 'lead_screen_thick_back' => $request->lead_screen_thick_back,
                 'iqi' => $request->iqi,
                 'film_processing' => $request->film_processing,
+                'exposure_time' => $request->exposure_time,
                 'test_technique' => $request->test_technique,
                 'test_arrangement' => $request->test_arrangement,
                 'test_class' => $request->test_class,
@@ -1338,6 +1418,13 @@ class TestReportRtController extends Controller
                     'response_message' => "You Can't Delete, Test Report (RT) Is Used In " . $usage[0]->table_name . ".",
                 ]);
             }
+            $is_used_in_fdc = DB::table('film_dc_details')->where('test_report_rt_id', $request->id)->exists();
+            if ($is_used_in_fdc) {
+                return response()->json([
+                    'response_code'    => '0',
+                    'response_message' => "You Can't Delete, Test Report (RT) Is Used In Film DC.",
+                ]);
+            }
 
             // ૩. Qty Validation (View based)
             $oldQty = (float)($report->rt_report_qty ?? 0);
@@ -1424,9 +1511,10 @@ class TestReportRtController extends Controller
                 'pend.pending_qty',
                 'pend.current_location_id',
                 'pend.revision_from_report_rt_id',
-                'mid.type_of_job_id',
-                'mid.job_desc_id',
-                'mid.part_id',
+                //'mid.type_of_job_id',
+                //'mid.job_desc_id',
+                //'mid.part_id',
+                'mid.job_desc as job_description',
                 'mid.material_id',
                 'mid.area_of_coverage_id',
                 'mid.procedure_ref_id',
@@ -1446,8 +1534,8 @@ class TestReportRtController extends Controller
                 'mi.material_inward_no',
                 'mi.material_inward_date',
                 'mi.test_at_fix',
-                'toj.type_of_job',
-                'jd.job_description',
+                //'toj.type_of_job',
+                //'jd.job_description',
                 'mid.part_no',
                 'mid.drg_no',
                 'm.material',
@@ -1465,8 +1553,8 @@ class TestReportRtController extends Controller
                 DB::raw("IFNULL(prev_tr.rt_no, mid.rt_no) as repair_rt_no"),
             ])
             ->leftJoin('test_report_rt as prev_tr', 'prev_tr.test_report_rt_id', '=', 'pend.revision_from_report_rt_id')
-            ->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
-            ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
+            //->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
+            //->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
             ->leftJoin('materials as m', 'm.id', '=', 'mid.material_id')
             ->leftJoin('area_of_coverage as ac', 'ac.area_of_coverage_id', '=', 'mid.area_of_coverage_id')
             ->leftJoin('procedure_reference as pr', 'pr.procedure_reference_id', '=', 'mid.procedure_ref_id')
@@ -1692,8 +1780,8 @@ class TestReportRtController extends Controller
         
         $query = DB::table('technique_sheet_rt as ts')
             ->leftJoin('customers as c', 'c.id', '=', 'ts.customer_id')
-            ->leftJoin('type_of_job as tj', 'tj.id', '=', 'ts.type_of_job_id')
-            ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'ts.job_desc_id')
+            //->leftJoin('type_of_job as tj', 'tj.id', '=', 'ts.type_of_job_id')
+            //->leftJoin('job_descriptions as jd', 'jd.id', '=', 'ts.job_desc_id')
             ->leftJoin('area_of_coverage as ac', 'ac.area_of_coverage_id', '=', 'ts.area_of_coverage_id')
             ->where('ts.current_location_id', $location_data->location_id)
             ->where('ts.year_id', $year);
@@ -1705,8 +1793,9 @@ class TestReportRtController extends Controller
             DB::raw("'' as rss_reference"),
             'ts.technique_sheet_rt_date',
             'c.customer',
-            'tj.type_of_job',
-            'jd.job_description',
+            //'tj.type_of_job',
+            //'jd.job_description',
+            'ts.job_desc as job_description',
             'ts.part_no',
             'ts.drg_no',
             'ac.area_of_coverage'
@@ -2245,8 +2334,9 @@ class TestReportRtController extends Controller
             'customers.customer',
             'test_report_rt.nabl_type_fix',
             'test_report_rt.job_type_fix',
-            'type_of_job.type_of_job',
-            'job_descriptions.job_description',
+            // 'type_of_job.type_of_job',
+            // 'job_descriptions.job_description',
+            'test_report_rt.job_desc as job_description',
             'test_report_rt.part_no',
             'test_report_rt.drg_no',
             'materials.material',
@@ -2255,14 +2345,17 @@ class TestReportRtController extends Controller
             'test_report_rt.product_code'
         ])
         ->leftJoin('customers', 'customers.id', '=', 'test_report_rt.customer_id')
-        ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_rt.type_of_job_id')
-        ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_rt.job_desc_id')
+        // ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_rt.type_of_job_id')
+        // ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_rt.job_desc_id')
         ->leftJoin('materials', 'materials.id', '=', 'test_report_rt.material_id')
         ->where('test_report_rt.year_id', $year)
         ->where('test_report_rt.current_location_id', $location);
 
-        if ($request->filled('type_of_job_id')) {
-            $query->where('test_report_rt.type_of_job_id', $request->type_of_job_id);
+        // if ($request->filled('type_of_job_id')) {
+        //     $query->where('test_report_rt.type_of_job_id', $request->type_of_job_id);
+        // }
+        if ($request->filled('customer_id')) {
+            $query->where('test_report_rt.customer_id', $request->customer_id);
         }
 
         $reports = $query->orderBy('test_report_rt.test_report_rt_id', 'desc')->get();

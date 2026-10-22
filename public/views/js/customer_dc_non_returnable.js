@@ -55,7 +55,6 @@ jQuery(document).ready(function () {
                             <td>${item.mi_po_number || ''}</td>
                             <td>${item.mi_po_date || ''}</td>
                             <td>${item.type_of_test || ''}</td>
-                            <td>${item.type_of_job || ''}</td>
                             <td>${item.job_description || ''}</td>
                             <td>${item.part_no || ''}</td>
                             <td>${item.drg_no || ''}</td>
@@ -194,7 +193,6 @@ jQuery(document).ready(function () {
                     <td>${item.mi_po_number || ''}</td>
                     <td>${item.mi_po_date || ''}</td>
                     <td>${item.type_of_test || ''}</td>
-                    <td>${item.type_of_job || ''}</td>
                     <td>${item.job_description || ''}</td>
                     <td>${item.part_no || ''}</td>
                     <td>${item.drg_no || ''}</td>
@@ -465,7 +463,6 @@ jQuery(document).ready(function () {
                                 <td>${item.mi_po_number || ''}</td>
                                 <td>${item.mi_po_date || ''}</td>
                                 <td>${item.type_of_test || ''}</td>
-                                <td>${item.type_of_job || ''}</td>
                                 <td>${item.job_description || ''}</td>
                                 <td>${item.part_no || ''}</td>
                                 <td>${item.drg_no || ''}</td>

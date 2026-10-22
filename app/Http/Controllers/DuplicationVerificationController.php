@@ -76,6 +76,7 @@ use App\Models\Transaction\ProductionEntry;
 use App\Models\Transaction\TestReportUt;
 use App\Models\Transaction\TestReportDpt;
 use App\Models\Transaction\TestReportMpt;
+use App\Models\Transaction\FilmDc;
 use Date;
 
 class DuplicationVerificationController extends Controller
@@ -1108,7 +1109,7 @@ class DuplicationVerificationController extends Controller
                 return response()->json([
                     'part' => $users_count,
                     'response_code' => '1',
-                    'response_message' => 'Duplicate Job Description , Part No. & Drg. No. Found.',
+                    'response_message' => 'Duplicate Job Description , Part No. / Die No. & Drg. No. Found.',
                 ]);
             }
             else
@@ -2404,7 +2405,7 @@ class DuplicationVerificationController extends Controller
        $message = "Offer No.";
        $id = $request->id;
        $table_id = 'offer_id';
-       $pre_fix = 'OFFER';  
+       $pre_fix = 'OF';  
        return  $this->checkMarketingTranscationDuplication($seq, $modal, $sequence, $message , $id, $table_id, $pre_fix) ;
     }
      // Latest Material Inspection Number Duplication Check
@@ -2477,6 +2478,18 @@ class DuplicationVerificationController extends Controller
        $table_id = 'production_entry_id';
        $pre_fix = 'PROD';  
        return  $this->checkTranscationDuplication($seq, $modal, $sequence, $message , $id, $table_id, $pre_fix) ;
+    }
+
+    public function checkFilmDcSequenceDuplication(Request $request)
+    {
+        $seq = "film_dc_sequence";
+        $modal  =  FilmDc::class;
+        $sequence = $request->film_dc_sequence;
+        $message = "DC No.";
+        $id = $request->id;
+        $table_id = 'film_dc_id';
+        $pre_fix = 'FDC';
+        return $this->checkTranscationDuplication($seq, $modal, $sequence, $message, $id, $table_id, $pre_fix);
     }
 
     // Transcation Controller

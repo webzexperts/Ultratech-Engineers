@@ -43,6 +43,8 @@ class ObservationSheetController extends Controller
             'mid.drg_no',
             'mid.heat_no',
             'mid.product_code',
+            'mid.job_desc',
+            'mid.job_desc as job_description',
             // DB::raw("IF(osd.from_type_id_fix = 2, tr.test_report_no, tsr.technique_sheet_rt_no) as rt_no"),
             'mi.material_inward_no',
             'mi.material_inward_date',
@@ -53,8 +55,8 @@ class ObservationSheetController extends Controller
             'mi.dc_date',
             'mi.po_no',
             'mi.po_date',
-            'toj.type_of_job',
-            'jd.job_description',
+            //'toj.type_of_job',
+            //'jd.job_description',
             'm.material',
             'observation_sheet.created_on',
             'observation_sheet.created_by',
@@ -67,8 +69,8 @@ class ObservationSheetController extends Controller
         ->leftJoin('material_inward as mi', 'mi.material_inward_id', '=', 'mid.material_inward_id')
         ->leftJoin('test_report_rt as tr', 'tr.test_report_rt_id', '=', 'osd.test_report_rt_id')
         ->leftJoin('technique_sheet_rt as tsr', 'tsr.technique_sheet_rt_id', '=', 'osd.technique_sheet_rt_id')
-        ->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
-        ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
+        //->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
+        //->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
         ->leftJoin('materials as m', 'm.id', '=', 'mid.material_id')
         ->where('observation_sheet.year_id', $year_data->id)
         ->where('observation_sheet.current_location_id', $location_data->location_id);
@@ -114,6 +116,18 @@ class ObservationSheetController extends Controller
             })
             ->filterColumn('mi.po_date', function ($q, $k) {
                 applyDate($q, $k, 'mi.po_date');
+            })
+            ->filterColumn('mi.job_type_fix', function ($query, $keyword) {
+                $globalSearch = request()->input('search.value');
+                $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
+                $lowerKeyword = strtolower(trim($searchValue));
+                if ($lowerKeyword === 'welding') {
+                    $query->where('mi.job_type_fix', '=', 'Welding');
+                } elseif ($lowerKeyword === 'non-welding' || $lowerKeyword === 'non welding') {
+                    $query->where('mi.job_type_fix', '=', 'Non-Welding');
+                } else {
+                    $query->where('mi.job_type_fix', 'like', "{$lowerKeyword}%");
+                }
             })
             ->addColumn('actions', function ($sheet) {
                 $actions = '<div class="dropdown d-inline-block">
@@ -177,6 +191,11 @@ class ObservationSheetController extends Controller
             } else {
                 $sheet_no = $request->observation_sheet_no;
                 $sheet_seq = $request->observation_sheet_sequence;
+            }
+
+            $checkDup = checkReportDuplication(ObservationSheet::class, 'observation_sheet_no', $sheet_no, $request, "Duplicate Observation Sheet No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
             }
 
             $page_id = getMenuIdBassedOnDisplayName('observation_sheet');
@@ -419,8 +438,8 @@ class ObservationSheetController extends Controller
 
         $reports = DB::table('test_report_rt as tr')
             ->leftJoin('customers as c', 'c.id', '=', 'tr.customer_id')
-            ->leftJoin('type_of_job as toj', 'toj.id', '=', 'tr.type_of_job_id')
-            ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'tr.job_desc_id')
+            // ->leftJoin('type_of_job as toj', 'toj.id', '=', 'tr.type_of_job_id')
+            // ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'tr.job_desc_id')
             ->leftJoin('materials as m', 'm.id', '=', 'tr.material_id')
             ->leftJoin('observation_sheet_details as osd', 'osd.test_report_rt_id', '=', 'tr.test_report_rt_id')
             ->where('tr.customer_id', $customerId)
@@ -446,8 +465,9 @@ class ObservationSheetController extends Controller
                 DB::raw("'' as project_name"),
                 'c.customer',
                 'm.material',
-                'toj.type_of_job',
-                'jd.job_description'
+                //'toj.type_of_job',
+                //'jd.job_description',
+                'tr.job_desc as job_description',
             ])
 
             ->orderBy('tr.test_report_rt_id', 'DESC')
@@ -609,6 +629,11 @@ class ObservationSheetController extends Controller
     {
         $year_data =getCurrentYearData();
         $location_data = getCurrentLocation();
+
+        $checkDup = checkReportDuplication(ObservationSheet::class, 'observation_sheet_no', $request->observation_sheet_no, $request, "Duplicate Observation Sheet No. Found.", $request->id, 'observation_sheet_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
         DB::beginTransaction();
         try {
             $sheetId = $request->id;
@@ -1067,8 +1092,8 @@ class ObservationSheetController extends Controller
             ->join('material_inward_details as mid', 'mid.material_inward_details_id', '=', 'pend.material_inward_details_id')
             ->join('material_inward as mi', 'mi.material_inward_id', '=', 'mid.material_inward_id')
             ->leftJoin('test_report_rt as tr', 'tr.test_report_rt_id', '=', 'pend.test_report_rt_id')
-            ->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
-            ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
+            //->leftJoin('type_of_job as toj', 'toj.id', '=', 'mid.type_of_job_id')
+            //->leftJoin('job_descriptions as jd', 'jd.id', '=', 'mid.job_desc_id')
             ->leftJoin('materials as m', 'm.id', '=', 'mid.material_id')
             ->leftJoin('area_of_coverage as ac', 'ac.area_of_coverage_id', '=', 'mid.area_of_coverage_id')
             ->leftJoin('procedure_reference as pr', 'pr.procedure_reference_id', '=', 'mid.procedure_ref_id')
@@ -1087,7 +1112,7 @@ class ObservationSheetController extends Controller
                 DB::raw("IF(pend.test_report_rt_id > 0, 'Repair', mid.process_type) as process_type"),
                 'mid.type_of_job_id',
                 'mid.job_desc_id',
-                'mid.part_id',
+                //'mid.part_id',
                 'mid.material_id',
                 'mid.heat_no',
                 DB::raw("IF(pend.test_report_rt_id > 0, tr.test_report_no, '') as rt_no"),
@@ -1110,9 +1135,10 @@ class ObservationSheetController extends Controller
                 'mi.job_type_fix',
                 'mi.material_inward_no',
                 'mi.material_inward_date',
-                'toj.type_of_job',
-                'jd.job_description',
+                //'toj.type_of_job',
+                //'jd.job_description',
                 'mid.part_no',
+                'mid.job_desc as job_description',
                 'mid.drg_no',
                 'm.material'
             ])
@@ -1152,16 +1178,17 @@ class ObservationSheetController extends Controller
             DB::raw("'' as project_name"),
             DB::raw("'' as material"),
             'c.customer',
-            'toj.type_of_job',
+            //'toj.type_of_job',
             'technique_sheet_rt.film_type',
-            'jd.job_description',
+            //'jd.job_description',
             'technique_sheet_rt.part_no',
             'technique_sheet_rt.drg_no',
+            'technique_sheet_rt.job_desc as job_description',
             'aoc.area_of_coverage'
         ])
         ->leftJoin('customers as c', 'c.id', '=', 'technique_sheet_rt.customer_id')
-        ->leftJoin('type_of_job as toj', 'toj.id', '=', 'technique_sheet_rt.type_of_job_id')
-        ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'technique_sheet_rt.job_desc_id')
+       // ->leftJoin('type_of_job as toj', 'toj.id', '=', 'technique_sheet_rt.type_of_job_id')
+        //->leftJoin('job_descriptions as jd', 'jd.id', '=', 'technique_sheet_rt.job_desc_id')
         ->leftJoin('area_of_coverage as aoc', 'aoc.area_of_coverage_id', '=', 'technique_sheet_rt.area_of_coverage_id')
         ->where('technique_sheet_rt.current_location_id', $current_location_id)
         ->whereIn('technique_sheet_rt.year_id', $yearIds);

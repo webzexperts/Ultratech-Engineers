@@ -33,8 +33,8 @@
                             <th>Short Close Date</th>
                             <th>Material Indent No.</th>
                             <th>Date</th>
-                            <th>From Location</th>
-                            <th>To Location</th>
+                            <!-- <th>From Location</th>
+                            <th>To Location</th> -->
                             <th>Item</th>
                             <th>Item Type</th>
                             <th>Short Close Qty.</th>
@@ -93,8 +93,8 @@
                 { data: 'pisc_date', name: 'purchase_indent_short_close.pisc_date', },
                 { data: 'pi_no', name: 'purchase_indent.pi_no', },
                 { data: 'pi_date', name: 'purchase_indent.pi_date', },
-                { data: 'from_location', name: 'from_location.location_name', },
-                { data: 'to_location', name: 'location.location_name', },
+                // { data: 'from_location', name: 'from_location.location_name', },
+                // { data: 'to_location', name: 'location.location_name', },
                 { data: 'item_name', name: 'item.item_name', },
                 { data: 'item_type', name: 'item.item_type', },
                 { data: 'pisc_sc_qty' , name: 'purchase_indent_short_close.pisc_sc_qty' },

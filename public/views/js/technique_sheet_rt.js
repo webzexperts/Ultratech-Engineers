@@ -41,7 +41,7 @@ function fillTSDetailTable() {
 
             let activeFilmId = zeroToEmpty(row.film_id || row.detail_film_id);
             let isFilmActive = activeFilmId && jQuery('#detail_film_id option[value="' + activeFilmId + '"]:not(.temp-option)').length > 0;
-            
+
             let isCopiedRow = (row.is_copy === true || row.is_copied === true);
             let isExistingOrPendingRow = (isExistingReport && row.technique_sheet_rt_details_id && row.technique_sheet_rt_details_id != 0) || row.from_pending === true;
 
@@ -71,10 +71,10 @@ function fillTSDetailTable() {
                 <td>${row.sfd || ''}</td>
                 <td>${row.iqi_designation || row.iqi_designation_name || ''}</td>
                 <td>${row.iqi_sensitivity || row.iqi_sensitivity_name || ''}</td>
-                <td>${film_size_display || ''}</td>
-                <td>${row.no_of_film_fix}</td>
                 <td>${row.test_technique || ''}</td>
                 <td>${row.film_position || ''}</td>
+                <td>${film_size_display || ''}</td>
+                <td>${row.no_of_film_fix}</td>
                 <td class="d-none">${row.film_qty}</td>
                 <td class="d-none">${sq_display}</td>
                 <td class="d-none">${total_sq_display}</td>
@@ -98,7 +98,9 @@ function updateHeaderSummaries(rows, film_size_fix) {
         jQuery('#total_area').val('');
         jQuery('#film_brand').val('');
         jQuery('#film_type').val('');
-        jQuery('#source_used').val('');
+        if (!jQuery('#source_size').val()) {
+            jQuery('#source_used').val('');
+        }
         jQuery('#test_technique').val('');
         updateSourceFieldsState();
         return;
@@ -326,6 +328,9 @@ function getNextSrNo() {
 
 // Reset entire header and detail form
 function resetTechniqueSheetRtForm() {
+    jQuery('#pendingTSCopyModal').modal('hide');
+    jQuery('#TestReportRTPendingModal').modal('hide');
+
     document.getElementById("commonTechniqueSheetRtForm").reset();
     const form = document.getElementById("commonTechniqueSheetRtForm");
     if (form) {
@@ -334,16 +339,23 @@ function resetTechniqueSheetRtForm() {
     jQuery('#id').val('');
     jQuery('#technique_sheet_rt_sequence').val('');
     jQuery('#technique_sheet_rt_no').val('');
-    jQuery('input[name="entry_type_fix"][value="Manual"]').prop('checked', true);
+    jQuery('input[name="entry_type_fix"][value="Manual"]').prop('checked', true).trigger('change');
+    jQuery('input[name="job_type_fix"][value="Non-Welding"]').prop('checked', true);
     setRadioReadonly('input[name*="entry_type_fix"]', false);
     setSelect2Readonly('#TechniqueSheetRtModal #customer_id', false);
     jQuery('#customer_id').val('').trigger('change');
     jQuery('#type_of_job_id').val('').trigger('change');
+    jQuery('#job_desc').val('');
     jQuery('#job_desc_id').val('').trigger('change');
     // jQuery('#part_id').val('').trigger('change');
     jQuery('#part_no').val('');
     jQuery('#drg_no').val('');
+    jQuery('#material_id').val('').trigger('change');
+    jQuery('#product_code').val('');
     jQuery('#area_of_coverage_id').val('').trigger('change');
+    jQuery('#welding_process').val('');
+    jQuery('#joint_type').val('');
+    toggleWeldingFields();
 
     jQuery('#procedure_ref_id').val('').trigger('change');
     jQuery('#evaluation_as_per_id').val('').trigger('change');
@@ -424,6 +436,7 @@ function fetchAndFillTechniqueSheetRt(id) {
                 jQuery('#technique_sheet_rt_no').val(d.technique_sheet_rt_no);
                 jQuery('#technique_sheet_rt_date').val(d.technique_sheet_rt_date);
                 jQuery(`input[name="entry_type_fix"][value="${d.entry_type_fix}"]`).prop('checked', true).change();
+                jQuery(`input[name="job_type_fix"][value="${d.job_type_fix || 'Non-Welding'}"]`).prop('checked', true);
                 jQuery('#customer_id').val(zeroToEmpty(d.customer_id)).trigger('change');
                 setTimeout(() => {
                     setSelect2Readonly('#TechniqueSheetRtModal #customer_id', true);
@@ -433,11 +446,17 @@ function fetchAndFillTechniqueSheetRt(id) {
                 // so filterPartsByJobDesc() can read and restore the correct part selection
                 // jQuery('#part_id').val(zeroToEmpty(d.part_id));
                 jQuery('#part_no').val(d.part_no || '');
+                jQuery('#job_desc').val(d.job_description || d.job_desc || '');
                 jQuery('#job_desc_id').val(zeroToEmpty(d.job_desc_id)).trigger('change');
                 // After filtering, re-apply part_id and update Select2
                 // jQuery('#part_id').val(zeroToEmpty(d.part_id)).trigger('change.select2');
                 jQuery('#drg_no').val(d.drg_no || '');
+                jQuery('#material_id').val(zeroToEmpty(d.material_id)).trigger('change');
+                jQuery('#product_code').val(d.product_code || '');
                 jQuery('#area_of_coverage_id').val(zeroToEmpty(d.area_of_coverage_id)).trigger('change');
+                jQuery('#welding_process').val(d.welding_process || '');
+                jQuery('#joint_type').val(d.joint_type || '');
+                toggleWeldingFields();
 
                 jQuery('#source_size').val(d.source_size);
                 jQuery('#xray_focal_size').val(d.xray_focal_size);
@@ -555,7 +574,7 @@ function fetchAndFillTechniqueSheetRt(id) {
 var _pendingEditData = null;
 
 // TSDetailsModal shown event: set values after Select2 is initialized
-jQuery('#TSDetailsModal').on('shown.bs.modal', function () {
+jQuery('#TSDetailsModal').on('shown.bs.modal show.bs.modal', function () {
     let thisForm = jQuery('#TSDetailsModal');
     let sfdUnit = jQuery('input[name="sfd_unit_fix"]:checked').val() || 'mm';
     thisForm.find('label[for="detail_sfd"]').html('SFD (' + sfdUnit + ') <sup class="astric">*</sup>');
@@ -629,6 +648,7 @@ jQuery('#TSDetailsModal').on('shown.bs.modal', function () {
     setTimeout(() => {
         thisForm.find('#detail_sr_no').focus().select();
     }, 100);
+    toggleWeldingFields();
 });
 
 // Copy data from specified Sr. No. on Blur / Change
@@ -712,6 +732,7 @@ jQuery(document).on('click', '#addDetailRowBtn', function () {
     jQuery('#detail_sr_no').val(getNextSrNo());
 
     _pendingEditData = null;
+    toggleWeldingFields();
     jQuery('#TSDetailsModal').modal('show');
 });
 
@@ -786,6 +807,7 @@ function loadTSDetailByIndex(index) {
         thisForm.find('#detail_sr_no').focus().select();
     }, 100);
 
+    toggleWeldingFields();
     return true;
 }
 
@@ -1368,13 +1390,19 @@ function updateSourceFieldsState() {
     if (hasGamma) {
         jQuery('#source_size').prop('readonly', false).removeAttr('tabindex');
     } else {
-        jQuery('#source_size').prop('readonly', true).val('').attr('tabindex', -1);
+        jQuery('#source_size').prop('readonly', true).attr('tabindex', -1);
+        if (!sourceUsedVal) {
+            jQuery('#source_size').val('');
+        }
     }
 
     if (hasXray) {
         jQuery('#xray_focal_size').prop('readonly', false).removeAttr('tabindex');
     } else {
-        jQuery('#xray_focal_size').prop('readonly', true).val('').attr('tabindex', -1);
+        jQuery('#xray_focal_size').prop('readonly', true).attr('tabindex', -1);
+        if (!sourceUsedVal) {
+            jQuery('#xray_focal_size').val('');
+        }
     }
 }
 
@@ -1463,27 +1491,27 @@ function updateRadioDisabledStates() {
     }
 
     // Ensure all radio buttons are NOT disabled so they submit naturally
-    jQuery('input[name="entry_type_fix"], input[name="film_size_fix"]').prop('disabled', false);
+    jQuery('input[name="entry_type_fix"], input[name="job_type_fix"], input[name="film_size_fix"]').prop('disabled', false);
 
-    // 1. Entry Type:
+    // 1. Entry Type & Job Type:
     // - In Edit mode: ALWAYS readonly
     // - In Add mode: readonly if details exist, otherwise editable
     if (formId && formId !== "") {
-        jQuery('input[name="entry_type_fix"]').addClass('readonly-radio');
-        jQuery('input[name="entry_type_fix"]').parent().css({
+        jQuery('input[name="entry_type_fix"], input[name="job_type_fix"]').addClass('readonly-radio');
+        jQuery('input[name="entry_type_fix"], input[name="job_type_fix"]').parent().css({
             'opacity': '1',
             'pointer-events': 'none'
         });
     } else {
         if (hasDetails) {
-            jQuery('input[name="entry_type_fix"]').addClass('readonly-radio');
-            jQuery('input[name="entry_type_fix"]').parent().css({
+            jQuery('input[name="entry_type_fix"], input[name="job_type_fix"]').addClass('readonly-radio');
+            jQuery('input[name="entry_type_fix"], input[name="job_type_fix"]').parent().css({
                 'opacity': '1',
                 'pointer-events': 'none'
             });
         } else {
-            jQuery('input[name="entry_type_fix"]').removeClass('readonly-radio');
-            jQuery('input[name="entry_type_fix"]').parent().css({
+            jQuery('input[name="entry_type_fix"], input[name="job_type_fix"]').removeClass('readonly-radio');
+            jQuery('input[name="entry_type_fix"], input[name="job_type_fix"]').parent().css({
                 'opacity': '1',
                 'pointer-events': 'auto'
             });
@@ -1574,6 +1602,67 @@ function suggestDrgNo(e, element) {
     });
 }
 
+function suggestProductCode(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#product_code_list',
+        url: 'technique_sheet_rt_product_code-list',
+        responseListKey: 'productCodeList'
+    });
+}
+
+function suggestWeldingProcess(e, element) {
+    if (jQuery(element).prop('readonly') || jQuery(element).prop('disabled') || jQuery('input[name="job_type_fix"]:checked').val() === 'Non-Welding') {
+        return;
+    }
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#welding_process_list',
+        url: 'technique_sheet_rt_welding_process-list',
+        responseListKey: 'weldingProcessList'
+    });
+}
+
+function suggestJointType(e, element) {
+    if (jQuery(element).prop('readonly') || jQuery(element).prop('disabled') || jQuery('input[name="job_type_fix"]:checked').val() === 'Non-Welding') {
+        return;
+    }
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#joint_type_list',
+        url: 'technique_sheet_rt_joint_type-list',
+        responseListKey: 'jointTypeList'
+    });
+}
+
+function toggleWeldingFields() {
+    let jobType = jQuery('input[name="job_type_fix"]:checked').val() || 'Non-Welding';
+    if (jobType === 'Non-Welding') {
+        jQuery('#welding_process, #joint_type').val('').prop('readonly', true).css('pointer-events', 'none').addClass('skip-tab').attr('tabindex', '-1');
+        jQuery('#welding_process_suggestion, #joint_type_suggestion').val('');
+        jQuery('#welding_process_list, #joint_type_list').empty();
+        jQuery('#detail_identification')
+            .val('')
+            .prop('readonly', true)
+            .attr('readonly', 'readonly')
+            .css('pointer-events', 'none')
+            .addClass('skip-tab')
+            .attr('tabindex', '-1');
+    } else {
+        jQuery('#welding_process, #joint_type').prop('readonly', false).css('pointer-events', 'auto').removeClass('skip-tab').removeAttr('tabindex');
+        jQuery('#detail_identification')
+            .prop('readonly', false)
+            .removeAttr('readonly')
+            .css('pointer-events', 'auto')
+            .removeClass('skip-tab')
+            .removeAttr('tabindex');
+    }
+}
+
+jQuery(document).on('change', 'input[name="job_type_fix"]', function () {
+    toggleWeldingFields();
+});
+
 // Copy Buttons logic
 /* Old logic - commented out as per requirement
 jQuery(document).on('change', '#customer_id', function () {
@@ -1619,40 +1708,37 @@ function checkCopyDataAvailable() {
     jQuery('#copyAllBtn').prop('disabled', false);
 }
 
-jQuery(document).on('change', '#type_of_job_id', function () {
+jQuery(document).on('change', '#customer_id', function () {
     checkCopyDataAvailable();
-    var entry_type = jQuery('input[name="entry_type_fix"]:checked').val();
-    var formId = jQuery('#commonTechniqueSheetRtForm').find('input[name="id"]').val();
-    if (entry_type == 'From RT Report' && (formId == undefined || formId == '')) {
-        fillPendingRTList();
-    }
 });
 
 jQuery(document).on('click', '#copyAllBtn', function () {
     let entry_type = jQuery('input[name="entry_type_fix"]:checked').val();
 
+    jQuery('#pendingTSCopyModal').modal('hide');
+    jQuery('#TestReportRTPendingModal').modal('hide');
+
     if (entry_type === 'From RT Report') {
         fillPendingRTList();
-        jQuery('#TestReportRTPendingModal').modal('show');
     } else {
-        let type_of_job_id = jQuery('#type_of_job_id').val();
+        let customer_id = jQuery('#customer_id').val();
         jQuery('#tsCopyTable tbody').empty();
         let table7 = jQuery('#tsCopyTable');
         if (jQuery.fn.DataTable.isDataTable(table7)) {
             table7.DataTable().clear().destroy();
             jQuery('#tsCopyTable thead tr.search-row').remove();
         }
-        loadTSCopyList(type_of_job_id || '');
+        loadTSCopyList(customer_id || '');
     }
 });
 
-function loadTSCopyList(type_of_job_id) {
+function loadTSCopyList(customer_id) {
     skipLoader = false;
     showLoader();
     jQuery.ajax({
         url: "get-technique-sheet-copy-list",
         type: "GET",
-        data: { type_of_job_id: type_of_job_id },
+        data: { customer_id: customer_id },
         headers: headerOpt,
         dataType: 'json',
         success: function (data) {
@@ -1843,11 +1929,22 @@ function performCopy(selectedId, copyMaster, copyDetails) {
                 if (copyMaster && data.ts_data != null) {
                     var d = data.ts_data;
                     // jQuery('#customer_id').val(zeroToEmpty(d.customer_id)).trigger('change');
-                    // jQuery('#type_of_job_id').val(zeroToEmpty(d.type_of_job_id)).trigger('change');
+                    jQuery('#type_of_job_id').val(zeroToEmpty(d.type_of_job_id)).trigger('change');
+                    if (d.job_type_fix) {
+                        jQuery(`input[name="job_type_fix"][value="${d.job_type_fix}"]`).prop('checked', true);
+                    }
                     // jQuery('#part_id').val(zeroToEmpty(d.part_id));
-                    // jQuery('#job_desc_id').val(zeroToEmpty(d.job_desc_id)).trigger('change');
+                    jQuery('#job_desc').val(d.job_description || d.job_desc || '');
+                    jQuery('#job_desc_id').val(zeroToEmpty(d.job_desc_id)).trigger('change');
                     // jQuery('#part_id').val(zeroToEmpty(d.part_id)).trigger('change.select2');
-                    // jQuery('#area_of_coverage_id').val(zeroToEmpty(d.area_of_coverage_id)).trigger('change');
+                    jQuery('#part_no').val(d.part_no || '');
+                    jQuery('#drg_no').val(d.drg_no || '');
+                    jQuery('#material_id').val(zeroToEmpty(d.material_id)).trigger('change');
+                    jQuery('#product_code').val(d.product_code || '');
+                    jQuery('#area_of_coverage_id').val(zeroToEmpty(d.area_of_coverage_id)).trigger('change');
+                    jQuery('#welding_process').val(d.welding_process || '');
+                    jQuery('#joint_type').val(d.joint_type || '');
+                    toggleWeldingFields();
                     // jQuery('#prepared_by_user_id').val(zeroToEmpty(d.prepared_by_user_id)).trigger('change');
                     // jQuery('#checked_by_authority_person_id').val(zeroToEmpty(d.checked_by_authority_person_id)).trigger('change');
                     // jQuery('#authorized_by_authority_person_id').val(zeroToEmpty(d.authorized_by_authority_person_id)).trigger('change');
@@ -1972,21 +2069,20 @@ function getPendingCustomers() {
     });
 }
 
-jQuery("#customer_id").on("change", function () {
-    checkCopyDataAvailable();
-});
 
 function fillPendingRTList() {
 
     var thisModal = jQuery('#TestReportRTPendingModal');
     var thisForm = jQuery('#commonTechniqueSheetRtForm');
 
-    let type_of_job_id = jQuery('#type_of_job_id').val() || '';
+    let customer_id = jQuery('#customer_id').val() || '';
+    let job_type_fix = jQuery('input[name="job_type_fix"]:checked').val() || '';
+    var formId = jQuery('#commonTechniqueSheetRtForm').find('input[name="id"]').val();
     var Url = "";
-    if (formId == undefined) {
-        Url = "get-customer_pending_test_report_list?type_of_job_id=" + type_of_job_id;
+    if (formId == undefined || formId == '') {
+        Url = "get-customer_pending_test_report_list?customer_id=" + customer_id + "&job_type_fix=" + job_type_fix;
     } else {
-        Url = "get-customer_pending_test_report_list?id=" + formId + "&type_of_job_id=" + type_of_job_id;
+        Url = "get-customer_pending_test_report_list?id=" + formId + "&customer_id=" + customer_id + "&job_type_fix=" + job_type_fix;
     }
 
     jQuery(".toggleModalBtn").prop('disabled', true);
@@ -2005,38 +2101,21 @@ function fillPendingRTList() {
             var tblHtml = ``;
 
             if (data.response_code == 1 && data.PendingList && data.PendingList.length > 0) {
-                thisForm.find('#TSDetailTable tbody input[name="form_indx"]').each(function (indx) {
-                    let frmIndx = jQuery(this).val();
-
-                    let jbEorkOrderId = PendingList[frmIndx].test_report_rt_id;
-                    if (jbEorkOrderId != "" && jbEorkOrderId != null) {
-                        usedParts.push(Number(jbEorkOrderId));
-                    }
-                });
-
-                function isUsed(pjId) {
-                    if (usedParts.includes(Number(pjId))) {
-                        totalDisb++;
-                        return true;
-                    }
-                    return false;
-                }
-
                 let totalEntry = 0;
                 found = 1;
 
                 for (let idx in data.PendingList) {
-                    var inUse = isUsed(data.PendingList[idx].test_report_rt_id);
                     var in_use = data.PendingList[idx].in_use == true ? 'readonly' : '';
                     totalEntry++;
                     tblHtml += `
                             <tr>
-                                <td><input type="radio" name="test_report_rt_id[]" class="simple-check radio-filter-remove ${inUse ? 'in-use' : ''}" id="test_report_rt_ids_${data.PendingList[idx].test_report_rt_id}" value="${data.PendingList[idx].test_report_rt_id}" ${inUse ? 'checked' : ''} ${in_use}/></td>
+                                <td><input type="radio" name="test_report_rt_id[]" class="simple-check radio-filter-remove" id="test_report_rt_ids_${data.PendingList[idx].test_report_rt_id}" value="${data.PendingList[idx].test_report_rt_id}" ${in_use}/></td>
 
                                 <td>${data.PendingList[idx].test_report_no || ''}</td>
                                 <td>${data.PendingList[idx].revision_number || ''}</td>
                                 <td>${data.PendingList[idx].test_report_date || ''}</td>
                                 <td>${data.PendingList[idx].type_of_job || ''}</td>
+                                <td>${data.PendingList[idx].job_type_fix || ''}</td>
                                 <td>${data.PendingList[idx].job_description || ''}</td>
                                 <td>${data.PendingList[idx].part_no || ''}</td>
                                 <td>${data.PendingList[idx].material || ''}</td>
@@ -2051,7 +2130,12 @@ function fillPendingRTList() {
 
             var $table = jQuery("#TestReportRTPendingModal").find('#pendingDataTable');
             if (jQuery.fn.DataTable.isDataTable($table)) {
-                $table.DataTable().clear().destroy();
+                try {
+                    $table.DataTable().clear().destroy();
+                } catch (e) {
+                    console.warn('DataTable destroy error:', e);
+                }
+                jQuery('#pendingDataTable thead tr.search-row').remove();
             }
             jQuery('#pendingDataTable tbody').empty().append(tblHtml);
 
@@ -2072,6 +2156,7 @@ function fillPendingRTList() {
             });
             fixDataTableColumnsUntilAdjusted($new);
             jQuery(".toggleModalBtn").prop('disabled', false);
+            jQuery('#TestReportRTPendingModal').modal('show');
         },
 
         error: function (jqXHR, textStatus, errorThrown) {
@@ -2103,11 +2188,18 @@ $('#addPendingTestReportRTForm').on('submit', function (e) {
     let chkArr = [];
     var formId = jQuery('#commonTechniqueSheetRtForm').find('input[name="id"]').val();
 
-    jQuery("#addPendingTestReportRTForm")
-        .find("[id^='test_report_rt_ids_']:checked")
-        .each(function () {
+    if (jQuery.fn.DataTable.isDataTable('#pendingDataTable')) {
+        let dt = jQuery('#pendingDataTable').DataTable();
+        dt.$('input[name="test_report_rt_id[]"]:checked').each(function () {
             chkArr.push(jQuery(this).val());
         });
+    } else {
+        jQuery("#addPendingTestReportRTForm")
+            .find("input[name='test_report_rt_id[]']:checked")
+            .each(function () {
+                chkArr.push(jQuery(this).val());
+            });
+    }
 
     // No checkbox selected
     if (chkArr.length === 0) {
@@ -2276,11 +2368,23 @@ $('#addPendingTestReportRTForm').on('submit', function (e) {
 function FillMasterTable(data) {
     if (!data) return;
 
-    // Do not set test_report_rt_id so it remains null
-    // Do not touch Part No. and Drg. No. so manual input is preserved
-    // jQuery('#area_of_coverage_id').val(data.area_of_coverage_id).trigger('change.select2');
+    if (data.job_type_fix) {
+        jQuery('input[name="job_type_fix"][value="' + data.job_type_fix + '"]').prop('checked', true);
+    }
+    jQuery('#type_of_job_id').val(zeroToEmpty(data.type_of_job_id)).trigger('change.select2');
+    // jQuery('#job_desc_id').val(zeroToEmpty(data.job_desc_id)).trigger('change');
+    jQuery('#job_desc').val(data.job_desc);
+    jQuery('#part_no').val(data.part_no);
+    jQuery('#drg_no').val(data.drg_no);
+    jQuery('#material_id').val(zeroToEmpty(data.material_id)).trigger('change');
+    jQuery('#product_code').val(data.product_code);
+    jQuery('#area_of_coverage_id').val(zeroToEmpty(data.area_of_coverage_id)).trigger('change');
+    jQuery('#welding_process').val(data.welding_process);
+    jQuery('#joint_type').val(data.joint_type);
     jQuery('#source_used').val(data.source_used);
     jQuery('#source_size').val(data.source_size);
+    toggleWeldingFields();
+    updateSourceFieldsState();
     jQuery('#lead_screen_thick').val(data.lead_screen_thick);
     jQuery('#lead_screen_thick_back').val(data.lead_screen_thick_back || '');
     jQuery('#xray_focal_size').val(data.xray_focal_size);
@@ -2353,10 +2457,10 @@ function fillRTDetailTable() {
             tblHtml += `<td>${sfd}</td>`;
             tblHtml += `<td>${iqi_designation}</td>`;
             tblHtml += `<td>${iqi_sensitivity}</td>`;
-            tblHtml += `<td>${film_size}</td>`;
-            tblHtml += `<td>${no_of_film}</td>`;
             tblHtml += `<td>${test_technique}</td>`;
             tblHtml += `<td>${film_position}</td>`;
+            tblHtml += `<td>${film_size}</td>`;
+            tblHtml += `<td>${no_of_film}</td>`;
             tblHtml += `</tr>`;
         }
 
@@ -2373,51 +2477,28 @@ function fillRTDetailTable() {
 }
 
 jQuery('#TestReportRTPendingModal').on('show.bs.modal', function (e) {
-    var dt = jQuery('#pendingDataTable').DataTable();
-    fixDataTableColumnsUntilAdjusted(dt);
-    var usedParts = [];
-    if (technique_sheet_rt_details_data && technique_sheet_rt_details_data.length > 0) {
-        technique_sheet_rt_details_data.forEach(function (item) {
-            if (item.test_report_rt_id) {
-                usedParts.push(Number(item.test_report_rt_id));
-            }
-        });
+    if (jQuery.fn.DataTable.isDataTable('#pendingDataTable')) {
+        var dt = jQuery('#pendingDataTable').DataTable();
+        fixDataTableColumnsUntilAdjusted(dt);
+        dt.$('input[name="test_report_rt_id[]"]').prop('checked', false);
+    } else {
+        jQuery('#pendingDataTable tbody input[name="test_report_rt_id[]"]').prop('checked', false);
     }
-    function isUsed(pjId) {
-        if (usedParts.includes(Number(pjId))) {
-            return true;
+});
+
+jQuery('#TestReportRTPendingModal').on('shown.bs.modal', function () {
+    let $table = jQuery('#pendingDataTable');
+    if (jQuery.fn.DataTable.isDataTable($table)) {
+        $table.DataTable().columns.adjust().draw();
+        if (typeof initColumnSearch === 'function') {
+            initColumnSearch('#pendingDataTable', [0], 'common_search');
         }
-        return false;
     }
-    var totalEntry = 0;
-    jQuery('#pendingDataTable tbody tr').each(function (indx) {
-        totalEntry++;
-        var checkField = jQuery(this).find('input[name="test_report_rt_id[]"]');
-        var partId = jQuery(checkField).val();
-        var inUse = isUsed(partId);
-
-        if (formId == undefined) {
-            if (technique_sheet_rt_details_data.length > 0) {
-                var inUse = isUsed(partId);
-            } else {
-                var inUse = false;
-            }
-        } else {
-            var inUse = isUsed(partId);
-        }
-
-        if (inUse) {
-            jQuery(checkField).prop('checked', true);
-
-        } else {
-            jQuery(checkField).prop('checked', false);
-        }
-    });
 });
 
 jQuery('#TestReportRTPendingModal').on('hide.bs.modal', function (e) {
     this.dataset.customHideFocus = 'true';
-    const input = document.getElementById('type_of_job_id');
+    const input = document.getElementById('job_desc');
     if (input) {
         setTimeout(() => {
             input.focus();

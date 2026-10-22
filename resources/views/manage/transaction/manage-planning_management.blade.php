@@ -40,7 +40,7 @@
                             <th>Customer</th>
                             <th>Type Of Job</th>
                             <th>Job Description</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>OA Type</th>
                             <th>Type of Test</th>
                             <th>Qty.</th>

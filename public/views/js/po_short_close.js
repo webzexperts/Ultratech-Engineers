@@ -7,9 +7,9 @@ $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
     var row = $('#POShortCloseDataTable').DataTable().row(dataIndex).node();
     var checkbox = $(row).find("input[type='checkbox']");
     if (checkbox.is(':checked')) {
-        return true; 
+        return true;
     }
-    return true; 
+    return true;
 });
 jQuery('#resetbtn').on('click', function () {
     po_sc_data = [];
@@ -111,8 +111,8 @@ function fillPOShortCloseTable() {
             tblHtml += `<td>${po_date}</td>`;
             tblHtml += `<td>${supplier_name}</td>`;
             tblHtml += `<td>${ref_no_date}</td>`;
-            tblHtml += `<td>${bill_to}</td>`;
-            tblHtml += `<td>${ship_to}</td>`;
+            // tblHtml += `<td>${bill_to}</td>`;
+            // tblHtml += `<td>${ship_to}</td>`;
             tblHtml += `<td>${item_name}</td>`;
             tblHtml += `<td>${item_group}</td>`;
             tblHtml += `<td>${main_group}</td>`;

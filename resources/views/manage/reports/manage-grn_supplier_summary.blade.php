@@ -128,7 +128,7 @@
                     className: 'export_grn_supplier_summary d-none',
                     exportOptions: {
                         columns: function(idx, data, node) {
-                            return idx !== 0 && table.column(idx).visible();
+                            return table.column(idx).visible();
                         },
                         modifier: {
                             page: 'all'

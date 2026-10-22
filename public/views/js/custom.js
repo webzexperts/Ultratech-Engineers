@@ -29,7 +29,43 @@ let startDate = new Date(jQuery('#def_year_startdate').val());
 
 let endDate = new Date(jQuery('#def_year_enddate').val());
 
-var headerOpt = { 'X-CSRF-TOKEN': jQuery('input[name="_token"]').val() };
+// var headerOpt = { 'X-CSRF-TOKEN': jQuery('input[name="_token"]').val() };
+
+var currentTabYearId = jQuery('#current_tab_year_id').val();
+var currentTabLocationId = jQuery('#current_tab_location_id').val();
+var headerOpt = {
+    'X-CSRF-TOKEN': jQuery('input[name="_token"]').val(),
+    'X-Year-Id': currentTabYearId,
+    "X-Location-Id": currentTabLocationId
+};
+
+if (typeof jQuery !== 'undefined') {
+    jQuery.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+        var yearId = jQuery('#current_tab_year_id').val();
+        var LocationId = jQuery('#current_tab_location_id').val();
+        if (yearId) {
+            jqXHR.setRequestHeader('X-Year-Id', yearId);
+        }
+        if (LocationId) {
+            jqXHR.setRequestHeader('X-Location-Id', LocationId)
+        }
+    });
+
+    jQuery(document).ready(function () {
+        var yearId = jQuery('#current_tab_year_id').val();
+        var LocationId = jQuery('#current_tab_location_id').val();
+        if (yearId) {
+            jQuery('form').each(function () {
+                if (jQuery(this).find('input[name="year_id"]').length === 0) {
+                    jQuery(this).prepend('<input type="hidden" name="year_id" value="' + yearId + '">');
+                }
+                if (jQuery(this).find('input[name="location_id"]').length === 0) {
+                    jQuery(this).prepend('<input type="hidden" name="location_id" value="' + LocationId + '">');
+                }
+            });
+        }
+    });
+}
 
 // old working code start
 // function toastSuccess(msg, callNext = null) {

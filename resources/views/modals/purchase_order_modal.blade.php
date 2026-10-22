@@ -78,7 +78,10 @@
                                     </div>
                                 </div>
 
-                                <div class="row g-2 mb-1">
+                               
+                            </div>
+                            <div class="col-md-4">
+                                 <div class="row g-2 ml-2 mb-1">
                                     <div class="col-4">
                                         <label class="form-label">Supplier <sup class="astric">*</sup></label>
                                     </div>
@@ -99,8 +102,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
                                 {{-- <div class="row g-2 ml-2" style="margin-bottom: 1.9rem !important;"> --}}
                                 <div class="row g-2 ml-2">
                                     <div class="col-4">
@@ -122,6 +123,9 @@
                                     </div>
                                 </div>
 
+                                
+                            </div>
+                            <div class="col-md-4">
                                 <div class="row g-2 ml-2 mb-1">
                                     <div class="col-4">
                                         <label class="form-label">Ref. No. & Date</label>
@@ -138,8 +142,6 @@
                                         <input type="text" class="form-control" id="payment_terms" name="payment_terms">  
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
                                 <div class="row g-2 ml-2">
                                 {{-- <div class="row g-2 ml-2" style="margin-bottom: 1.9rem !important;"> --}}
                                     <div class="col-4">
@@ -147,6 +149,7 @@
                                     <div class="col-8">
                                     </div>
                                 </div>
+                                {{-- 
                                 <div class="row g-2 ml-2 mb-1">
                                     <div class="col-4">
                                         <label class="form-label">Bill To <sup class="astric">*</sup></label>
@@ -182,6 +185,8 @@
                                         </div>
                                     </div>
                                 </div>
+                                --}}
+
                             </div>          
                         </div>
                     </div>

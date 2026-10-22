@@ -49,15 +49,15 @@
                                         <label class="form-check-label" for="process_type_repair">Repair</label>
                                     </div>
                                     <button type="button" id="pendingBtn" class="btn btn-sm btn-primary ms-auto" disabled>Pending</button>
-                                    <button type="button" id="copyMaterialBtn" class="btn btn-sm btn-primary text-nowrap" disabled>Past Inward</button>
+                                    <button type="button" id="copyMaterialBtn" class="btn btn-sm btn-primary text-nowrap" disabled>Past Offer</button>
                                 </div>
                             </div>
 
-                            <div class="row g-2 mb-1">
-                                <div class="col-4"><label for="type_of_job_id" class="form-label">Type of Job <sup class="astric">*</sup></label></div>
+                            <div class="row g-2 mb-1" style="display: none;">
+                                <div class="col-4"><label for="type_of_job_id" class="form-label">Type of Job</label></div>
                                 <div class="col-8">
                                     <div class="otherselectwidth">
-                                        <select class="js-example-basic-single suggest_type_of_job" name="type_of_job_id" id="type_of_job_id" required>
+                                        <select class="js-example-basic-single suggest_type_of_job" name="type_of_job_id" id="type_of_job_id">
                                             <option value="">Select Type of Job</option>
                                             @forelse(getTypeOfJob() as $toj)
                                                 <option value="{{ $toj->id }}">{{ $toj->type_of_job }}</option>
@@ -73,26 +73,15 @@
                             </div>
 
                             <div class="row g-2 mb-1">
-                                <div class="col-4"><label for="inward_job_desc_id" class="form-label">Job Description <sup class="astric">*</sup></label></div>
+                                <div class="col-4"><label for="job_desc" class="form-label">Job Description <sup class="astric">*</sup></label></div>
                                 <div class="col-8">
-                                    <div class="otherselectwidth">
-                                        <select class="js-example-basic-single suggest_job_description" name="job_desc_id" id="inward_job_desc_id" required>
-                                            <option value="">Select Job Description</option>
-                                            @forelse(getMiJobDescription() as $jd)
-                                                <option value="{{ $jd->id }}" data-parts="{{ json_encode($jd->parts) }}">{{ $jd->job_description }}</option>
-                                            @empty
-                                            @endforelse
-                                        </select>
-                                        <div class="invalid-tooltip">Select Job Description.</div>
-                                        @if(hasAccess("job_description","add"))
-                                            <i class="plus-icon bx bx-plus-medical" onclick="addedJobDescription(true)" data-bs-target="#JobDescriptionModal"></i>
-                                        @endif
-                                    </div>
+                                    <input type="text" name="job_desc" id="job_desc" class="form-control" maxlength="255" required autocomplete="off">
+                                    <div class="invalid-tooltip">Enter Job Description.</div>
                                 </div>
                             </div>
 
                             <div class="row g-2 mb-1">
-                                <div class="col-4"><label for="part_no" class="form-label">Part No.</label></div>
+                                <div class="col-4"><label for="part_no" class="form-label">Part No. / Die No.</label></div>
                                 <div class="col-8">
                                     <input type="text" name="part_no" id="part_no" class="form-control" onkeyup="suggestInwardPartNo(event, this)" maxlength="155" autocomplete="off">
                                     <div id="inward_part_no_list"></div>
@@ -234,7 +223,7 @@
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="quantity" class="form-label">Quantity <sup class="astric">*</sup></label></div>
                                 <div class="col-8">
-                                    <input type="text" name="quantity" id="quantity" class="form-control isInteger" required>
+                                    <input type="text" name="quantity" id="quantity" class="form-control isInteger skip-tab" value="1" readonly tabindex="-1" required>
                                     <div class="invalid-tooltip">Enter Quantity.</div>
                                 </div>
                             </div>
@@ -259,6 +248,18 @@
                                 <div class="col-4 justify-content-start"><label for="remark" class="form-label">Remark</label></div>
                                 <div class="col-8">
                                     <textarea name="remark" id="remark" class="form-control" rows="2" maxlength="8000"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-1" id="repeat_item_row">
+                                <div class="col-4"></div>
+                                <div class="col-8 d-flex gap-4 align-items-center">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="repeat_item" name="repeat_item">
+                                        <label class="form-check-label" for="repeat_item">
+                                            Repeat Item
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>

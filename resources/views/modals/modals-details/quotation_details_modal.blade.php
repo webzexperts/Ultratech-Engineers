@@ -88,7 +88,7 @@
                             <!-- Part No. -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="quotd_part_no" class="form-label pt-0">Part No.</label>
+                                    <label for="quotd_part_no" class="form-label pt-0">Part No.  / Die No.</label>
                                 </div>
                                 <div class="col-8">
                                     <input type="text" name="quotd_part_no" id="quotd_part_no" class="form-control" onkeyup="suggestQuotationPartNo(event, this)" maxlength="155" autocomplete="off">

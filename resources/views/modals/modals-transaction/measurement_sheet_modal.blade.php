@@ -72,7 +72,7 @@
                                             <th scope="col">Material</th>
                                             <th scope="col">Type of Job</th>
                                             <th scope="col">Job Description</th>
-                                            <th scope="col">Part No.</th>
+                                            <th scope="col">Part No. / Die No.</th>
                                             <th scope="col">Drg. No.</th>
                                             <th scope="col">Product Code</th>
                                             <th scope="col">Ir-192 SQIN</th>

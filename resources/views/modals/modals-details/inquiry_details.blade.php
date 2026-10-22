@@ -117,7 +117,7 @@
                                 <div class="row g-2 mb-1">
                                     <div class="col-4 justify-content-start">
                                         <label for="inqd_part_no" class="form-label">
-                                            Part No.
+                                            Part No. / Die No.
                                         </label>
                                     </div>
 

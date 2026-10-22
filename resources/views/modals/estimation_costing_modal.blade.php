@@ -104,11 +104,11 @@
 
                                 <div class="row g-2 mb-1">
                                     <div class="col-4">
-                                        <label for="inqd_part_id" class="form-label">Part No.</label>
+                                        <label for="inqd_part_id" class="form-label">Part No. / Die No.</label>
                                     </div>
                                     <div class="col-8">
                                         <select class="js-example-basic-single skip-tab" name="inqd_part_id" id="inqd_part_id">
-                                            <option value="">Select Part No.</option> 
+                                            <option value="">Select Part No. / Die No.</option> 
                                              @forelse(getparts() as $part)
                                                 <option value="{{ $part->part_id }}">{{ !empty($part->drg_no) ? $part->part_no . ' - ' . $part->drg_no : $part->part_no }}</option>
                                                 @empty

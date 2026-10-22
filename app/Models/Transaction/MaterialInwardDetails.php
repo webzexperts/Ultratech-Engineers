@@ -18,7 +18,7 @@ class MaterialInwardDetails extends Model
         'type_of_testing_id_fix',
         'type_of_job_id',
         'job_desc_id',
-        'part_id',
+        'job_desc',
         'part_no',
         'drg_no',
         'material_id',
@@ -36,6 +36,7 @@ class MaterialInwardDetails extends Model
         'remark',
         'process_type',
         'is_observation_sheet',
-        'test_report_rt_id'
+        'test_report_rt_id',
+        'offer_details_id'
     ];
 }

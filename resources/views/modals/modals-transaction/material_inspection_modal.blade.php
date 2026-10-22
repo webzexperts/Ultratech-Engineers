@@ -98,9 +98,9 @@
                                     <textarea type="text" class="form-control skip-tab" id="mid_job_desc" name="mid_job_desc" autocomplete="off" readonly></textarea>
                                 </div>
                                 <div class="col-12 g-2 mt-2">
-                                    <label for="mid_part_id" class="form-label">Part No.</label>
+                                    <label for="mid_part_id" class="form-label">Part No. / Die No.</label>
                                     <select class="js-example-basic-single skip-tab" name="mid_part_id" id="mid_part_id" >
-                                        <option value="">Select Part No.</option> 
+                                        <option value="">Select Part No. / Die No.</option> 
                                          @forelse(getparts() as $part)
                                             <option value="{{ $part->part_id }}">{{ !empty($part->drg_no) ? $part->part_no . ' - ' . $part->drg_no : $part->part_no }}</option>
                                             @empty

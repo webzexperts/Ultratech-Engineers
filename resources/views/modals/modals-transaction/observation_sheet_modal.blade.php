@@ -85,9 +85,9 @@
                                             <th scope="col">DC Date</th>
                                             <th scope="col">PO No.</th>
                                             <th scope="col">PO Date</th>
-                                            <th scope="col">Type of Job</th>
+                                            <!-- <th scope="col">Type of Job</th> -->
                                             <th scope="col">Job Desc.</th>
-                                            <th scope="col">Part No.</th>
+                                            <th scope="col">Part No. / Die No.</th>
                                             <th scope="col">Drg. No.</th>
                                             <th scope="col">Material</th>
                                             <th scope="col">Heat No.</th>
@@ -97,7 +97,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="details_tbody">
-                                        <tr id="noDetails"><td colspan="22" class="text-center">No Observation Sheet Details Added</td></tr>
+                                        <tr id="noDetails"><td colspan="21" class="text-center">No Observation Sheet Details Added</td></tr>
                                     </tbody>
                                 </table>
                             </div>

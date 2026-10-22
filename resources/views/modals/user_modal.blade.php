@@ -118,19 +118,18 @@
                             </div>
                         </div>
 
-                        <div class="row mb-1 position-relative">
+                        <!-- <div class="row mb-1 position-relative">
                             <div class="col-lg-2">
                                 <label for="allow_production_back_days_entry" class="form-label">Allow Production Back Days Entry </label>
                             </div>
                             <div class="col-lg-4 d-flex mt-0 align-items-start">
                                 <input type="text" name="allow_production_back_days_entry" id="allow_production_back_days_entry" class="form-control isInteger" value="0">
-                                <!-- <span class="ml-1">&nbsp;&nbsp;Days</span> -->
                                 <span class="text-nowrap ms-2">Days </span>
                             </div>
                             <div class="col-lg-1">
                                 <span class="text-nowrap ms-2" style="color:red;"><b>Note:</b> 0 Days = Allow Back Dated Unlimited Days Entry.</span>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
 
                     <input type="hidden" name="location_ids[]" id="default_location_id" value="1">

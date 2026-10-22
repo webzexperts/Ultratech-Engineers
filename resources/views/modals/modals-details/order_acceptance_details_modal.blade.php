@@ -86,9 +86,9 @@
                             </div>
                             <div class="row mt-3">
                                 <div class="col-12">
-                                    <label for="oad_part_id" class="form-label col-form-label">Part No.</label>
+                                    <label for="oad_part_id" class="form-label col-form-label">Part No. / Die No.</label>
                                     <select class="js-example-basic-single" name="oad_part_id" id="oad_part_id">
-                                        <option value="">Select Part No.</option>
+                                        <option value="">Select Part No.  / Die No.</option>
                                         <!-- @forelse (getparts() as $part)
                                         <option value="{{ $part->part_id }}">{{ $part->part }}</option>
                                         @empty

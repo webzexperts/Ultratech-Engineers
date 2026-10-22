@@ -22,7 +22,7 @@
                                 <th>Challan Date</th>
                                 <th>Type of Job</th>
                                 <th>Job Description</th>
-                                <th>Part No.</th>
+                                <th>Part No. / Die No.</th>
                                 <th>Type of Test</th>
                                 <th>Inward Qty.</th>
                                 <th>Unit</th>

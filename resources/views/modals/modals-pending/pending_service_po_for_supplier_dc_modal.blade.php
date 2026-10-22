@@ -18,8 +18,10 @@
                                 <th>PO Date</th>
                                 <th>Purpose</th>
                                 <th>Ref. No. & Date</th>
+                                {{-- 
                                 <th>Bill To</th>
                                 <th>For Location</th>
+                                --}}
                                 <th>Item</th>
                                 <th>Item Group</th>
                                 <th>Main Group</th>

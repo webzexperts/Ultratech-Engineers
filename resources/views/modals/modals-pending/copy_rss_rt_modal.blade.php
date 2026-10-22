@@ -17,9 +17,9 @@
                                     <th>RSS No.</th>
                                     <th>Date</th>
                                     <th>Customer</th>
-                                    <th>Type of Job</th>
+                                    <!-- <th>Type of Job</th> -->
                                     <th>Job Desc.</th>
-                                    <th>Part No.</th>
+                                    <th>Part No. / Die No.</th>
                                     <th>Drg. No.</th>
                                     <th>Area of Coverage</th>
                                 </tr>

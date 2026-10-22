@@ -14,9 +14,9 @@
                                 <th>Report No.</th>
                                 <th>Date</th>
                                 <th>Customer</th>
-                                <th>Type Of Job</th>
+                                <!-- <th>Type Of Job</th> -->
                                 <th>Job Desc.</th>
-                                <th>Part No.</th>
+                                <th>Part No. / Die No.</th>
                                 <th>Drg. No.</th>
                                 <th>Area Of Coverage</th>
                             </tr>

@@ -128,7 +128,7 @@
 
                                 <div class="row g-2 mb-1">
                                     <div class="col-4">
-                                        <label class="form-label">Part No.</label>
+                                        <label class="form-label">Part No. / Die No.</label>
                                     </div>
                                     <div class="col-8">
                                         <input type="text" class="form-control skip-tab" id="inqd_part_no" name="inqd_part_no" autocomplete="off" readonly>

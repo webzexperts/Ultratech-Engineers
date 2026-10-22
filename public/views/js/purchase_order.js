@@ -1,14 +1,6 @@
 po_details_data = [];
 var formId = jQuery('#commonPurchaseOrderForm').find('input[name="id"]').val();
-let selectedRows = {};
-$.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-    var row = $('#pendingPIDataTable').DataTable().row(dataIndex).node();
-    var checkbox = $(row).find("input[type='checkbox']");
-    if (checkbox.is(':checked')) {
-        return true;
-    }
-    return true;
-});
+let selectedPendingPIIds = new Set();
 // Edit purchase order row click
 jQuery('#dyntable tbody').on('click', '.edit-purchase_order', function () {
     var data = table.row(jQuery(this).parents('tr')).data();
@@ -82,9 +74,8 @@ function fetchAndFillPurchaseOrder(id) {
 
                 jQuery('#PurchaseOrderModal').find('#ref_no_date').val(data.po_data.ref_no_date != "" ? data.po_data.ref_no_date : "");
                 setRadioReadonly("input[name='po_type_id']", true);
-                jQuery('#PurchaseOrderModal').find('#bill_to_location_id').val(data.po_data.bill_to_location_id != "" ? data.po_data.bill_to_location_id : "").trigger('change.select2');
-
-                jQuery('#PurchaseOrderModal').find('#ship_to_location_id').val(data.po_data.ship_to_location_id != "" ? data.po_data.ship_to_location_id : "").trigger('change.select2');
+                // jQuery('#PurchaseOrderModal').find('#bill_to_location_id').val(data.po_data.bill_to_location_id != "" ? data.po_data.bill_to_location_id : "").trigger('change.select2');
+                // jQuery('#PurchaseOrderModal').find('#ship_to_location_id').val(data.po_data.ship_to_location_id != "" ? data.po_data.ship_to_location_id : "").trigger('change.select2');
 
                 if (data.po_data.in_use == true) {
                     jQuery('#PurchaseOrderModal').find('#ship_to_location_id').addClass('skip-tab');
@@ -155,7 +146,7 @@ function fetchAndFillPurchaseOrder(id) {
 // Reset button click for purchase order modal
 jQuery('#resetbtn').on('click', function () {
     po_details_data = [];
-    selectedRows = {};
+    selectedPendingPIIds.clear();
 
     jQuery('#PurchaseOrderDetailTable tbody').empty();
 
@@ -171,8 +162,10 @@ jQuery('#resetbtn').on('click', function () {
         jQuery('#po_sequence').prop('readonly', false).focus();
         jQuery('#PurchaseOrderModal').find("#po_supplier_id").val('').trigger('change');
         jQuery('#PurchaseOrderModal').find("#po_kind_attn_id").val('').trigger('change.select2');
-        jQuery('#PurchaseOrderModal').find('#bill_to_location_id').val('').trigger('change');
-        jQuery('#PurchaseOrderModal').find('#ship_to_location_id').val('').trigger('change');
+        // jQuery('#PurchaseOrderModal').find('#bill_to_location_id').val('').trigger('change');
+        // jQuery('#PurchaseOrderModal').find('#ship_to_location_id').val('').trigger('change');
+        // jQuery('#PurchaseOrderModal').find('#bill_to_location_id').val('1').trigger('change');
+        // jQuery('#PurchaseOrderModal').find('#ship_to_location_id').val('1').trigger('change');
 
         getLatestPurchaseOrderNo();
     } else {
@@ -228,8 +221,10 @@ jQuery('#PurchaseOrderModal').on('click', '#add_new', function () {
 
     jQuery('#PurchaseOrderModal').find('input[name*="po_type_id"][value="Manual"]').prop('checked', true).change();
     jQuery('#PurchaseOrderModal').find("#po_supplier_id").val('').trigger('change');
-    jQuery('#PurchaseOrderModal').find('#bill_to_location_id').val('').trigger('change');
-    jQuery('#PurchaseOrderModal').find('#ship_to_location_id').val('').trigger('change');
+    // jQuery('#PurchaseOrderModal').find('#bill_to_location_id').val('').trigger('change');
+    // jQuery('#PurchaseOrderModal').find('#ship_to_location_id').val('').trigger('change');
+    // jQuery('#PurchaseOrderModal').find('#bill_to_location_id').val('1').trigger('change');
+    // jQuery('#PurchaseOrderModal').find('#ship_to_location_id').val('1').trigger('change');
 
     jQuery('#PurchaseOrderModal').find('#add_new').hide();
     jQuery('#PurchaseOrderModal').find('#preview_btn').hide();
@@ -385,13 +380,33 @@ function getSupplierKindAttn() {
                     } else {
                         jQuery("#po_terms_and_conditions").val('');
                     }
+
+                    // Supplier-wise LNR for GST Type (Only in Add Mode)
+                    let isEditMode = jQuery('#PurchaseOrderModal').find('#id').val() != '';
+                    if (!isEditMode) {
+                        if (data.LnrData && data.LnrData.gst_type_fix_id) {
+                            // If previous PO exists for this supplier, select that supplier's LNR
+                            jQuery('#PurchaseOrderModal')
+                                .find('input[name="gst_type_fix_id"][value="' + data.LnrData.gst_type_fix_id + '"]')
+                                .prop('checked', true)
+                                .trigger('change');
+                        } else {
+                            jQuery('#PurchaseOrderModal')
+                                .find('input[name="gst_type_fix_id"][value="3"]')
+                                .prop('checked', true)
+                                .trigger('change');
+                        }
+                    }
                 }
             }
         });
     } else {
         $modal.find('#po_kind_attn_id').val('').trigger('change.select2');
         $modal.find("#po_terms_and_conditions").val('');
-
+        let isEditMode = $modal.find('#id').val() != '';
+        if (!isEditMode) {
+            $modal.find('input[name="gst_type_fix_id"][value="3"]').prop('checked', true).trigger('change');
+        }
     }
 }
 
@@ -572,12 +587,14 @@ $('#commonPurchaseOrderForm').on('submit', function (e) {
                             jQuery('#po_sequence').prop('readonly', false).focus();
 
                             $("#po_supplier_id").val('').trigger('change');
-                            $("#bill_to_location_id").val('').trigger('change.select2');
-                            $("#ship_to_location_id").val('').trigger('change.select2');
+                            // $("#bill_to_location_id").val('').trigger('change.select2');
+                            // $("#ship_to_location_id").val('').trigger('change.select2');
+                            // $("#bill_to_location_id").val('1').trigger('change');
+                            // $("#ship_to_location_id").val('1').trigger('change');
                             $("#PurchaseOrderDetailsForm #pod_pid_id").val(0).trigger('change.select2');
                             $("#PurchaseOrderDetailsForm #pod_id").val(0).trigger('change.select2');
                             po_details_data = [];
-                            selectedRows = {};
+                            selectedPendingPIIds.clear();
                             jQuery('#PurchaseOrderDetailTable tbody').empty();
                             jQuery("#totalAmount").text("0.00");
                             getLatestPurchaseOrderNo();
@@ -1136,9 +1153,11 @@ function checkSequence() {
             jQuery('#po_sequence').parent().parent().parent('div.control-group').addClass('error');
             jQuery('#po_sequence').focus();
             jQuery('#po_sequence').val('');
+            jQuery('#PurchaseOrderModal').find('#submitbtn, #updatebtn').prop('disabled', false);
 
         } else {
             jQuery('#po_sequence').addClass('file-loader');
+            jQuery('#PurchaseOrderModal').find('#submitbtn, #updatebtn').prop('disabled', true);
             jQuery('#po_sequence').parent().parent().parent('div.control-group').removeClass('error');
 
             var urL = "check-purchase_order_number_duplication?for=add&po_sequence=" + val;
@@ -1161,13 +1180,16 @@ function checkSequence() {
                         toastr.error(data.response_message);
                         jQuery('#commonPurchaseOrderForm #po_sequence').val('');
                         const input = document.getElementById('po_sequence'); input?.focus();
+                        jQuery('#PurchaseOrderModal').find('#submitbtn, #updatebtn').prop('disabled', false);
                     } else {
                         jQuery('#commonPurchaseOrderForm #po_number').val(data.latest_no);
                         jQuery('#commonPurchaseOrderForm #po_sequence').val(val);
+                        jQuery('#PurchaseOrderModal').find('#submitbtn, #updatebtn').prop('disabled', false);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     jQuery('#po_sequence').removeClass('file-loader');
+                    jQuery('#PurchaseOrderModal').find('#submitbtn, #updatebtn').prop('disabled', false);
                     var errMessage = JSON.parse(jqXHR.responseText);
                     if (errMessage.errors) {
                         validator.showErrors(errMessage.errors);
@@ -1184,9 +1206,12 @@ function checkSequence() {
     } else {
         jQuery('#po_number').val('');
         jQuery('#po_sequence').val('');
+        jQuery('#PurchaseOrderModal').find('#submitbtn, #updatebtn').prop('disabled', false);
     }
 
 }
+// જૂનો State-Matching કોડ કૉમેન્ટ કર્યો છે, હવે Supplier-wise LNR ચાલશે:
+/*
 jQuery('#po_supplier_id , #bill_to_location_id').on('change.select2 change', function () {
     $sup_state = jQuery("#po_supplier_id").find('option:selected').data('state-id');
     $bill_state = jQuery("#bill_to_location_id").find('option:selected').data('state_id');
@@ -1199,6 +1224,7 @@ jQuery('#po_supplier_id , #bill_to_location_id').on('change.select2 change', fun
         jQuery('input[name="gst_type_fix_id"][value="2"]').prop('checked', true).trigger('change');
     }
 });
+*/
 
 jQuery('input[name="gst_type_fix_id"]').on('change', function () {
     manageGstType();
@@ -1422,10 +1448,13 @@ function GetPendingPIforPO() {
                             var inUse = isUsed(data.pi_data[idx].pod_pid_id);
                             var in_use = data.pi_data[idx].in_use == true ? 'readonly' : '';
                             totalEntry++;
+                            if (inUse) {
+                                selectedPendingPIIds.add(String(data.pi_data[idx].pod_pid_id));
+                            }
                             tblHtml += `
                                                 <tr>
                                                     <td>
-                                                        <input type="checkbox" name="pod_pid_id[]" class="simple-check  ${inUse ? 'in-use' : ''}" id="pod_pid_ids_${data.pi_data[idx].pod_pid_id}" value="${data.pi_data[idx].pod_pid_id}" ${inUse ? 'checked' : ''} ${in_use} onchange="checkesCheckboxFrist(this)"/>
+                                                        <input type="checkbox" name="pod_pid_id[]" class="simple-check pending-pi-checkbox ${inUse ? 'in-use' : ''}" id="pod_pid_ids_${data.pi_data[idx].pod_pid_id}" value="${data.pi_data[idx].pod_pid_id}" ${inUse ? 'checked' : ''} ${in_use}/>
                                                     </td>
                                                     <td>${data.pi_data[idx].pi_no != null ? data.pi_data[idx].pi_no : ''}</td>
                                                     <td>${data.pi_data[idx].pi_date != null ? data.pi_data[idx].pi_date : ''}</td>
@@ -1465,12 +1494,9 @@ function GetPendingPIforPO() {
                     });
                     fixDataTableColumnsUntilAdjusted($new);
                     $new.on('draw', function () {
-                        let table = $('#pendingPIDataTable').DataTable();
-
-                        $.each(selectedRows, function (pid, row) {
-                            $(table.table().body()).prepend(row); // move to top
-                        });
+                        syncPendingPICheckboxes();
                     });
+                    syncPendingPICheckboxes();
                 } else {
                     jQuery('.toggleModalBtn').prop('disabled', true);
                 }
@@ -1492,20 +1518,74 @@ function GetPendingPIforPO() {
         }
     });
 }
-jQuery('#checkall-pi_data').click(function () {
-    if (jQuery(this).is(':checked')) {
-        jQuery("#pendingPIDataTable").find("[id^='pod_pid_ids_']:not(.in-use)").prop('checked', true).trigger('change');
-        jQuery("#pendingPIDataTable").find("[id^='pod_pid_ids_']").prop('checked', true).trigger('change');
-    } else {
-        jQuery("#pendingPIDataTable").find("[id^='pod_pid_ids_']:not(.in-use)").prop('checked', false).trigger('change');
-        jQuery("#pendingPIDataTable").find("[id^='pod_pid_ids_']").prop('checked', false).trigger('change');
-    }
 
+function syncPendingPICheckboxes() {
+    let $table = jQuery('#pendingPIDataTable');
+    if (jQuery.fn.DataTable.isDataTable($table)) {
+        let dt = $table.DataTable();
+        $table.find('tbody tr').each(function () {
+            let $chk = jQuery(this).find('input[name="pod_pid_id[]"]');
+            if ($chk.length) {
+                let val = String($chk.val());
+                $chk.prop('checked', selectedPendingPIIds.has(val));
+            }
+        });
+
+        let allCheckboxes = jQuery(dt.rows().nodes()).find('input[name="pod_pid_id[]"]:not([readonly]):not(:disabled)');
+        let totalCount = allCheckboxes.length;
+        if (totalCount > 0) {
+            let checkedCount = 0;
+            allCheckboxes.each(function () {
+                if (selectedPendingPIIds.has(String(jQuery(this).val()))) {
+                    checkedCount++;
+                }
+            });
+            jQuery('#checkall-pi_data').prop('checked', totalCount === checkedCount);
+        } else {
+            jQuery('#checkall-pi_data').prop('checked', false);
+        }
+    }
+}
+
+jQuery(document).on('change', '#pendingPIDataTable .pending-pi-checkbox', function () {
+    let val = String(jQuery(this).val());
+    if (jQuery(this).is(':checked')) {
+        selectedPendingPIIds.add(val);
+    } else {
+        selectedPendingPIIds.delete(val);
+    }
+    syncPendingPICheckboxes();
+});
+
+jQuery('#checkall-pi_data').on('click', function () {
+    let isChecked = jQuery(this).is(':checked');
+    let $table = jQuery('#pendingPIDataTable');
+    if (jQuery.fn.DataTable.isDataTable($table)) {
+        let dt = $table.DataTable();
+        let allCheckboxes = jQuery(dt.rows().nodes()).find('input[name="pod_pid_id[]"]:not([readonly]):not(:disabled)');
+        allCheckboxes.each(function () {
+            let val = String(jQuery(this).val());
+            if (isChecked) {
+                selectedPendingPIIds.add(val);
+            } else {
+                selectedPendingPIIds.delete(val);
+            }
+        });
+        syncPendingPICheckboxes();
+    }
 });
 
 $('#addPendigPoForm').on('submit', function (e) {
 
     e.preventDefault();
+
+    let chkArr = Array.from(selectedPendingPIIds);
+
+    // No checkbox selected
+    if (chkArr.length === 0) {
+        toastr.error('Select Purchase Indent From Pending.');
+        return;
+    }
 
     jQuery('#full-page-loader')
         .removeClass('hidden-loader')
@@ -1515,29 +1595,7 @@ $('#addPendigPoForm').on('submit', function (e) {
         .find('#submitbtn')
         .prop('disabled', true);
 
-    let chkArr = [];
     var formId = jQuery('#commonPurchaseOrderForm').find('input[name="id"]').val();
-
-    jQuery("#addPendigPoForm")
-        .find("[id^='pod_pid_ids_']:checked")
-        .each(function () {
-            chkArr.push(jQuery(this).val());
-        });
-
-    // No checkbox selected
-    if (chkArr.length === 0) {
-        toastr.error('Select Purchase Indent From Pending.');
-
-        jQuery('#full-page-loader')
-            .removeClass('loader-progress-whole-page')
-            .addClass('hidden-loader');
-
-        jQuery('#PurchaseOrderPendingModal')
-            .find('#submitbtn')
-            .prop('disabled', false);
-
-        return;
-    }
 
     if (formId != undefined && formId != "") {
         var pend_url = "get-purchase_indent_part_data_purchase_order?id=" + formId;
@@ -1559,7 +1617,6 @@ $('#addPendigPoForm').on('submit', function (e) {
                     for (let ind in data.po_details_data) {
                         po_details_data.push(data.po_details_data[ind]);
                     }
-                    // po_details_data.push(...data.inq_data);
                     fillPurchaseOrderDetailTable(data.po_details_data);
 
                 } else {
@@ -1587,7 +1644,6 @@ $('#addPendigPoForm').on('submit', function (e) {
                 toastr.error(jqXHR.statusText);
             } else {
                 toastr.error('Something went wrong!');
-                // console.log(jqXHR.responseText);
             }
 
             jQuery('#PurchaseOrderPendingModal')
@@ -1601,62 +1657,20 @@ $('#addPendigPoForm').on('submit', function (e) {
     });
 });
 
-
 jQuery('#PurchaseOrderPendingModal').on('show.bs.modal', function (e) {
     var dt = jQuery('#pendingPIDataTable').DataTable();
     fixDataTableColumnsUntilAdjusted(dt);
-    var usedParts = [];
+
+    selectedPendingPIIds.clear();
     if (po_details_data && po_details_data.length > 0) {
         po_details_data.forEach(function (item) {
             if (item.pod_pid_id) {
-                usedParts.push(Number(item.pod_pid_id));
+                selectedPendingPIIds.add(String(item.pod_pid_id));
             }
         });
     }
-    function isUsed(pjId) {
-        if (usedParts.includes(Number(pjId))) {
-            return true;
-        }
-        return false;
-    }
-    var totalEntry = 0;
-    jQuery('#pendingPIDataTable tbody tr').each(function (indx) {
-        totalEntry++;
-        var checkField = jQuery(this).find('input[name="pod_pid_id[]"]');
-        var partId = jQuery(checkField).val();
-        var inUse = isUsed(partId);
-
-        if (formId == undefined) {
-            if (po_details_data.length > 0) {
-                var inUse = isUsed(partId);
-            } else {
-                var inUse = false;
-            }
-        } else {
-            var inUse = isUsed(partId);
-        }
-
-        if (inUse) {
-            jQuery(checkField).prop('checked', true);
-
-        } else {
-            jQuery(checkField).prop('checked', false);
-        }
-    });
+    syncPendingPICheckboxes();
 });
-jQuery('#PurchaseOrderPendingModal').on('hide.bs.modal', function (e) {
-    selectedRows = {};
-});
-
-function checkesCheckboxFrist($this) {
-    var $row = jQuery($this).closest('tr');
-    var pod_pid_id = jQuery($this).val();
-    if (jQuery($this).is(':checked')) {
-        selectedRows[pod_pid_id] = $row;
-    } else {
-        delete selectedRows[pod_pid_id];
-    }
-}
 
 
 $(document).ready(function () {

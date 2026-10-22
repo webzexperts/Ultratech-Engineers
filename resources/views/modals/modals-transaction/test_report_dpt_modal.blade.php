@@ -18,6 +18,25 @@
                     <div class="row mb-1 g-2">
                         <!-- Column 1 -->
                         <div class="col-md-4">
+
+                            <!-- Entry Type -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <!-- <label class="form-label">Entry Type</label> -->
+                                </div>
+                                <div class="col-8">
+                                    <div class="d-flex gap-3 align-items-center mt-1">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="entry_type_fix" id="entry_type_manual" value="Manual" checked required>
+                                            <label class="form-check-label" for="entry_type_manual">Manual</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="entry_type_fix" id="entry_type_pending" value="From Inward" disabled>
+                                            <label class="form-check-label" for="entry_type_pending">From Inward</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Report No -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
@@ -61,17 +80,17 @@
                                 </div>
                                 <div class="col-8">
                                     <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
-                                        <div class="d-flex gap-3 align-items-center" style="pointer-events: none;">
+                                        <div class="d-flex gap-3 align-items-center">
                                             <div class="form-check">
-                                                <input class="form-check-input skip-tab" type="radio" name="nabl_type_fix" id="nabl_non_nabl" value="Non NABL" checked tabindex="-1" onclick="return false;">
+                                                <input class="form-check-input skip-tab" type="radio" name="nabl_type_fix" id="nabl_non_nabl" value="Non NABL" checked tabindex="-1">
                                                 <label class="form-check-label" for="nabl_non_nabl">Non NABL</label>
                                             </div>
                                             <div class="form-check me-3">
-                                                <input class="form-check-input skip-tab" type="radio" name="nabl_type_fix" id="nabl_nabl" value="NABL" tabindex="-1" onclick="return false;">
+                                                <input class="form-check-input skip-tab" type="radio" name="nabl_type_fix" id="nabl_nabl" value="NABL" tabindex="-1">
                                                 <label class="form-check-label" for="nabl_nabl">NABL</label>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-success btn-sm toggleModalBtn" data-bs-target="#PendingInwardForDptModal" id="pending_btn" disabled>Pending Inward</button>
+                                        <button disabled type="button" class="btn btn-success btn-sm toggleModalBtn" data-bs-target="#PendingInwardForDptModal" id="pending_btn" disabled>Pending Inward</button>
                                     </div>
                                 </div>
                             </div>
@@ -80,13 +99,13 @@
                                 <div class="col-4">
                                 </div>
                                 <div class="col-8">
-                                    <div class="d-flex gap-3 align-items-center mt-1 flex-wrap" style="pointer-events: none;">
+                                    <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
                                         <div class="form-check">
-                                            <input class="form-check-input skip-tab" type="radio" name="job_type_fix" id="job_casting" value="Non-Welding" checked tabindex="-1" onclick="return false;">
+                                            <input class="form-check-input skip-tab" type="radio" name="job_type_fix" id="job_casting" value="Non-Welding" checked tabindex="-1">
                                             <label class="form-check-label" for="job_casting">Non-Welding</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input skip-tab" type="radio" name="job_type_fix" id="job_welding" value="Welding" tabindex="-1" onclick="return false;">
+                                            <input class="form-check-input skip-tab" type="radio" name="job_type_fix" id="job_welding" value="Welding" tabindex="-1">
                                             <label class="form-check-label" for="job_welding">Welding</label>
                                         </div>
                                     </div>
@@ -104,7 +123,8 @@
                                     <input type="hidden" name="customer_client_suggestion" id="customer_client_suggestion">
                                 </div>
                             </div>
-                            <!-- Type of Job -->
+                            <!-- Type of Job (Commented Out) -->
+                            <!--
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
                                     <label for="type_of_job_id" class="form-label">Type of Job <sup class="astric">*</sup></label>
@@ -123,7 +143,11 @@
                                     </div>
                                 </div>
                             </div>
+                            -->
+                            <input type="hidden" name="type_of_job_id" id="type_of_job_id" value="">
+
                             <!-- Job Description -->
+                            <!--
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
                                     <label for="job_desc_id" class="form-label">Job Description <sup class="astric">*</sup></label>
@@ -139,10 +163,23 @@
                                     <div class="invalid-tooltip">Select Job Description.</div>
                                 </div>
                             </div>
+                            -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="job_desc" class="form-label">Job Description <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <div class="d-flex gap-2">
+                                        <input type="text" class="form-control" name="job_desc" id="job_desc" required>
+                                        <div class="invalid-tooltip">Enter Job Description.</div>
+                                        <button type="button" class="btn btn-success btn-sm ms-1" id="copy_report_btn">Copy</button>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Part No. -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
-                                    <label for="part_no" class="form-label">Part No.</label>
+                                    <label for="part_no" class="form-label">Part No. / Die No.</label>
                                 </div>
                                 <div class="col-8">
                                     <input type="text" class="form-control" id="part_no" name="part_no" oninput="suggestPartNo(event, this)" autocomplete="off">
@@ -360,12 +397,6 @@
                                     <input type="hidden" name="pre_cleaning_suggestion" id="pre_cleaning_suggestion">
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Column 3 -->
-                        <div class="col-md-4">
-                            <!-- Surface Condition -->
-                            
                             <!-- Penetrant Application -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
@@ -377,6 +408,13 @@
                                     <input type="hidden" name="penetrant_application_suggestion" id="penetrant_application_suggestion">
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Column 3 -->
+                        <div class="col-md-4">
+                            <!-- Surface Condition -->
+                            
+                            
                             <!-- Dwell Time -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
@@ -502,6 +540,24 @@
                                     <div class="invalid-tooltip">Select Acceptance Standard.</div>
                                 </div>
                             </div>
+                            <!-- DPT Test No. Label -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="dpt_test_no_label" class="form-label">DPT Test No. Label</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="dpt_test_no_label" name="dpt_test_no_label" placeholder="DPT Test No.">
+                                </div>
+                            </div>
+                            <!-- Heat No. Label -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="heat_no_label" class="form-label">Heat No. Label</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="heat_no_label" name="heat_no_label" placeholder="Heat No.">
+                                </div>
+                            </div>
                             <!-- Defectogram Image Upload -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
@@ -573,8 +629,8 @@
                                                 <tr>
                                                     <th class="action_col">Actions</th>
                                                     <th>Sr. No.</th>
-                                                    <th>DPT Test No.</th>
-                                                    <th>Heat No.</th>
+                                                    <th id="th_dpt_test_no">DPT Test No.</th>
+                                                    <th id="th_heat_no">Heat No.</th>
                                                     <th>Quantity</th>
                                                     <th>Discontinuity Evaluation</th>
                                                     <th>Result</th>

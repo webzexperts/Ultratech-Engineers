@@ -41,9 +41,9 @@
                             <th>DC Date</th>
                             <th>PO No.</th>
                             <th>PO Date</th>
-                            <th>Type of Job</th>
+                            <!-- <th>Type of Job</th> -->
                             <th>Job Desc.</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>Drg. No.</th>
                             <th>Material</th>
                             <th>Product Code</th>
@@ -73,7 +73,7 @@
             "processing": false,
             "serverSide": true,
             "scrollX": true,
-            "order": [[2, 'desc'], [23, 'desc']],
+            "order": [[2, 'desc'], [22, 'desc']],
             dom: 'Blfrtip',
             buttons: [{
                 extend: 'excel',
@@ -115,8 +115,8 @@
                 { data: 'dc_date', name: 'material_inward.dc_date' },
                 { data: 'po_no', name: 'material_inward.po_no' },
                 { data: 'po_date', name: 'material_inward.po_date' },
-                { data: 'type_of_job', name: 'type_of_job.type_of_job' },
-                { data: 'job_description', name: 'job_descriptions.job_description' },
+                // { data: 'type_of_job', name: 'type_of_job.type_of_job' },
+                { data: 'job_description', name: 'test_report_dpt.job_desc' },
                 { data: 'part_no', name: 'test_report_dpt.part_no' },
                 { data: 'drg_no', name: 'test_report_dpt.drg_no' },
                 { data: 'material', name: 'materials.material' },

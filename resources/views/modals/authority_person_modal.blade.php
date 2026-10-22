@@ -171,7 +171,8 @@
                                     </div>
                                 </div>
 
-                                <div class="row g-2 mb-2 position-relative" id="location_row">
+                                {{-- Location Concept - Commented for future use
+                                <div class="row g-2 mb-2 position-relative d-none" id="location_row">
                                     <div class="col-3">
                                         <label for="status" class="form-label">Location <sup class="astric">*</sup></label>
                                     </div>
@@ -188,6 +189,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                --}}
 
                                 <div class="row g-1 mb-1" id="validity_row">
                                     <div class="col-3">

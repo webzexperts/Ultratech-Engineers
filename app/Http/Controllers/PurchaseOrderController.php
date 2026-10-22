@@ -18,6 +18,7 @@ use App\Models\POShortClose;
 use App\Models\Supplier;
 use App\Models\PurchaseIndentDetails;
 use App\Models\SupplierDetails;
+use Exception;
 
 class PurchaseOrderController extends Controller
 {
@@ -358,6 +359,11 @@ class PurchaseOrderController extends Controller
                 $po_sequence = $request->po_sequence;
             }
 
+            $checkDup = checkReportDuplication(PurchaseOrder::class, 'po_number', $po_number, $request, "Duplicate Purchase Order No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
+
             $page_id = getMenuIdBassedOnDisplayName('purchase_order');
             $assign_format_no = getAssignFormateNoForTransaction($LocationData->location_id, $page_id->id,$request->po_date);
             $amount_rupee = $request->net_amount;
@@ -371,8 +377,10 @@ class PurchaseOrderController extends Controller
                 'po_date' => $request->po_date ? Date::createFromFormat('d/m/Y', $request->po_date)->format('Y-m-d') : null,
                 'po_supplier_id' => $request->po_supplier_id,
                 'po_kind_attn_id' => $request->po_kind_attn_id,
-                'bill_to_location_id' => $request->bill_to_location_id,
-                'ship_to_location_id' => $request->ship_to_location_id,
+                // 'bill_to_location_id' => $request->bill_to_location_id,
+                // 'ship_to_location_id' => $request->ship_to_location_id,
+                'bill_to_location_id' => 1,
+                'ship_to_location_id' => 1,
                 'po_terms_and_conditions' => $request->po_terms_and_conditions,
                 'po_sp_note' => $request->po_sp_note,
                 'ref_no_date' => $request->ref_no_date,
@@ -475,7 +483,7 @@ class PurchaseOrderController extends Controller
                 'response_message' => getResponseMessage('store_success'),
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
 
             report($e);
             DB::rollBack();
@@ -598,6 +606,12 @@ class PurchaseOrderController extends Controller
                 'po_sequence.unique' => 'Duplicate Purchase Order No. Found.',
                 'po_sequence.required' => 'Enter Purchase Order No.',
             ]);
+
+        $checkDup = checkReportDuplication(PurchaseOrder::class, 'po_number', $request->po_number, $request, "Duplicate Purchase Order No. Found.", $request->id, 'po_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
+
         try
         {
             $page_id = getMenuIdBassedOnDisplayName('purchase_order');
@@ -614,8 +628,10 @@ class PurchaseOrderController extends Controller
                 'po_date' => $request->po_date ? Date::createFromFormat('d/m/Y', $request->po_date)->format('Y-m-d') : null,
                 'po_supplier_id' => $request->po_supplier_id,
                 'po_kind_attn_id' => $request->po_kind_attn_id,
-                'bill_to_location_id' => $request->bill_to_location_id,
-                'ship_to_location_id' => $request->ship_to_location_id,
+                // 'bill_to_location_id' => $request->bill_to_location_id,
+                // 'ship_to_location_id' => $request->ship_to_location_id,
+                'bill_to_location_id' => 1,
+                'ship_to_location_id' => 1,
                 'po_terms_and_conditions' => $request->po_terms_and_conditions,
                 'po_sp_note' => $request->po_sp_note,
                 'ref_no_date' => $request->ref_no_date,
@@ -633,8 +649,8 @@ class PurchaseOrderController extends Controller
                 'amount_in_word' => $amount_in_word ?? null,
                 'prepared_by_user_id' => $request->prepared_by_user_id,
                 // 'assign_format_no' => $assign_format_no, not update assign formate discussion ramde sir
-                'current_location_id' => $LocationData->location_id ?? null,
-                'year_id' => $year_data->id,
+                // 'current_location_id' => $LocationData->location_id ?? null,
+                //'year_id' => $year_data->id,
                 'company_id' => Auth::user()->company_id,
                 'last_on'             => Carbon::now('Asia/Kolkata'),
                 'last_by'             => Auth::id(),
@@ -823,7 +839,7 @@ class PurchaseOrderController extends Controller
                 ]);
             }
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             report($e);
             DB::rollBack();
@@ -857,7 +873,7 @@ class PurchaseOrderController extends Controller
                 'response_message' => getResponseMessage('delete_success'),
             ]);
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             report($e);
             DB::rollBack(); 
@@ -1033,7 +1049,8 @@ class PurchaseOrderController extends Controller
         // dd($request->all());
         $supplierId = $request->supplier_id;
 
-        $LnrData = PurchaseOrder::select('po_terms_and_conditions')->where('po_supplier_id', $supplierId)->orderby('po_id', 'desc')->first();
+        // $LnrData = PurchaseOrder::select('po_terms_and_conditions')->where('po_supplier_id', $supplierId)->orderby('po_id', 'desc')->first();
+        $LnrData = PurchaseOrder::select('po_terms_and_conditions', 'gst_type_fix_id')->where('po_supplier_id', $supplierId)->orderby('po_id', 'desc')->first();
 
         $Kind_attn = SupplierDetails::select(
             'supd_details_id',

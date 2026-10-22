@@ -186,7 +186,7 @@ function suggestFilmBrand(e, $this) {
                 if (data.response_code == 1) {
                     jQuery('#film_brand_list').html(data.filmBrandList);
                 } else {
-                     toastr.error(data.response_message);
+                    toastr.error(data.response_message);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -195,9 +195,9 @@ function suggestFilmBrand(e, $this) {
                 if (errMessage.errors) {
                     countryValidator.showErrors(errMessage.errors);
                 } else if (jqXHR.status == 401) {
-                     toastr.error(jqXHR.statusText);
+                    toastr.error(jqXHR.statusText);
                 } else {
-                     toastr.error('Something went wrong!');
+                    toastr.error('Something went wrong!');
                     console.log(JSON.parse(jqXHR.responseText));
                 }
             }
@@ -222,7 +222,7 @@ jQuery(document).on('click', '#film_brand_list', function (e) {
 
 let lastVerifiedFilmBrand = '';
 
-jQuery(document).on('blur', '#film_brand', function () {
+jQuery(document).on('blur', '#FilmBrandModal #film_brand', function () {
     let film_brand = jQuery(this).val().trim();
 
     if (film_brand === '') return;
@@ -233,7 +233,7 @@ jQuery(document).on('blur', '#film_brand', function () {
     }
 });
 
-jQuery(document).on('input', '#film_brand', function () {
+jQuery(document).on('input', '#FilmBrandModal #film_brand', function () {
     lastVerifiedFilmBrand = '';
 });
 
@@ -255,7 +255,7 @@ function checkFilmBrandName(film_brand) {
 }
 
 function verifyFilmBrand() {
-    var FilmBrandName = jQuery('#film_brand').val();
+    var FilmBrandName = jQuery('#FilmBrandModal #film_brand').val();
     var suggestion_list = jQuery('#film_brand_list').html;
 
     if (suggestion_list != '') {

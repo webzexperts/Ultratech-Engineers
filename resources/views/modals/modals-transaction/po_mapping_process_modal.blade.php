@@ -82,9 +82,9 @@
                                 </div>
 
                                 <div class="col-12 g-2 m-2">
-                                    <label class="form-label">Part No. </label>
+                                    <label class="form-label">Part No. / Die No. </label>
                                     <select class="js-example-basic-single suggest_part skip-tab" name="po_mp_part_id" id="po_mp_part_id">
-                                        <option value="">Select Part No.</option>
+                                        <option value="">Select Part No. / Die No.</option>
                                         @forelse(getparts() as $part)
                                             <option value="{{ $part->part_id }}">{{ !empty($part->drg_no) ? $part->part_no . ' - ' . $part->drg_no : $part->part_no }}</option>
                                             @empty
@@ -161,7 +161,7 @@
                                                         <th>PO No.</th>
                                                         <th>PO Date</th>
                                                         <th>Job Description</th>
-                                                        <th>Part No.</th>
+                                                        <th>Part No. / Die No.</th>
                                                         <th>Unit</th>
                                                         <th>OA Qty.</th>
                                                         <th>Planning Qty.</th>

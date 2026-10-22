@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Validation\Rule;
 use App\Models\PurchaseIndentShortClose;
+use Exception;
 
 
 class PurchaseIndentController extends Controller
@@ -170,6 +171,11 @@ class PurchaseIndentController extends Controller
                 $pi_sequence = $request->pi_sequence;
             }
 
+            $checkDup = checkReportDuplication(PurchaseIndent::class, 'pi_no', $pi_no, $request, "Duplicate Purchase Indent No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
+
             $page_id = getMenuIdBassedOnDisplayName('purchase_indent');
             $assign_format_no = getAssignFormateNoForTransaction($current_location_id, $page_id->id,$request->pi_date);
 
@@ -179,7 +185,8 @@ class PurchaseIndentController extends Controller
                 'pi_sequence'           => $pi_sequence ?? null,
                 'pi_date'               => isset($request->pi_date) ? Date::createFromFormat('d/m/Y', $request->pi_date)->format('Y-m-d') : null,
                 'current_location_id'   => $current_location_id ?? null,
-                'to_location_id'        => $request->to_location_id ?? null,
+                // 'to_location_id'        => $request->to_location_id ?? null,
+                'to_location_id'        => 1,
                 'indent_by_user_id'     => $request->indent_by_user_id ?? null,
                 'special_note'          => $request->special_note ?? null,
                 'assign_format_no'      => $assign_format_no,
@@ -249,7 +256,7 @@ class PurchaseIndentController extends Controller
                 ]);
             }
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             report($e);
             DB::rollBack();
@@ -466,6 +473,11 @@ class PurchaseIndentController extends Controller
             'pi_sequence.required' => 'Enter Indent No.',
         ]);
 
+        $checkDup = checkReportDuplication(PurchaseIndent::class, 'pi_no', $request->pi_no, $request, "Duplicate Purchase Indent No. Found.", $request->id, 'pi_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
+
         try
         {           
 
@@ -477,8 +489,9 @@ class PurchaseIndentController extends Controller
                 'pi_sequence'       => $request->pi_sequence ?? null,
                 'pi_no'             => $request->pi_no ?? null,
                 'pi_date'           => (!empty($request->pi_date)) ? Date::createFromFormat('d/m/Y', $request->pi_date)->format('Y-m-d') : null,
-                'current_location_id'   => $current_location_id ?? null,
-                'to_location_id'        => $request->to_location_id ?? null,
+                // 'current_location_id'   => $current_location_id ?? null,
+                // 'to_location_id'        => $request->to_location_id ?? null,
+                'to_location_id'        => 1,
                 'indent_by_user_id'     => $request->indent_by_user_id ?? null,
                 'special_note'          => $request->special_note ?? null,
                 // 'assign_format_no'      => $assign_format_no,   not update assign formate discussion ramde sir
@@ -592,7 +605,7 @@ class PurchaseIndentController extends Controller
                 'response_message' => getResponseMessage('update_success'),
             ]);
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             report($e);
             DB::rollBack();
@@ -627,7 +640,7 @@ class PurchaseIndentController extends Controller
                 'response_message' => getResponseMessage('delete_success'),
             ]);
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
              report($e);
              DB::rollBack(); 

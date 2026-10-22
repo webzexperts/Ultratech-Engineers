@@ -377,8 +377,7 @@ function fillPendingGrn() {
                                         <td>${data.po_data[idx].po_number}</td>
                                         <td>${data.po_data[idx].po_date}</td>
                                         <td>${data.po_data[idx].ref_no_date != null && data.po_data[idx].ref_no_date != undefined ? data.po_data[idx].ref_no_date : ''}</td>
-                                        <td>${data.po_data[idx].bill_to}</td>
-                                        <td>${data.po_data[idx].ship_to}</td>
+
                                         <td>${data.po_data[idx].item_name}</td>
                                         <td>${data.po_data[idx].item_group}</td>
                                         <td>${data.po_data[idx].main_group}</td>
@@ -388,13 +387,16 @@ function fillPendingGrn() {
                                         <td>${data.po_data[idx].pod_remark != null && data.po_data[idx].pod_remark != undefined ? data.po_data[idx].pod_remark : ""}</td>
                                         <td>${data.po_data[idx].prepared_by}</td>
                                     </tr>`;
+                            // < td > ${ data.po_data[idx].bill_to }</td >
+                            // <td>${data.po_data[idx].ship_to}</td> 
 
                         }
 
                     } else {
 
                         tblHtml += `<tr class="centeralign" id="noPendingPo">
-                                        <td colspan="14">No Pending PO Available</td>
+                                        <!-- <td colspan="14">No Pending PO Available</td> -->
+                                        <td colspan="12">No Pending PO Available</td>
                                     </tr>`;
 
                     }
@@ -1740,6 +1742,7 @@ function resetFieds() {
     jQuery('#GrnModal').find('#grn_sequence').prop('readonly', false);
     jQuery("#grn_supplier_id").val('').trigger('change');
     setRadioReadonly("input[name='grn_type_id']", false);
+    setSelect2Readonly("#grn_supplier_id", false);
     jQuery('#GrnModal').find('input[name*="grn_type_id"][value="Against PO"]').prop('checked', true).change().focus();
     jQuery("#commonGrnForm .toggleModalBtn").prop('disabled', true);
     jQuery("#GrnDetailsForm #pod_pid_id").val('');

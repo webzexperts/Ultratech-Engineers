@@ -201,7 +201,7 @@ jQuery(document).ready(function () {
                             type_of_testing_id_fix: item.type_of_testing_id_fix || 'RT',
                             process_type: item.process_type || 'Fresh',
                             is_observation_sheet: 'Yes',
-                            type_of_job_id: item.type_of_job_id || null,
+                            //type_of_job_id: item.type_of_job_id || null,
                             job_desc_id: item.job_desc_id || null,
                             part_id: item.part_id || null,
                             part_no: item.part_no || '',
@@ -229,7 +229,7 @@ jQuery(document).ready(function () {
                             dc_date: item.dc_date || '',
                             po_no: item.po_no || '',
                             po_date: item.po_date || '',
-                            type_of_job: item.type_of_job || '',
+                            //type_of_job: item.type_of_job || '',
                             job_description: item.job_description || '',
                             sub_details: [],
                             mode: 'Insert'
@@ -769,7 +769,6 @@ function fetchPendingTechniqueSheets() {
                         <td>${s.technique_sheet_rt_no || ''}</td>
                         <td>${s.technique_sheet_rt_date || ''}</td>
                         <td>${s.customer || ''}</td>
-                        <td>${s.type_of_job || ''}</td>
                         <td>${s.job_description || ''}</td>
                         <td>${s.part_no || ''}</td>
                         <td>${s.drg_no || ''}</td>
@@ -845,7 +844,6 @@ function renderPendingInwardModalTable() {
                 <td>${p.dc_date || ''}</td>
                 <td>${p.po_no || ''}</td>
                 <td>${p.po_date || ''}</td>
-                <td>${p.type_of_job || ''}</td>
                 <td>${p.job_description || ''}</td>
                 <td>${p.part_no || ''}</td>
                 <td>${p.drg_no || ''}</td>
@@ -1044,7 +1042,6 @@ function renderObservationSheetDetailsTable() {
             '<td>' + (row.dc_date || '') + '</td>' +
             '<td>' + (row.po_no || '') + '</td>' +
             '<td>' + (row.po_date || '') + '</td>' +
-            '<td>' + (row.type_of_job || '') + '</td>' +
             '<td>' + (row.job_description || '') + '</td>' +
             '<td>' + (row.part_no || '') + '</td>' +
             '<td>' + (row.drg_no || '') + '</td>' +
@@ -1078,7 +1075,7 @@ function editObservationDetailRow(indx) {
         jQuery('#detail_index').val(indx);
         jQuery('#inward_no').val(row.inward_no);
         jQuery('#inward_date').val(row.inward_date);
-        jQuery('#type_of_job').val(row.type_of_job);
+        // jQuery('#type_of_job').val(row.type_of_job);
         jQuery('#dc_no').val(row.dc_no);
 
         // Map missing fields for new layout
@@ -1484,7 +1481,7 @@ function fetchPendingOldRtReports() {
                         html += '<td>' + (report.test_report_date || '') + '</td>';
                         html += '<td>' + (report.ulr_no || '') + '</td>';
                         html += '<td>' + (report.customer || '') + '</td>';
-                        html += '<td>' + (report.type_of_job || '') + '</td>';
+                        // html += '<td>' + (report.type_of_job || '') + '</td>';
                         html += '<td>' + (report.job_description || '') + '</td>';
                         html += '<td>' + (report.part_no || '') + '</td>';
                         html += '<td>' + (report.drg_no || '') + '</td>';

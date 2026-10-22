@@ -18,8 +18,9 @@
                                 <th>Rev. No.</th>
                                 <th>Date</th>
                                 <th>Type of Job</th>
+                                <th>Job Type</th>
                                 <th>Job Desc.</th>
-                                <th>Part No.</th>
+                                <th>Part No. / Die No.</th>
                                 <th>Material</th>
                                 <th>Special Note</th>
                             </tr>

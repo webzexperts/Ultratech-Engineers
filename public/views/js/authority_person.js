@@ -15,33 +15,33 @@ function toggleAuthorityFields() {
     var type = jQuery("#authority_person_type_value_fix").val();
 
     // Hide all fields
-    jQuery("#location_row").hide();
+    // jQuery("#location_row").hide();
     jQuery("#validity_row").hide();
     jQuery("#pms_row").hide();
     jQuery("#certificate_row").hide();
 
     if (type == "RSO") {
-        jQuery("#location_row").show();
+        // jQuery("#location_row").show();
         jQuery("#validity_row").show();
         jQuery("#pms_row").show();
         jQuery("#certificate_row").show();
-        jQuery("#current_location_id").prop("required", true);
+        // jQuery("#current_location_id").prop("required", true);
         jQuery("#validity").prop("required", true);
         jQuery("#pms_no").prop("required", true);
         jQuery("#certificate").prop("required", true);
 
     }
     else if (type == "Radiographer") {
-        jQuery("#location_row").show();
+        // jQuery("#location_row").show();
         jQuery("#pms_row").show();
         jQuery("#certificate_row").show();
         jQuery("#validity").prop("required", false).val('');
-        jQuery("#current_location_id").prop("required", true);
+        // jQuery("#current_location_id").prop("required", true);
         jQuery("#pms_no").prop("required", true);
         jQuery("#certificate").prop("required", true);
     }else{
         jQuery("#validity").prop("required", false).val('');
-        jQuery("#current_location_id").prop("required", false).val('').trigger('change.select2');
+        // jQuery("#current_location_id").prop("required", false).val('').trigger('change.select2');
         jQuery("#pms_no").prop("required", false).val('');
         jQuery("#certificate").prop("required", false).val('');
         jQuery("#authority_person_type_value_fix").val('').trigger('change.select2');
@@ -119,7 +119,7 @@ function fetchAndFillAuthorityPerson(id) {
                 if(d.authority_person_type_value_fix != ''){
 
                     jQuery('#AuthorityPersonModal').find('#authority_person_type_value_fix').val(d.authority_person_type_value_fix).trigger('change');
-                    jQuery('#AuthorityPersonModal').find('#current_location_id').val(d.current_location_id).trigger('change.select2');
+                    // jQuery('#AuthorityPersonModal').find('#current_location_id').val(d.current_location_id).trigger('change.select2');
                     jQuery('#AuthorityPersonModal').find('#validity').val(d.validity);
                     jQuery('#AuthorityPersonModal').find('#pms_no').val(d.pms_no);
 
@@ -179,7 +179,7 @@ function resetAuthorityPersonForm() {
     jQuery('#AuthorityPersonModal').find('.operator_type_chk').prop('checked', false);
 
     jQuery('#AuthorityPersonModal').find('#authority_person_type_value_fix').val('').trigger('change');
-    jQuery('#AuthorityPersonModal').find('#current_location_id').val('').trigger('change.select2');
+    // jQuery('#AuthorityPersonModal').find('#current_location_id').val('').trigger('change.select2');
     jQuery('#AuthorityPersonModal').find('#pms_no').val('');
 
 }

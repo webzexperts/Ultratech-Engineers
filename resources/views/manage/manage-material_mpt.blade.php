@@ -38,9 +38,9 @@
                             <th>Batch No.</th>
                             <!-- <th>Iden. No.</th> -->
                             <th>Expiry Date</th>
-                            <th>Current Location</th>
+                            <!-- <th>Current Location</th> -->
                             <th>Status</th>
-                            <th>Own Location</th>
+                            <!-- <th>Own Location</th> -->
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -97,9 +97,9 @@
                 { data: 'mm_batch_no', name: 'material_mpt.mm_batch_no', },
                 // { data: 'mm_identification_no', name: 'material_mpt.mm_identification_no', },
                 { data: 'mm_expiry_date', name: 'material_mpt.mm_expiry_date', },
-                { data: 'current_location', name: 'current_location.location_name', },
+                // { data: 'current_location', name: 'current_location.location_name', },
                 { data: 'mm_status', name: 'material_mpt.mm_status', },
-                { data: 'own_location', name: 'own_location.location_name', },
+                // { data: 'own_location', name: 'own_location.location_name', },
                 { data: 'last_by', name: 'last_by', },
                 { data: 'last_on', name: 'material_mpt.last_on', },
                 { data: 'created_by', name: 'created_by', },

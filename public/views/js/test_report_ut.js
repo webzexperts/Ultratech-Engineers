@@ -136,14 +136,27 @@ function updateQtySummary(rows) {
     if (!rows) {
         rows = typeof test_report_ut_details_data !== 'undefined' ? test_report_ut_details_data.filter(row => row.mode !== 'Delete') : [];
     }
-    let nablType = jQuery('input[name="nabl_type_fix"]:checked').val() || 'Non NABL';
-    if (nablType === 'NABL') {
-        jQuery('#total_qty').val(1);
-    } else {
-        let sum = rows.reduce((acc, row) => acc + parseInt(row.quantity || 0), 0);
-        jQuery('#total_qty').val(sum > 0 ? sum : '');
-    }
+    let sum = rows.reduce((acc, row) => acc + parseInt(row.quantity || 0), 0);
+    jQuery('#total_qty').val(sum > 0 ? sum : '');
 }
+
+function applyDynamicDetailLabels() {
+    let rawUt = jQuery('#ut_test_no_label').val();
+    let rawHeat = jQuery('#heat_no_label').val();
+    let utLabel = (rawUt && rawUt.trim() !== '') ? rawUt.trim() : 'UT Test No.';
+    let heatLabel = (rawHeat && rawHeat.trim() !== '') ? rawHeat.trim() : 'Heat No.';
+
+    jQuery('#th_ut_test_no').text(utLabel);
+    jQuery('#lbl_det_ut_test_no').html(`${utLabel} <sup class="astric">*</sup>`);
+    jQuery('#tip_det_ut_test_no').text(`Enter ${utLabel}.`);
+
+    jQuery('#th_heat_no').text(heatLabel);
+    jQuery('#lbl_det_heat_no').text(heatLabel);
+}
+
+jQuery(document).on('change blur', '#ut_test_no_label, #heat_no_label', function () {
+    applyDynamicDetailLabels();
+});
 
 function formatDateStr(sqlDate) {
     if (!sqlDate || sqlDate === '0000-00-00') return '';
@@ -182,7 +195,8 @@ jQuery(document).on('input change', '#part_no', function () {
     }
 });
 
-// Fetch pending customers material inward list
+// Fetch pending customers material inward list (Commented for Manual Entry)
+/*
 jQuery(document).on('change', '#customer_id', function () {
     let customerId = jQuery(this).val();
 
@@ -223,8 +237,8 @@ jQuery(document).on('change', '#customer_id', function () {
                             dc_date: reportMasterData.dc_date ? reportMasterData.dc_date.split('/').reverse().join('-') : null,
                             po_no: reportMasterData.po_no,
                             po_date: reportMasterData.po_date ? reportMasterData.po_date.split('/').reverse().join('-') : null,
-                            type_of_job: jQuery('#type_of_job_id option:selected').text().trim(),
-                            job_description: jQuery('#job_desc_id option:selected').text().trim(),
+                            type_of_job: '',
+                            job_description: jQuery('#job_desc').val() || '',
                             part_no: reportMasterData.part_no,
                             drg_no: reportMasterData.drg_no,
                             material: jQuery('#material_id option:selected').text().trim(),
@@ -258,6 +272,7 @@ jQuery(document).on('change', '#customer_id', function () {
         }
     });
 });
+*/
 
 function fillPendingUtModalTable() {
     let $table = jQuery("#PendingInwardForUtModal").find('#PendingForUtTable');
@@ -292,9 +307,9 @@ function fillPendingUtModalTable() {
             <td>${item.dc_no || ''}</td>
             <td>${item.dc_date ? formatDateStr(item.dc_date) : ''}</td>
             <td>${item.po_no || ''}</td>
-            <td>${item.po_date ? formatDateStr(item.po_date) : ''}</td>
-            <td>${item.type_of_job || ''}</td>
-            <td>${item.job_description || ''}</td>
+            <td>${item.po_date ? formatDateStr(item.po_date) : ''}</td>` +
+            // `<td>${item.type_of_job || ''}</td>` +
+            `<td>${item.job_description || ''}</td>
             <td>${item.part_no || ''}</td>
             <td>${item.drg_no || ''}</td>
             <td>${item.material || ''}</td>
@@ -337,10 +352,13 @@ function fillPendingUtModalTable() {
     }
 }
 
+// Pending Inward button click (Commented for Manual Entry)
+/*
 jQuery(document).on('click', '#pending_btn', function () {
     fillPendingUtModalTable();
     jQuery('#PendingInwardForUtModal').modal('show');
 });
+*/
 
 jQuery('#PendingInwardForUtModal').on('shown.bs.modal', function () {
     let $table = jQuery('#PendingForUtTable');
@@ -440,12 +458,14 @@ jQuery(document).on('change', '#material_inward_details_id', function () {
         jQuery('#product_code').val(selectedItem.product_code || '');
         jQuery('#thickness').val(selectedItem.thickness || '');
 
-        if (selectedItem.type_of_job_id) {
-            jQuery('#type_of_job_id').val(selectedItem.type_of_job_id).trigger('change.select2');
-        }
-        if (selectedItem.job_desc_id) {
-            jQuery('#job_desc_id').val(selectedItem.job_desc_id).trigger('change.select2');
-        }
+        // if (selectedItem.type_of_job_id) {
+        //     jQuery('#type_of_job_id').val(selectedItem.type_of_job_id).trigger('change.select2');
+        // }
+        // if (selectedItem.job_desc_id) {
+        //     jQuery('#job_desc_id').val(selectedItem.job_desc_id).trigger('change.select2');
+        // }
+        jQuery('#type_of_job_id').val(selectedItem.type_of_job_id || '');
+        jQuery('#job_desc').val(selectedItem.job_description || selectedItem.job_desc || '');
         if (selectedItem.part_no) {
             jQuery('#part_no').val(selectedItem.part_no);
         }
@@ -495,6 +515,7 @@ function resetReportDetailsForm() {
     jQuery('#UTReportDetailsForm').removeClass('was-validated');
     jQuery('#detail_result_id').val('').trigger('change.select2');
     jQuery('#UTReportDetailsForm input[type="hidden"]').val('');
+    jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
 }
 
 function resetEquipmentForm() {
@@ -517,14 +538,7 @@ function resetProbeForm() {
 jQuery(document).on('click', '#addDetailRowBtn', function () {
     resetReportDetailsForm();
     jQuery('#det_form_type').val('add');
-
-    let nablType = jQuery('input[name="nabl_type_fix"]:checked').val() || 'Non NABL';
-    if (nablType === 'NABL') {
-        jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
-    } else {
-        jQuery('#det_quantity').prop('readonly', false).removeAttr('tabindex');
-    }
-
+    jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
     jQuery('#UTReportDetailsModal').modal('show');
 });
 
@@ -587,12 +601,7 @@ jQuery(document).on('click', '#submitDetailsRowBtn', function () {
         // Reset form and keep modal open for next entry
         resetReportDetailsForm();
         jQuery('#det_form_type').val('add');
-        let nablType = jQuery('input[name="nabl_type_fix"]:checked').val() || 'Non NABL';
-        if (nablType === 'NABL') {
-            jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
-        } else {
-            jQuery('#det_quantity').prop('readonly', false).removeAttr('tabindex');
-        }
+        jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
         //toastr.success('Details added successfully.');
         jQuery('#det_ut_test_no').focus();
     } else {
@@ -743,16 +752,9 @@ function editReportDetails(ele) {
 
     jQuery('#det_ut_test_no').val(row.ut_test_no);
     jQuery('#det_heat_no').val(row.heat_no);
-    jQuery('#det_quantity').val(row.quantity);
+    jQuery('#det_quantity').val(row.quantity || 1).prop('readonly', true).attr('tabindex', '-1');
     jQuery('#det_discontinuity_evaluation').val(row.discontinuity_evaluation);
     jQuery('#detail_result_id').val(row.detail_result_id).trigger('change.select2');
-
-    let nablType = jQuery('input[name="nabl_type_fix"]:checked').val() || 'Non NABL';
-    if (nablType === 'NABL') {
-        jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
-    } else {
-        jQuery('#det_quantity').prop('readonly', false).removeAttr('tabindex');
-    }
 
     jQuery('#UTReportDetailsModal').modal('show');
 }
@@ -908,9 +910,14 @@ function fillCustomerDropdown() {
 function resetMainForm() {
     _openForEdit = false;
     var lastNote = jQuery('#note').val();
+    var lastUtTestNoLabel = jQuery('#ut_test_no_label').val();
+    var lastHeatNoLabel = jQuery('#heat_no_label').val();
     jQuery('#commonTestReportUtForm')[0].reset();
     jQuery('#note').val(lastNote);
+    if (lastUtTestNoLabel) jQuery('#ut_test_no_label').val(lastUtTestNoLabel);
+    if (lastHeatNoLabel) jQuery('#heat_no_label').val(lastHeatNoLabel);
     jQuery('#commonTestReportUtForm').removeClass('was-validated');
+    jQuery('#entry_type_manual').prop('checked', true);
     jQuery('#id').val('');
     jQuery('#material_inward_details_id').val('');
     selectedPendingUtId = null;
@@ -922,8 +929,10 @@ function resetMainForm() {
     jQuery('#defectogram_image_remove').removeClass('i-block').addClass('hide');
 
     // Reset select2 dropdowns
-    jQuery('#type_of_job_id').val('').trigger('change.select2');
-    jQuery('#job_desc_id').val('').trigger('change.select2');
+    // jQuery('#type_of_job_id').val('').trigger('change.select2');
+    // jQuery('#job_desc_id').val('').trigger('change.select2');
+    jQuery('#type_of_job_id').val('');
+    jQuery('#job_desc').val('');
     jQuery('#material_id').val('').trigger('change.select2');
     jQuery('#area_of_coverage_id').val('').trigger('change.select2');
     jQuery('#procedure_ref_id').val('').trigger('change.select2');
@@ -948,6 +957,7 @@ function resetMainForm() {
     jQuery('#scan_plan_no_suggestion').val('');
     jQuery('#product_code_suggestion').val('');
     jQuery('#ulr_year').val('');
+    applyDynamicDetailLabels();
 
     // Clear detail grids
     test_report_ut_details_data = [];
@@ -1010,13 +1020,12 @@ function resetMainForm() {
         }
     });
 
-    // Reset and Lock radio buttons to defaults
+    // Reset radio buttons to defaults (Keep editable for manual selection)
+    setRadioReadonly('input[name="entry_type_fix"]', false);
     setRadioReadonly('input[name="nabl_type_fix"]', false);
     setRadioReadonly('input[name="job_type_fix"]', false);
     jQuery('#nabl_non_nabl').prop('checked', true);
     jQuery('#job_casting').prop('checked', true);
-    setRadioReadonly('input[name="nabl_type_fix"]', true);
-    setRadioReadonly('input[name="job_type_fix"]', true);
 
     setSelect2Readonly('#customer_id', false);
     jQuery('#material_inward_details_id').val('');
@@ -1134,11 +1143,14 @@ jQuery(document).on('click', '#submitbtn', function () {
         }
     }
 
+    // Inward check commented out for Manual entry:
+    /*
     let inwardDetailsId = jQuery('#material_inward_details_id').val();
     if (!inwardDetailsId) {
         toastr.error('Please Select At Least One Pending Report');
         return;
     }
+    */
 
     if (test_report_ut_equipment_details_data.filter(r => r.mode !== 'Delete').length === 0) {
         toastr.error('Please Add At Least One UT Equipment Detail');
@@ -1153,12 +1165,15 @@ jQuery(document).on('click', '#submitbtn', function () {
         toastr.error('Please Add At Least One Test Report UT Detail');
         return;
     }
+    // Pending Qty check commented out for Manual entry:
+    /*
     var pendQty = parseInt($('#pend_qty').val()) || 0;
     var totalQty = parseInt($('#total_qty').val()) || 0;
     if (totalQty > pendQty && pendQty > 0) {
         toastr.error('Total Qty Cannot Be Greater Than Pending Qty.');
         return;
     }
+    */
 
     for (let i = 0; i < activeDetails.length; i++) {
         let row = activeDetails[i];
@@ -1288,6 +1303,13 @@ function fetchAndFillTestReportUt(id) {
                 jQuery('#preview_btn').attr('href', previewUrl).show();
 
                 jQuery('#id').val(reportMasterData.test_report_ut_id);
+                setRadioReadonly('input[name="entry_type_fix"]', false);
+                if (reportMasterData.entry_type_fix) {
+                    jQuery(`input[name="entry_type_fix"][value="${reportMasterData.entry_type_fix}"]`).prop('checked', true);
+                } else {
+                    jQuery('#entry_type_manual').prop('checked', true);
+                }
+                setRadioReadonly('input[name="entry_type_fix"]', true);
                 jQuery('#test_report_sequence').val(reportMasterData.test_report_sequence).attr('data-oldval', reportMasterData.test_report_sequence);
                 setTimeout(() => {
                     let seqInput = jQuery('#test_report_sequence');
@@ -1309,8 +1331,10 @@ function fetchAndFillTestReportUt(id) {
 
                 // Fill all text / select fields
                 jQuery('#customer_client').val(reportMasterData.customer_client || '');
-                jQuery('#type_of_job_id').val(zeroToEmpty(reportMasterData.type_of_job_id)).trigger('change.select2');
-                jQuery('#job_desc_id').val(zeroToEmpty(reportMasterData.job_desc_id)).trigger('change.select2');
+                // jQuery('#type_of_job_id').val(zeroToEmpty(reportMasterData.type_of_job_id)).trigger('change.select2');
+                // jQuery('#job_desc_id').val(zeroToEmpty(reportMasterData.job_desc_id)).trigger('change.select2');
+                jQuery('#type_of_job_id').val(zeroToEmpty(reportMasterData.type_of_job_id));
+                jQuery('#job_desc').val(reportMasterData.job_description || reportMasterData.job_desc || '');
                 jQuery('#part_no').val(reportMasterData.part_no || '');
                 jQuery('#drg_no').val(reportMasterData.drg_no || '');
                 jQuery('#material_id').val(zeroToEmpty(reportMasterData.material_id)).trigger('change.select2');
@@ -1377,6 +1401,10 @@ function fetchAndFillTestReportUt(id) {
                 jQuery('#sp_note').val(reportMasterData.sp_note || '');
                 jQuery('#note').val(reportMasterData.note || '');
 
+                jQuery('#ut_test_no_label').val(reportMasterData.ut_test_no_label || '');
+                jQuery('#heat_no_label').val(reportMasterData.heat_no_label || '');
+                applyDynamicDetailLabels();
+
                 // Fill detail grids
                 test_report_ut_equipment_details_data = data.equipment_details_data.map((row, idx) => ({
                     ...row,
@@ -1430,7 +1458,7 @@ function fetchAndFillTestReportUt(id) {
                 // Disable copy button in edit mode
                 jQuery('#copy_report_btn').prop('disabled', true);
 
-                jQuery('#material_inward_details_id').val(reportMasterData.material_inward_details_id);
+                jQuery('#material_inward_details_id').val((reportMasterData.material_inward_details_id && reportMasterData.material_inward_details_id != 0) ? reportMasterData.material_inward_details_id : '');
 
                 // Load customer
                 fillCustomerDropdown();
@@ -1578,8 +1606,9 @@ function removeMedia(docName) {
 function handleNablTypeChange() {
     let nablType = jQuery('input[name="nabl_type_fix"]:checked').val() || 'Non NABL';
     if (nablType === 'NABL') {
-        jQuery('#total_qty').val(1);
-        jQuery('#addDetailRowBtn').prop('disabled', true).show();
+        let activeRows = test_report_ut_details_data.filter(r => r.mode !== 'Delete');
+        updateQtySummary(activeRows);
+        jQuery('#addDetailRowBtn').prop('disabled', false).show();
 
         setSelect2Readonly('#ulr_id', false);
         jQuery('#ulr_id').removeClass('skip-tab').prop('required', true).trigger('change');
@@ -1951,12 +1980,15 @@ jQuery(document).ready(function () {
 
 // Copy button click to open modal
 jQuery(document).on('click', '#copy_report_btn', function () {
-    let typeOfJobId = jQuery('#type_of_job_id').val();
+    // let typeOfJobId = jQuery('#type_of_job_id').val();
+    // let typeOfJobId = '';
+    let customerId = jQuery('#commonTestReportUtForm #customer_id').val() || jQuery('#customer_id').val() || '';
 
     jQuery.ajax({
         url: 'get-test_report_ut_copy_list',
         type: 'GET',
-        data: { type_of_job_id: typeOfJobId },
+        // data: { type_of_job_id: typeOfJobId },
+        data: { customer_id: customerId },
         dataType: 'json',
         success: function (data) {
             if (data.response_code == 1) {
@@ -1997,9 +2029,9 @@ function fillCopyReportModalTable() {
             <td>${item.test_report_date || ''}</td>
             <td>${item.customer || ''}</td>
             <td>${item.nabl_type_fix || ''}</td>
-            <td>${item.job_type_fix || ''}</td>
-            <td>${item.type_of_job || ''}</td>
-            <td>${item.job_description || ''}</td>
+            <td>${item.job_type_fix || ''}</td>` +
+            // `<td>${item.type_of_job || ''}</td>` +
+            `<td>${item.job_description || ''}</td>
             <td>${item.part_no || ''}</td>
             <td>${item.drg_no || ''}</td>
             <td>${item.material || ''}</td>
@@ -2120,6 +2152,13 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
                     jQuery('#ref_block_used').val(d.ref_block_used || '');
                     jQuery('#scanning_area').val(d.scanning_area || '');
                     jQuery('#scan_plan_no').val(d.scan_plan_no || '');
+                    jQuery('#ut_test_no_label').val(d.ut_test_no_label || '');
+                    jQuery('#heat_no_label').val(d.heat_no_label || '');
+                    jQuery('#note').val(d.note || '');
+                    if (d.sp_note) {
+                        jQuery('#sp_note').val(d.sp_note || '');
+                    }
+                    applyDynamicDetailLabels();
 
                     // Do not copy required fields (tested_by_authority_person_id is required, reviewed & authorized are not)
                     jQuery('#reviewed_by_authority_person_id').val(zeroToEmpty(d.reviewed_by_authority_person_id)).trigger('change.select2');
@@ -2157,7 +2196,8 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
 
                 // Focus on type of job dropdown after copy completes
                 setTimeout(function () {
-                    jQuery('#type_of_job_id').focus();
+                    // jQuery('#type_of_job_id').focus();
+                    jQuery('#job_desc').focus();
                 }, 100);
             }
         },
@@ -2284,6 +2324,9 @@ function getTRLNRData() {
             if (data.response_code == 1 && data.lnr_data != null) {
                 var lnr = data.lnr_data;
                 jQuery('#note').val(lnr.note ?? "");
+                jQuery('#ut_test_no_label').val(lnr.ut_test_no_label ?? "");
+                jQuery('#heat_no_label').val(lnr.heat_no_label ?? "");
+                applyDynamicDetailLabels();
             }
         },
         error: function () {

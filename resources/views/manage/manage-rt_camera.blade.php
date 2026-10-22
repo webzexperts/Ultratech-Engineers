@@ -28,7 +28,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <table id="dyntable" class="table nowrap align-middle table-bordered" style="width:100%" data-exclude-search="15">
+                <table id="dyntable" class="table nowrap align-middle table-bordered" style="width:100%" data-exclude-search="13">
                     <thead>
                         <tr>
                             <th class="action_col">Actions</th>
@@ -43,9 +43,9 @@
                             <th>Focal Spot</th>
                             <!-- <th>Document Ref No.</th> -->
                             <!-- <th>Validity</th> -->
-                            <th>Current Location</th>
+                            <!-- <th>Current Location</th> -->
                             <th>Status</th>
-                            <th>Own Location</th>
+                            <!-- <th>Own Location</th> -->
                             <th>AERB No.</th>
                             <th>Application No.</th>
                             <th>Movement Approval</th>
@@ -83,7 +83,7 @@
                 className: 'export_rt_camera d-none',
                  exportOptions: {
                     columns: function(idx, data, node) {
-                        return (idx !== 0 && idx !== 15) && table.column(idx).visible();
+                        return (idx !== 0 && idx !== 13) && table.column(idx).visible();
                     },
                     modifier: {
                         page: 'all'
@@ -118,9 +118,9 @@
                 { data: 'rt_focal_spot', name: 'rt_camera.rt_focal_spot', },
                 // { data: 'rt_document_ref_no', name: 'rt_camera.rt_document_ref_no', },
                 // { data: 'rt_validity_date', name: 'rt_camera.rt_validity_date', },
-                { data: 'current_location', name: 'current_location.location_name', },
+                // { data: 'current_location', name: 'current_location.location_name', },
                 { data: 'rt_status', name: 'rt_camera.rt_status', },
-                { data: 'own_location', name: 'own_location.location_name', },
+                // { data: 'own_location', name: 'own_location.location_name', },
                 { data: 'rt_aerb_no', name: 'rt_camera.rt_aerb_no', },
                 { data: 'application_no', name: 'rt_camera.application_no', },
                 { data: 'movement_approval', name: 'rt_camera.movement_approval', },

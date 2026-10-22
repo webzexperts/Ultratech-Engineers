@@ -96,12 +96,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row g-2 mb-1">
+                            <!-- <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="type_of_job" class="form-label">Type of Job</label></div>
                                 <div class="col-8">
                                     <input type="text" id="type_of_job" class="form-control form-control-sm" readonly>
                                 </div>
-                            </div>
+                            </div> -->
                             
                         </div>
 
@@ -120,7 +120,7 @@
 
                             <!-- Part No. -->
                             <div class="row g-2 mb-1">
-                                <div class="col-4"><label for="die_no" class="form-label">Part No.</label></div>
+                                <div class="col-4"><label for="die_no" class="form-label">Part No. / Die No.</label></div>
                                 <div class="col-8">
                                     <input type="text" id="die_no" class="form-control form-control-sm" readonly>
                                 </div>

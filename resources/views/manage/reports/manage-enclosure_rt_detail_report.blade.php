@@ -25,7 +25,7 @@
                     <table id="dyntable" class="table nowrap align-middle table-bordered cul-search" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Location</th>
+                                <!-- <th>Location</th> -->
                                 <th>En. Name</th>
                                 <th>En. No.</th>
                                 <th>Layout</th>
@@ -98,7 +98,7 @@
                     }
                 },
                 columns: [
-                    { data: 'location_name', name: 'location_name', },
+                    // { data: 'location_name', name: 'location_name', },
                     { data: 'enclosure_name', name: 'enclosure_name', },
                     { data: 'enclosure_no', name: 'enclosure_no', },
                     { data: 'enclosure_layout', name: 'enclosure_layout', class: 'remove_filters_short_qty', orderable: false, searchable: false },

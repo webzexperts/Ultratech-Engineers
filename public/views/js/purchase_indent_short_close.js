@@ -81,9 +81,9 @@ function fillPurchaseIndentShortCloseTable() {
             var pi_no = purchase_indent_sc_data[key].pi_no ? purchase_indent_sc_data[key].pi_no : "";
             var pi_date = purchase_indent_sc_data[key].pi_date ? purchase_indent_sc_data[key].pi_date : "";
 
-            var location_name = purchase_indent_sc_data[key].location_name ? purchase_indent_sc_data[key].location_name : "";
+            // var location_name = purchase_indent_sc_data[key].location_name ? purchase_indent_sc_data[key].location_name : "";
 
-            var from_location = purchase_indent_sc_data[key].from_location ? purchase_indent_sc_data[key].from_location : "";
+            // var from_location = purchase_indent_sc_data[key].from_location ? purchase_indent_sc_data[key].from_location : "";
 
             var item_name = purchase_indent_sc_data[key].item_name ? purchase_indent_sc_data[key].item_name : "";
 
@@ -108,8 +108,8 @@ function fillPurchaseIndentShortCloseTable() {
             </td>`;
             tblHtml += `<td>${pi_no}</td>`;
             tblHtml += `<td>${pi_date}</td>`;
-            tblHtml += `<td>${from_location}</td>`;
-            tblHtml += `<td>${location_name}</td>`;
+            // tblHtml += `<td>${from_location}</td>`;
+            // tblHtml += `<td>${location_name}</td>`;
             tblHtml += `<td>${item_name}</td>`;
             tblHtml += `<td>${item_group}</td>`;
             tblHtml += `<td>${main_group}</td>`;

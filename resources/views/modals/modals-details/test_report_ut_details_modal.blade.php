@@ -17,15 +17,15 @@
                         <div class="col-12">
                             <!-- UT Test No. -->
                             <div class="row g-2 mb-1">
-                                <div class="col-4"><label for="det_ut_test_no" class="form-label">UT Test No. <sup class="astric">*</sup></label></div>
+                                <div class="col-4"><label for="det_ut_test_no" class="form-label" id="lbl_det_ut_test_no">UT Test No. <sup class="astric">*</sup></label></div>
                                 <div class="col-8">
                                     <input type="text" name="ut_test_no" id="det_ut_test_no" class="form-control" required>
-                                    <div class="invalid-tooltip">Enter UT Test No.</div>
+                                    <div class="invalid-tooltip" id="tip_det_ut_test_no">Enter UT Test No.</div>
                                 </div>
                             </div>
                             <!-- Heat No. -->
                             <div class="row g-2 mb-1">
-                                <div class="col-4"><label for="det_heat_no" class="form-label">Heat No.</label></div>
+                                <div class="col-4"><label for="det_heat_no" class="form-label" id="lbl_det_heat_no">Heat No.</label></div>
                                 <div class="col-8">
                                     <input type="text" name="heat_no" id="det_heat_no" class="form-control">
                                 </div>
@@ -34,7 +34,7 @@
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="det_quantity" class="form-label">Quantity <sup class="astric">*</sup></label></div>
                                 <div class="col-8">
-                                    <input type="number" name="quantity" id="det_quantity" class="form-control isInteger" required>
+                                    <input type="number" name="quantity" id="det_quantity" class="form-control isInteger" value="1" readonly tabindex="-1" style="background-color: #e9ecef; cursor: not-allowed;" required>
                                     <div class="invalid-tooltip">Enter Quantity.</div>
                                 </div>
                             </div>

@@ -75,7 +75,7 @@
                             <th>Type of Test</th>
                             <th>Type Of Job</th>
                             <th>Job Desc.</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Die No.</th>
                             <th>Process At</th>
                             <th>Qty.</th>
                             <th>Unit</th>

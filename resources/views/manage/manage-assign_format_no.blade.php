@@ -19,7 +19,7 @@
             <div class="card-body mt-2">
                 <form id="commonAssignFormatNo" class="row g-3 needs-validation" novalidate>
                     @csrf
-                    <div class="row mt-2">
+                    <div class="row mt-2" style="display:none;">
                         <div class="col-lg-1">
                             <label for="assign_location_id" class="form-label">Location</label>
                         </div>

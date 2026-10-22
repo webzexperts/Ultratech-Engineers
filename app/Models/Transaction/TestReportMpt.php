@@ -20,12 +20,14 @@ class TestReportMpt extends Model
         'customer_id',
         'material_inward_details_id',
         'observation_sheet_details_id',
+        'entry_type_fix',
         'nabl_type_fix',
         'job_type_fix',
         'from_type_id_fix',
         'customer_client',
         'type_of_job_id',
         'job_desc_id',
+        'job_desc',
         'part_no',
         'drg_no',
         'material_id',
@@ -54,6 +56,8 @@ class TestReportMpt extends Model
         'yoke_wt_lift_check',
         'procedure_ref_id',
         'acceptance_standard_id',
+        'mpt_test_no_label',
+        'heat_no_label',
         'defectogram_image',
         'defectogram_image_blob',
         'ulr_id',
@@ -77,6 +81,21 @@ class TestReportMpt extends Model
         'locked_on'
     ];
 
+    public function setMaterialInwardDetailsIdAttribute($value)
+    {
+        $this->attributes['material_inward_details_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
+
+    public function setObservationSheetDetailsIdAttribute($value)
+    {
+        $this->attributes['observation_sheet_details_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
+
+    public function setFromTypeIdFixAttribute($value)
+    {
+        $this->attributes['from_type_id_fix'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
+
     public function equipment_details()
     {
         return $this->hasMany(TestReportMptEquipmentDetails::class, 'test_report_mpt_id', 'test_report_mpt_id');
@@ -92,3 +111,4 @@ class TestReportMpt extends Model
         return $this->hasMany(TestReportMptDetails::class, 'test_report_mpt_id', 'test_report_mpt_id');
     }
 }
+

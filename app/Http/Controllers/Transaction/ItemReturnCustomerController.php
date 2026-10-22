@@ -202,6 +202,11 @@ class ItemReturnCustomerController extends Controller
                 $return_sequence = $request->return_sequence;
             }
 
+            $checkDup = checkReportDuplication(ItemReturnCustomer::class, 'return_number', $return_number, $request, "Duplicate Item Return No. Found.");
+            if ($checkDup) {
+                return response()->json($checkDup);
+            }
+
             $page_id = getMenuIdBassedOnDisplayName('item_return_customer');
             $assign_format_no = getAssignFormateNoForTransaction(
                 $LocationData->location_id,
@@ -429,6 +434,11 @@ class ItemReturnCustomerController extends Controller
             'return_sequence.required' => 'Enter GRN No.',
         ]);
 
+        $checkDup = checkReportDuplication(ItemReturnCustomer::class, 'return_number', $request->return_number, $request, "Duplicate Item Return No. Found.", $request->id, 'return_id');
+        if ($checkDup) {
+            return response()->json($checkDup);
+        }
+
         try
         {           
             $return_data = ItemReturnCustomer::where('return_id', $request->id)->update([
@@ -442,7 +452,7 @@ class ItemReturnCustomerController extends Controller
                 'special_note'         => $request->special_note,
                 'prepared_by_user_id'  => $request->prepared_by_user_id,
                 'current_location_id'  => $current_location_id ?? null,
-                'year_id'              => $year_data->id,
+                // 'year_id'              => $year_data->id,
                 'company_id'           => Auth::user()->company_id,
                 'last_on'              => Carbon::now('Asia/Kolkata'),
                 'last_by'              => Auth::id(),

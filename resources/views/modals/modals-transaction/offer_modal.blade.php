@@ -143,9 +143,9 @@
                                                         <th class="action_col">Actions</th>
                                                         <th>Type of Test</th>
                                                         <th>Nature</th>
-                                                        <th>Type of Job</th>
+                                                        <!-- <th>Type of Job</th> -->
                                                         <th>Job Description</th>
-                                                        <th>Part No.</th>
+                                                        <th>Part No. / Die No.</th>
                                                         <th>Drg No.</th>
                                                         <th>Material</th>
                                                         <th>Heat No.</th>
@@ -314,9 +314,9 @@
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary" id="submitbtn">Submit</button>
                 <button type="button" class="btn btn-warning" id="resetbtn">Reset</button>
-                {{-- @if(hasAccess("offer","print"))
+                @if(hasAccess("offer","print"))
                     <a type="button" class="btn btn-secondary" target="_blank" id="preview_btn" style="display:none;">Preview</a>
-                @endif --}}
+                @endif
                 @if(hasAccess("offer","add"))
                     <button type="button" class="btn btn-info" id="add_new" style="display:none;">Add New</button>
                 @endif
