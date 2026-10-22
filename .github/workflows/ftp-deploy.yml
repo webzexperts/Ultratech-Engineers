@@ -2,8 +2,7 @@ name: Deploy to FTP
 
 on:
   push:
-    branches:
-ultratech-testing
+    branches: ultratech-testing
   workflow_dispatch:
 jobs:
   deploy:
