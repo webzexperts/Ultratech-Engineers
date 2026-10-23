@@ -61,8 +61,10 @@
     use App\Models\PurchaseOrder;
     use App\Models\Transaction\ServicePO;
     use App\Http\Controllers\LocationController;
-    use App\Models\RTCamera;
-    use App\Models\Transaction\TestReportRt;
+use App\Models\MaterialType;
+use App\Models\RTCamera;
+use App\Models\TestMethod;
+use App\Models\Transaction\TestReportRt;
     use Illuminate\Support\Facades\Session;
 
     // use function Psy\info;
@@ -92,7 +94,7 @@
     */
     function getJsVersion()
     {
-        return "0.0.02";
+        return "0.0.11";
     } 
 
     /**
@@ -100,7 +102,7 @@
     */
     function getCssVersion()
     {
-        return "0.0.02";
+        return "0.0.04";
     }
 
     // function getLatestSequence($modal,$sequence)
@@ -218,12 +220,49 @@
         return ItemOpening::where('io_item_id', $item_id)->where('current_location_id', $location_id)->sum('io_stock_qty');
     }
 
+    /*
+    // OLD FUNCTIONS (WITH PREFIX LOGIC)
+    function formatDocumentNumber($sequence, $prefix = null, $pad_length = 4)
+    {
+        $year_data = getCurrentYearData();
+        $middle_num = str_pad($sequence, $pad_length, '0', STR_PAD_LEFT);
+        $postfix = $year_data->yearcode;
+
+        return !empty($prefix)
+            ? rtrim($prefix, '/') . '/' . $middle_num . '/' . $postfix
+            : $middle_num . '/' . $postfix;
+    }
+
     function getLatestSequence($modal, $sequence, $prefix = null)
     {  
         $year_data = getCurrentYearData();
         $locationData = getCurrentLocation()->location_id;
  
         $isFound = $modal::where('year_id', $year_data->id)->where('current_location_id', $locationData)->max($sequence);
+        $isFound = $isFound ? $isFound + 1 : 1;
+ 
+        $middle_num = str_pad($isFound, 4, '0', STR_PAD_LEFT);
+        $postfix = $year_data->yearcode;
+ 
+        $format = !empty($prefix)
+            ? rtrim($prefix, '/') . '/' . $middle_num . '/' . $postfix
+            : $middle_num . '/' . $postfix;
+ 
+        return [
+            'format'  => $format,
+            'isFound' => $isFound
+        ];
+    }
+
+    function getCustomerLatestSequence($modal, $sequence, $customerId, $prefix = null)
+    {  
+        $year_data = getCurrentYearData();
+        $locationData = getCurrentLocation()->location_id;
+ 
+        $isFound = $modal::where('year_id', $year_data->id)
+            ->where('current_location_id', $locationData)
+            ->where('customer_id', $customerId)
+            ->max($sequence);
         $isFound = $isFound ? $isFound + 1 : 1;
  
         $middle_num = str_pad($isFound, 4, '0', STR_PAD_LEFT);
@@ -255,7 +294,6 @@
         }else{
             $format = $middle_num . '/' . $postfix;
         }
-
  
         return [
             'format'  => $format,
@@ -278,23 +316,6 @@
         else{
             $middle_num = str_pad($sequence, 4, "0", STR_PAD_LEFT);
             $postfix = $year_data->yearcode;  
-           
-            // if($modal == 'App\Models\Quotation'){
- 
-            //     $format =  'PNEC/QUOT/' .$middle_num . '/' . $postfix;    
- 
-            // }else{
- 
-            //     $format =  $middle_num . '/' . $postfix;    
-            // }
-
-            // old working code as on 30-03-2026
-            /*if (!empty($prefix)) {
-                $format = $prefix . $middle_num . '/' . $postfix;
-            } else {
-                $format = $middle_num . '/' . $postfix;
-            }*/
-            // old working code end
 
             $format = !empty($prefix)
                 ? rtrim($prefix, '/') . '/' . $middle_num . '/' . $postfix
@@ -307,6 +328,37 @@
         }
     }
 
+    function duplicationCustomerSequence($modal, $seq, $sequence, $id, $table_id, $customerId, $prefix = null)
+    {
+        $year_data = getCurrentYearData();
+        $locationData = getCurrentLocation()->location_id;
+        $check = $modal::where('year_id', '=', $year_data->id)
+            ->where('current_location_id', $locationData)
+            ->where('customer_id', $customerId)
+            ->where($seq, $sequence)
+            ->where($table_id, '!=', $id)
+            ->first();
+       
+        if($check != null && $check != "")
+        {
+            return [
+                'format' => 0,          
+            ];
+        }
+        else{
+            $middle_num = str_pad($sequence, 4, "0", STR_PAD_LEFT);
+            $postfix = $year_data->yearcode;  
+
+            $format = !empty($prefix)
+                ? rtrim($prefix, '/') . '/' . $middle_num . '/' . $postfix
+                : $middle_num . '/' . $postfix;
+
+            return [
+                'format'  => $format,
+                'isFound' => $sequence
+            ];
+        }
+    }
 
     function duplicationMarketingSequence($modal,$seq, $sequence, $id,$table_id, $prefix = null  )
     {
@@ -324,17 +376,162 @@
             $middle_num = str_pad($sequence, 4, "0", STR_PAD_LEFT);
             $postfix = $year_data->yearcode;            
             
-
             if($prefix != ""){
                 $format = $prefix .'/' . $middle_num . '/' . $postfix;
             }else{
                 $format = $middle_num . '/' . $postfix;
+            }
+
+            return [
+                'format'  => $format,
+                'isFound' => $sequence
+            ];
         }
+    }
+    */
 
-            // $format = 'Ultratech/' 
-            //     . $middle_num . '/' 
-            //     . $postfix;
+    function formatDocumentNumber($sequence, $prefix = null, $pad_length = 4)
+    {
+        $year_data = getCurrentYearData();
+        $middle_num = str_pad($sequence, $pad_length, '0', STR_PAD_LEFT);
+        $postfix = $year_data->yearcode;
 
+        return $middle_num . '/' . $postfix;
+    }
+
+    function getLatestSequence($modal, $sequence, $prefix = null)
+    {  
+        $year_data = getCurrentYearData();
+        $locationData = getCurrentLocation()->location_id;
+ 
+        $isFound = $modal::where('year_id', $year_data->id)->where('current_location_id', $locationData)->max($sequence);
+        $isFound = $isFound ? $isFound + 1 : 1;
+ 
+        $middle_num = str_pad($isFound, 4, '0', STR_PAD_LEFT);
+        $postfix = $year_data->yearcode;
+ 
+        $format = $middle_num . '/' . $postfix;
+ 
+        return [
+            'format'  => $format,
+            'isFound' => $isFound
+        ];
+    }
+
+    function getCustomerLatestSequence($modal, $sequence, $customerId, $prefix = null)
+    {  
+        $year_data = getCurrentYearData();
+        $locationData = getCurrentLocation()->location_id;
+ 
+        $isFound = $modal::where('year_id', $year_data->id)
+            ->where('current_location_id', $locationData)
+            ->where('customer_id', $customerId)
+            ->max($sequence);
+        $isFound = $isFound ? $isFound + 1 : 1;
+ 
+        $middle_num = str_pad($isFound, 4, '0', STR_PAD_LEFT);
+        $postfix = $year_data->yearcode;
+ 
+        $format = $middle_num . '/' . $postfix;
+ 
+        return [
+            'format'  => $format,
+            'isFound' => $isFound
+        ];
+    }
+
+    function getMarketingLatestSequence($modal, $sequence, $prefix = null)
+    {  
+        $year_data = getCurrentYearData();
+        $locationData = getCurrentLocation()->location_id;
+ 
+        $isFound = $modal::where('year_id', $year_data->id)->max($sequence);
+        $isFound = $isFound ? $isFound + 1 : 1;
+ 
+        $middle_num = str_pad($isFound, 4, '0', STR_PAD_LEFT);
+        $postfix = $year_data->yearcode;     
+ 
+        $format = $middle_num . '/' . $postfix;
+ 
+        return [
+            'format'  => $format,
+            'isFound' => $isFound
+        ];
+    }
+
+    function duplicationSequence($modal,$seq, $sequence, $id,$table_id, $prefix = null  )
+    {
+        $year_data = getCurrentYearData();
+        $locationData = getCurrentLocation()->location_id;
+        $check = $modal::where('year_id', '=', $year_data->id)->where('current_location_id', $locationData)->where($seq, $sequence)->where($table_id, '!=', $id)->first();
+       
+        if($check != null && $check != "")
+        {
+            return [
+                'format' => 0,          
+            ];
+        }
+        else{
+            $middle_num = str_pad($sequence, 4, "0", STR_PAD_LEFT);
+            $postfix = $year_data->yearcode;  
+ 
+            $format = $middle_num . '/' . $postfix;
+ 
+            return [
+                'format'  => $format,
+                'isFound' => $sequence
+            ];
+        }
+    }
+
+    function duplicationCustomerSequence($modal, $seq, $sequence, $id, $table_id, $customerId, $prefix = null)
+    {
+        $year_data = getCurrentYearData();
+        $locationData = getCurrentLocation()->location_id;
+        $check = $modal::where('year_id', '=', $year_data->id)
+            ->where('current_location_id', $locationData)
+            ->where('customer_id', $customerId)
+            ->where($seq, $sequence)
+            ->where($table_id, '!=', $id)
+            ->first();
+       
+        if($check != null && $check != "")
+        {
+            return [
+                'format' => 0,          
+            ];
+        }
+        else{
+            $middle_num = str_pad($sequence, 4, "0", STR_PAD_LEFT);
+            $postfix = $year_data->yearcode;  
+ 
+            $format = $middle_num . '/' . $postfix;
+ 
+            return [
+                'format'  => $format,
+                'isFound' => $sequence
+            ];
+        }
+    }
+
+    function duplicationMarketingSequence($modal,$seq, $sequence, $id,$table_id, $prefix = null  )
+    {
+        $year_data = getCurrentYearData();
+        $locationData = getCurrentLocation()->location_id;
+        $check = $modal::where('year_id', '=', $year_data->id)->where($seq, $sequence)->where($table_id, '!=', $id)->first();
+       
+        if($check != null && $check != "")
+        {
+            return [
+                'format' => 0,          
+            ];
+        }
+        else{
+            $middle_num = str_pad($sequence, 4, "0", STR_PAD_LEFT);
+            $postfix = $year_data->yearcode;            
+            
+            $format = $middle_num . '/' . $postfix;
+ 
             return [
                 'format'  => $format,
                 'isFound' => $sequence
@@ -586,6 +783,14 @@
     function getNABLConfiguration()
     {
         return NABLConfiguration::select('nabl_id','nabl_location')->orderBy('nabl_location','asc')->get();
+    }
+    function getMaterialType()
+    {
+        return MaterialType::select('material_type_id','material_type')->orderBy('material_type','asc')->get();
+    }
+    function getTestMethod()
+    {
+        return TestMethod::select('test_method_id','test_method')->orderBy('test_method','asc')->get();
     }
 
 
@@ -2944,6 +3149,14 @@ function checkPdf($remotePdfUrl, $localFilePath, $returnurl) {
     function getAuthorityPersonsAuthorizedBy()
     {
         return AuthorityPerson::select('authority_person_id', 'operator', 'designation')->where('status', 'Active')->where('authorized_by','Yes')->orderBy('operator', 'asc')->get();
+    }
+    function getAuthorityPersonsPerformedBy()
+    {
+        return AuthorityPerson::select('authority_person_id', 'operator', 'designation')->where('status', 'Active')->where('performed_by','Yes')->orderBy('operator', 'asc')->get();
+    }
+    function getAuthorityPersonsExaminedBy()
+    {
+        return AuthorityPerson::select('authority_person_id', 'operator', 'designation')->where('status', 'Active')->where('examined_by','Yes')->orderBy('operator', 'asc')->get();
     }
 
     function getCheckedByAuthorityPersons()

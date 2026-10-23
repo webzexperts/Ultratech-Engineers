@@ -48,18 +48,8 @@
         vertical-align: middle;
     }
 
-    #offer_auth_table .offer_checkbox,
-    #checkall_offers {
+    #offer_auth_table .offer_radio {
         cursor: pointer;
-    }
-
-    #authorized_by_id {
-        width: 100%;
-    }
-
-    #prepared_by_user_id {
-        width: 100%;
-        pointer-events: none;
     }
 </style>
 @endsection
@@ -99,13 +89,8 @@
                             <tr>
                                 <th
                                     class="text-center align-middle"
-                                    style="width: 30px;"
+                                    style="width: 40px;"
                                 >
-                                    <input
-                                        type="checkbox"
-                                        id="checkall_offers"
-                                        class="form-check-input"
-                                    />
                                 </th>
 
                                 <th>Offer No.</th>
@@ -115,6 +100,13 @@
                                 <th>Customer</th>
                                 <th>Ch. No.</th>
                                 <th>Ch. Date</th>
+                                <th>Evaluation</th>
+                                <th>Acc. Std.</th>
+                                <th>Test Method</th>
+                                <th>Covered Are.</th>
+                                <th>Radiation Energy</th>
+                                <th>Del. Date</th>
+                                <th>Procedure Submitted</th>
                             </tr>
                         </thead>
 
@@ -156,16 +148,15 @@
                                                 <tr>
                                                     <th>Process Type</th>
                                                     <th>Process</th>
+                                                    <th>Lab ID</th>
+                                                    <th>Customer ID No.</th>
                                                     <th>Job Description</th>
+                                                    <th>Die No.</th>
                                                     <th>Heat No.</th>
                                                     <th>Drg. No.</th>
                                                     <th>Material</th>
-                                                    <th>Evaluation</th>
-                                                    <th>Acc. Std.</th>
-                                                    <th>Procedure Ref.</th>
-                                                    <th>Area of Coverage</th>
-                                                    <th>Total Qty.</th>
-                                                    <th>Req. Qty.</th>
+                                                    <th>Thickness (mm)</th>
+                                                    <th>Quantity</th>
                                                     <th>Remark</th>
                                                 </tr>
                                             </thead>
@@ -185,55 +176,7 @@
 
                 </div>
 
-                {{-- =========================================================
-                    AUTHORISED BY
-                ========================================================== --}}
-                <div class="row mt-2 align-items-center" id="authorized_by_container">
 
-                    <div class="col-md-5 col-lg-4 d-flex align-items-center position-relative">
-                        <div class="col-4">
-                            <label for="authorized_by_id" class="form-label me-2 mb-0  text-nowrap"> Authorised By <sup class="astric">*</sup> </label>
-                        </div>
-                        <div class="col-8">
-                            <select class="js-example-basic-single zindexnotapply" id="authorized_by_id" name="authorized_by_id" required>
-                                <option value=""> Select Authorised By</option>
-                                @foreach($authorized_persons as $person)
-                                    <option value="{{ $person->authority_person_id }}">
-                                        {{ $person->operator }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="invalid-tooltip" id="authorized_by_id_error">
-                                Select Authorised By.
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Authorised By User --}}
-                    <div class="col-md-5 col-lg-4 d-flex align-items-center">
-                        <div class="col-4">
-                            <label for="prepared_by_user_id" class="form-label me-2 mb-0 text-nowrap"> Authorised By User</label>
-                        </div>
-                        <div class="col-8">
-                            <select class="js-example-basic-single skip-tab zindexnotapply" name="prepared_by_user_id" id="prepared_by_user_id" disabled style="pointer-events: none;">
-                                <option value="">Select Authorised By User </option>
-
-                                @forelse(getUsers() as $users)
-
-                                    <option
-                                        value="{{ $users->id }}"
-                                        {{ auth()->id() == $users->id ? 'selected' : '' }}
-                                    >
-                                        {{ $users->person_name }}
-                                    </option>
-                                @empty
-                                @endforelse
-
-                            </select>
-                        </div>
-                    </div>
-
-                </div>
 
                 {{-- =========================================================
                     ACTION BUTTONS
@@ -245,7 +188,7 @@
                         class="btn btn-success me-1"
                         id="btn-authorize"
                     >
-                        Authorize
+                        Authorise
                     </button>
 
                     <button
@@ -253,7 +196,7 @@
                         class="btn btn-info me-1"
                         id="btn-unauthorize"
                     >
-                        Accept Unauthorize
+                        Accept Unauthorise
                     </button>
 
                     <button
@@ -293,19 +236,24 @@
     };
 
     var currentAuthorizedStatus = 0; // 0 = Pending, 1 = Authorized
+    var selectedOfferId = null;
+    var isAuthorizing = false;
 
     $(document).ready(function() {
-        $('#prepared_by_user_id').prop('disabled', true);
-
         var table = $('#offer_auth_table').DataTable({
             serverSide: true,
-           
+            paging: false,
+            info: false,
+            lengthChange: false,
             ajax: {
                 url: "{{ route('listing-offer_authorized') }}",
                 type: "POST",
                 headers: headerOpt,
                 data: function(d) {
                     d.authorized_status = currentAuthorizedStatus;
+                    if (selectedOfferId) {
+                        d.selected_offer_id = selectedOfferId;
+                    }
                 },
                 error: function(jqXHR) {
                     if (jqXHR.status == 401) {
@@ -323,7 +271,8 @@
                     searchable: false,
                     className: 'text-center align-middle',
                     render: function(data, type, row) {
-                        return '<input type="checkbox" class="form-check-input offer_checkbox" value="' + data + '" />';
+                        var isChecked = (selectedOfferId && String(selectedOfferId) === String(data)) ? 'checked' : '';
+                        return '<input type="radio" name="selected_offer" class="form-check-input offer_radio" value="' + data + '" ' + isChecked + ' />';
                     }
                 },
                 { data: 'offer_no', name: 'offer.offer_no' },
@@ -331,15 +280,21 @@
                 { data: 'job_type_fix', name: 'offer.job_type_fix' },
                 { data: 'nabl_type_fix', name: 'offer.nabl_type_fix' },
                 { data: 'customer_name', name: 'customers.customer' },
-                { data: 'dc_no', name: 'offer.dc_no' },
-                { data: 'dc_date', name: 'offer.dc_date' }
+                { data: 'challan_no', name: 'offer.challan_no' },
+                { data: 'challan_date', name: 'offer.challan_date' },
+                { data: 'evaluation_as_per', name: 'evaluation_as_per.evaluation_as_per', defaultContent: '' },
+                { data: 'acceptance_standard', name: 'acceptance_standards.acceptance_standard', defaultContent: '' },
+                { data: 'test_method', name: 'test_method.test_method', defaultContent: '' },
+                { data: 'area_of_coverage', name: 'offer.coverage_area', defaultContent: '' },
+                { data: 'radiation_energy_fix', name: 'offer.radiation_energy_fix', defaultContent: '' },
+                { data: 'del_date', name: 'offer.del_date', defaultContent: '' },
+                { data: 'procedure_submitted_fix', name: 'offer.procedure_submitted_fix', defaultContent: '' }
             ],
             order: [[1, 'asc']],
-             buttons: [],
-            
-            dom: 'Blfrtip',
+            buttons: [],
+            dom: 'Bfrt',
         });
-          jQuery('.dataTables_filter').hide();
+        jQuery('.dataTables_filter').hide();
 
         var detailsTable = $('#offer_details_table').DataTable({
             processing: false,
@@ -351,16 +306,15 @@
             columns: [
                 { data: 'process_type', defaultContent: '' },
                 { data: 'type_of_testing_id_fix', defaultContent: '' },
+                { data: 'lab_id', defaultContent: '' },
+                { data: 'customer_id_no', defaultContent: '' },
                 { data: 'job_desc', defaultContent: '' },
+                { data: 'die_no', defaultContent: '' },
                 { data: 'heat_no', defaultContent: '' },
                 { data: 'drg_no', defaultContent: '' },
                 { data: 'material_name', defaultContent: '' },
-                { data: 'evaluation_as_per', defaultContent: '' },
-                { data: 'acceptance_standard', defaultContent: '' },
-                { data: 'procedure_reference', defaultContent: '' },
-                { data: 'area_of_coverage', defaultContent: '' },
-                { data: 'total_qty', defaultContent: 0 },
-                { data: 'req_qty', defaultContent: 0 },
+                { data: 'thickness', defaultContent: '' },
+                { data: 'quantity', defaultContent: 0 },
                 { data: 'remark', defaultContent: '' }
             ]
         });
@@ -394,111 +348,107 @@
             detailsTable.clear().draw();
         }
 
-        function updateCheckedDetails() {
-            var selectedOffers = [];
-            $('.offer_checkbox:checked').each(function() {
-                selectedOffers.push($(this).val());
-            });
+        function updateSelectedDetails() {
+            var currentChecked = $('input[name="selected_offer"]:checked').val();
+            if (currentChecked) {
+                selectedOfferId = currentChecked;
+            }
 
             if (currentAuthorizedStatus === 1) {
-                if (selectedOffers.length > 0) {
+                if (selectedOfferId) {
                     $('#btn-delete').prop('disabled', false);
                 } else {
                     $('#btn-delete').prop('disabled', true);
                 }
             }
 
-            if (selectedOffers.length > 0) {
-                loadOfferDetails(selectedOffers);
+            if (selectedOfferId) {
+                loadOfferDetails([selectedOfferId]);
             } else {
                 clearDetailsTable();
             }
         }
 
-        // Check All Checkbox Handler
-        $('#checkall_offers').on('change', function() {
-            var isChecked = $(this).is(':checked');
-            $('.offer_checkbox').prop('checked', isChecked);
-            updateCheckedDetails();
-        });
-
-        // Checkbox Selection Handler for Offer Details loading
-        $(document).on('change', '.offer_checkbox', function() {
-            var totalCheckboxes = $('.offer_checkbox').length;
-            var totalChecked = $('.offer_checkbox:checked').length;
-            $('#checkall_offers').prop('checked', totalCheckboxes > 0 && totalCheckboxes === totalChecked);
-            updateCheckedDetails();
+        // Radio Selection Handler for Offer Details loading
+        $(document).on('change', '.offer_radio', function() {
+            selectedOfferId = $(this).val();
+            updateSelectedDetails();
         });
 
         // Master table draw event
         table.on('draw', function() {
-            $('#checkall_offers').prop('checked', false);
-            updateCheckedDetails();
+            if (selectedOfferId) {
+                $('input[name="selected_offer"][value="' + selectedOfferId + '"]').prop('checked', true);
+            }
+            updateSelectedDetails();
         });
 
         // Switch Mode Functions
         function switchToPendingMode() {
             currentAuthorizedStatus = 0;
+            selectedOfferId = null;
             $('#btn-authorize').removeClass('d-none').prop('disabled', false);
-            $('#authorized_by_container').removeClass('d-none');
             $('#btn-delete').addClass('d-none').prop('disabled', true);
-            $('#checkall_offers').prop('checked', false);
+            $('input[name="selected_offer"]').prop('checked', false);
             table.ajax.reload();
             clearDetailsTable();
         }
 
         function switchToAuthorizedMode() {
             currentAuthorizedStatus = 1;
+            selectedOfferId = null;
             $('#btn-authorize').removeClass('d-none').prop('disabled', true);
-            $('#authorized_by_container').removeClass('d-none');
             $('#btn-delete').removeClass('d-none').prop('disabled', true);
-            $('#checkall_offers').prop('checked', false);
+            $('input[name="selected_offer"]').prop('checked', false);
             table.ajax.reload();
             clearDetailsTable();
         }
-        jQuery(document).on('change', '#authorized_by_id', function() {
-            $('#authorized_by_id').removeClass('is-invalid');
-            $('#authorized_by_id_error').html('');
-        });
+
         // Authorize Button Action
-        $('#btn-authorize').on('click', function() {
-            var selectedOffers = [];
-            $('.offer_checkbox:checked').each(function() {
-                selectedOffers.push($(this).val());
-            });
+        $('#btn-authorize').on('click', function(e) {
+            e.preventDefault();
+            if (isAuthorizing) return false;
 
-            if (selectedOffers.length === 0) {
-                toastr.error('Please Select At Least One Offer To Authorize.');
+            var offerId = selectedOfferId || $('input[name="selected_offer"]:checked').val();
+
+            if (!offerId) {
+                toastr.error('Please Select An Offer To Authorise.');
                 return;
             }
 
-            var authorizedById = $('#authorized_by_id').val();
-            if (!authorizedById) {
-                $('#authorized_by_id').addClass('is-invalid');
-                $('#authorized_by_id_error').html('Select Authorised By.');
-                return;
-            } else{
-                $('#authorized_by_id').removeClass('is-invalid');
-                $('#authorized_by_id_error').html('');
-            }
+            isAuthorizing = true;
+            var $btn = $(this);
+            $btn.prop('disabled', true).css('pointer-events', 'none');
+            $('#btn-unauthorize, #btn-cancel').prop('disabled', true);
 
             $.ajax({
                 url: "{{ route('authorize-offer') }}",
                 type: "POST",
-                data: { offer_ids: selectedOffers, authorized_by_id: authorizedById },
+                data: { offer_ids: [offerId] },
                 headers: headerOpt,
                 success: function(response) {
+                    isAuthorizing = false;
+                    $btn.prop('disabled', false).css('pointer-events', 'auto').html('Authorise');
+                    $('#btn-unauthorize, #btn-cancel').prop('disabled', false);
                     if (response.status === 'success' || response.response_code === '1') {
+                        selectedOfferId = null;
                         function nextFn() {
                             window.location.reload();
                         }
-                        toastSuccess(response.message || 'Offer(s) Authorized Successfully!',nextFn);
+                        toastSuccess(response.message || 'Offer Authorised.', nextFn);
                     } else {
-                        toastr.error(response.message || 'Error authorizing offer.');
+                        toastr.error(response.message || 'Error authorising offer.');
                     }
                 },
-                error: function() {
-                    toastr.error('Something went wrong while authorizing offer.');
+                error: function(jqXHR) {
+                    isAuthorizing = false;
+                    $btn.prop('disabled', false).css('pointer-events', 'auto').html('Authorise');
+                    $('#btn-unauthorize, #btn-cancel').prop('disabled', false);
+                    var errorMsg = 'Something went wrong while authorising offer.';
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                        errorMsg = jqXHR.responseJSON.message;
+                    }
+                    toastr.error(errorMsg);
                 }
             });
         });
@@ -510,42 +460,35 @@
 
         // Delete / Unauthorize Button Action
         $('#btn-delete').on('click', function() {
-            var selectedOffers = [];
-            $('.offer_checkbox:checked').each(function() {
-                selectedOffers.push($(this).val());
-            });
+            var offerId = selectedOfferId || $('input[name="selected_offer"]:checked').val();
 
-            if (selectedOffers.length === 0) {
-                toastr.error('Please Select At Least One Offer To Unauthorize.');
+            if (!offerId) {
+                toastr.error('Please Select An Offer To Unauthorize.');
                 return;
             }
 
-            var authorizedById = $('#authorized_by_id').val();
-            if (!authorizedById) {
-                $('#authorized_by_id').addClass('is-invalid');
-                $('#authorized_by_id_error').html('Select Authorised By.');
-                return;
-            } else{
-                $('#authorized_by_id').removeClass('is-invalid');
-                $('#authorized_by_id_error').html('');
-            }
+            var $btn = $(this);
+            $btn.prop('disabled', true);
 
             $.ajax({
                 url: "{{ route('unauthorize-offer') }}",
                 type: "POST",
-                data: { offer_ids: selectedOffers, authorized_by_id: authorizedById },
+                data: { offer_ids: [offerId] },
                 headers: headerOpt,
                 success: function(response) {
+                    $btn.prop('disabled', false).html('Delete');
                     if (response.status === 'success' || response.response_code === '1') {
+                        selectedOfferId = null;
                         function nextFn() {
                             window.location.reload();
                         }
-                        toastSuccess(response.message || 'Offer(s) Unauthorized Successfully!',nextFn);                       
+                        toastSuccess(response.message || 'Offer Unauthorized.', nextFn);                       
                     } else {
                         toastr.error(response.message || 'Error unauthorizing offer.');
                     }
                 },
                 error: function(jqXHR) {
+                    $btn.prop('disabled', false).html('Delete');
                     var errorMsg = 'Something went wrong while unauthorizing offer.';
                     if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
                         errorMsg = jqXHR.responseJSON.message;
@@ -557,13 +500,13 @@
 
         // Reset / Cancel Buttons Action
         $('#btn-cancel').on('click', function() {
+            selectedOfferId = null;
             if (currentAuthorizedStatus === 1) {
                 switchToPendingMode();
             } else {
-                $('.offer_checkbox').prop('checked', false);
-                $('#checkall_offers').prop('checked', false);
-                $('#authorized_by_id').val('').trigger('change');
+                $('input[name="selected_offer"]').prop('checked', false);
                 clearDetailsTable();
+                table.ajax.reload();
             }
         });
     });

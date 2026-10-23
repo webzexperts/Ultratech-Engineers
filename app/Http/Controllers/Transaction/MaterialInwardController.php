@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Transaction\MaterialInward;
 use App\Models\Transaction\MaterialInwardDetails;
 use App\Models\Transaction\Offer;
+use App\Models\Transaction\OfferDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
@@ -34,23 +35,23 @@ class MaterialInwardController extends Controller
             'material_inward.nabl_type_fix',
             'material_inward.test_at_fix',
             'material_inward.job_type_fix',
-            'customers.customer as customer',
-            'material_inward.dc_no',
-            'material_inward.dc_date',
-            'material_inward.po_no',
-            'material_inward.po_date',
+            'customers.customer',
+            'material_inward.challan_no',
+            'material_inward.challan_date',
+            'material_inward.offer_no',
+            'material_inward.offer_date',
+            'material_inward_details.process_type_fix',
             'material_inward_details.type_of_testing_id_fix',
-            //'type_of_job.type_of_job',
-            // DB::raw("COALESCE(material_inward_details.job_desc, job_descriptions.job_description) as job_description"),
             'material_inward_details.job_desc as job_description',
-            'material_inward_details.part_no',
+            'material_inward_details.sr_no',
+            'material_inward_details.customer_id_no',
+            'material_inward_details.die_no',
             'material_inward_details.drg_no',
             'materials.material',
             'material_inward_details.heat_no',
-            'material_inward_details.rt_no',
-            'material_inward_details.product_code',
+            'material_inward_details.lab_id',
+            'material_inward_details.thickness',
             'material_inward_details.quantity',
-            'prepared_by.person_name as prepared_by',
             'material_inward.created_on',
             'material_inward.created_by',
             'material_inward.last_by',
@@ -58,21 +59,11 @@ class MaterialInwardController extends Controller
         ])
         ->leftJoin('material_inward_details', 'material_inward_details.material_inward_id', '=', 'material_inward.material_inward_id')
         ->leftJoin('customers', 'customers.id', '=', 'material_inward.customer_id')
-        ->leftJoin('admin as prepared_by', 'prepared_by.id', '=', 'material_inward.prepared_by_user_id')
-        //->leftJoin('type_of_job', 'type_of_job.id', '=', 'material_inward_details.type_of_job_id')
-        //->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'material_inward_details.job_desc_id')
         ->leftJoin('materials', 'materials.id', '=', 'material_inward_details.material_id')
         ->where('material_inward.year_id', $year_data->id)
         ->where('material_inward.current_location_id', $current_location_id);
 
         $dataTable = DataTables::of($mi_data)
-        ->editColumn('part', function ($mi_data) {
-            return $mi_data->part ?? '';
-        })
-        ->filterColumn('part', function($query, $keyword) {
-            $keyword = trim($keyword);
-            $query->whereRaw("IF(part.drg_no IS NOT NULL AND part.drg_no != '', CONCAT(part.part_no, ' - ', part.drg_no), part.part_no) LIKE ?", ["%{$keyword}%"]);
-        })
         ->editColumn('material_inward_date', function ($mi_data) {
             if ($mi_data->material_inward_date != null) {
                 return Date::createFromFormat('Y-m-d', $mi_data->material_inward_date)->format(DATE_FORMAT);
@@ -82,32 +73,32 @@ class MaterialInwardController extends Controller
         ->filterColumn('material_inward.material_inward_date', function ($q, $k) {
             applyDate($q, $k, 'material_inward.material_inward_date');
         })
-        ->editColumn('dc_date', function ($mi_data) {
-            if ($mi_data->dc_date != null) {
-                return Date::createFromFormat('Y-m-d', $mi_data->dc_date)->format(DATE_FORMAT);
+        ->editColumn('challan_date', function ($mi_data) {
+            if ($mi_data->challan_date != null) {
+                return Date::createFromFormat('Y-m-d', $mi_data->challan_date)->format(DATE_FORMAT);
             }
             return '';
         })
-        ->filterColumn('material_inward.dc_date', function ($q, $k) {
-            applyDate($q, $k, 'material_inward.dc_date');
+        ->filterColumn('material_inward.challan_date', function ($q, $k) {
+            applyDate($q, $k, 'material_inward.challan_date');
         })
-        ->editColumn('po_date', function ($mi_data) {
-            if ($mi_data->po_date != null) {
-                return Date::createFromFormat('Y-m-d', $mi_data->po_date)->format(DATE_FORMAT);
+        ->editColumn('offer_date', function ($mi_data) {
+            if ($mi_data->offer_date != null) {
+                return Date::createFromFormat('Y-m-d', $mi_data->offer_date)->format(DATE_FORMAT);
             }
             return '';
         })
-        ->filterColumn('material_inward.po_date', function ($q, $k) {
-            applyDate($q, $k, 'material_inward.po_date');
+        ->filterColumn('material_inward.offer_date', function ($q, $k) {
+            applyDate($q, $k, 'material_inward.offer_date');
         })
         ->filterColumn('material_inward.job_type_fix', function ($query, $keyword) {
             $globalSearch = request()->input('search.value');
             $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
             $lowerKeyword = strtolower(trim($searchValue));
-            if ($lowerKeyword === 'welding') {
-                $query->where('material_inward.job_type_fix', '=', 'Welding');
-            } elseif ($lowerKeyword === 'non-welding' || $lowerKeyword === 'non welding') {
-                $query->where('material_inward.job_type_fix', '=', 'Non-Welding');
+            if ($lowerKeyword === 'casting') {
+                $query->where('material_inward.job_type_fix', '=', 'Casting');
+            } elseif ($lowerKeyword === 'fabrication') {
+                $query->where('material_inward.job_type_fix', '=', 'Fabrication');
             } else {
                 $query->where('material_inward.job_type_fix', 'like', "{$lowerKeyword}%");
             }
@@ -154,16 +145,11 @@ class MaterialInwardController extends Controller
         ->make(true);
     }
 
-    /**
-     * Auto-number generator (mirrors getLatestServicePONumber).
-     * The exact display format (/<Loc_Code>/INW/XXXX/XX-XX) is produced by
-     * the project helper getLatestSequence() based on the prefix + company/location/year.
-     */
     public function getLatestMaterialInwardNumber(Request $request)
     {
         $modal    = MaterialInward::class;
         $sequence = 'material_inward_sequence';
-        $prefix   = 'INW';
+        $prefix   = '';
 
         $num_format = getLatestSequence($modal, $sequence, $prefix);
 
@@ -174,34 +160,59 @@ class MaterialInwardController extends Controller
         ]);
     }
 
-    /**
-     * Edit â€” reads parent + child rows through the stored procedures
-     * material_inward_master / material_inward_details
-     * (see database/stored_procedures/material_inward_procedures.sql).
-     */
     public function edit(Request $request)
     {
         $mi_data = DB::select('CALL material_inward_master(?)', [$request->id]);
 
         if (!empty($mi_data)) {
             $mi_data = $mi_data[0];
-            $mi_data->material_inward_date = $mi_data->material_inward_date != "" ? Date::createFromFormat('Y-m-d', $mi_data->material_inward_date)->format('d/m/Y') : "";
-            $mi_data->dc_date = $mi_data->dc_date != "" ? Date::createFromFormat('Y-m-d', $mi_data->dc_date)->format('d/m/Y') : "";
-            $mi_data->po_date = !empty($mi_data->po_date) ? Date::createFromFormat('Y-m-d', $mi_data->po_date)->format('d/m/Y') : "";
-            if(isset($mi_data->company_logo))
-            {
+            $mi_data->material_inward_date = !empty($mi_data->material_inward_date) ? Date::createFromFormat('Y-m-d', $mi_data->material_inward_date)->format('d/m/Y') : "";
+            $mi_data->challan_date = !empty($mi_data->challan_date) ? Date::createFromFormat('Y-m-d', $mi_data->challan_date)->format('d/m/Y') : (!empty($mi_data->dc_date) ? Date::createFromFormat('Y-m-d', $mi_data->dc_date)->format('d/m/Y') : "");
+            $mi_data->dc_date = $mi_data->challan_date;
+            $mi_data->offer_date = !empty($mi_data->offer_date) ? Date::createFromFormat('Y-m-d', $mi_data->offer_date)->format('d/m/Y') : (!empty($mi_data->po_date) ? Date::createFromFormat('Y-m-d', $mi_data->po_date)->format('d/m/Y') : "");
+            $mi_data->po_date = $mi_data->offer_date;
+            $mi_data->del_date = !empty($mi_data->del_date) ? Date::createFromFormat('Y-m-d', $mi_data->del_date)->format('d/m/Y') : "";
+
+            if (isset($mi_data->company_logo)) {
                 $mi_data->company_logo = base64_encode($mi_data->company_logo);
             }
 
             $mi_number = !empty($mi_data->material_inward_no) ? '_' . str_replace('/', '_', $mi_data->material_inward_no) : "";
             $cust_name = !empty($mi_data->customer_name) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $mi_data->customer_name) : "";
             $mi_data->pdf_name = 'Material_Inward' . $mi_number . $cust_name;
-        }
 
+            // Safety check: if stored procedure in DB is not yet recompiled with new fields, fill from Eloquent
+            if (!isset($mi_data->offer_id) || !isset($mi_data->material_type_id)) {
+                $rawMi = MaterialInward::find($request->id);
+                if ($rawMi) {
+                    foreach ($rawMi->getAttributes() as $attr => $val) {
+                        if (!isset($mi_data->$attr) || $mi_data->$attr === null) {
+                            $mi_data->$attr = $val;
+                        }
+                    }
+                    if (empty($mi_data->challan_date) && !empty($rawMi->challan_date)) {
+                        $mi_data->challan_date = Date::createFromFormat('Y-m-d', $rawMi->challan_date)->format('d/m/Y');
+                    }
+                    if (empty($mi_data->offer_date) && !empty($rawMi->offer_date)) {
+                        $mi_data->offer_date = Date::createFromFormat('Y-m-d', $rawMi->offer_date)->format('d/m/Y');
+                    }
+                    if (empty($mi_data->del_date) && !empty($rawMi->del_date)) {
+                        $mi_data->del_date = Date::createFromFormat('Y-m-d', $rawMi->del_date)->format('d/m/Y');
+                    }
+                }
+            }
+            $mi_data->procedure_ref_id = $mi_data->procedure_reference_id ?? ($mi_data->procedure_ref_id ?? '');
+        }
 
         $mi_details_data = DB::select('CALL material_inward_details(?)', [$request->id]);
 
-        $usage = DB::select('CALL material_inward_used_list(?)', [$request->id]);
+        $usage = [];
+        try {
+            $usage = DB::select('CALL material_inward_used_list(?)', [$request->id]);
+        } catch (\Exception $e) {
+            $usage = [];
+        }
+
         $detail_used_map = [];
         $detail_dc_used_map = [];
         $detail_direct_obs_used_map = [];
@@ -229,16 +240,6 @@ class MaterialInwardController extends Controller
                 }
             }
         }
-        
-        $allUsedDetailIds = [];
-        foreach ($usage as $uRow) {
-            if (!empty($uRow->material_inward_details_ids)) {
-                $ids = array_map('trim', explode(',', $uRow->material_inward_details_ids));
-                $allUsedDetailIds = array_merge($allUsedDetailIds, $ids);
-            }
-        }
-        $allUsedDetailIds = array_unique(array_filter($allUsedDetailIds));
-        
 
         $detail_ids = [];
         if ($mi_details_data) {
@@ -247,55 +248,11 @@ class MaterialInwardController extends Controller
                     $detail_ids[] = $dVal->material_inward_details_id;
                 }
                 $dVal->mode = 'Update';
-
-                // Fetch part_no & drg_no directly from DB table material_inward_details for edit mode auto-fill
-                $dbDetail = DB::table('material_inward_details')->where('material_inward_details_id', $dVal->material_inward_details_id)->first();
-                if ($dbDetail) {
-                    if (!empty($dbDetail->part_no)) $dVal->part_no = $dbDetail->part_no;
-                    if (!empty($dbDetail->drg_no)) $dVal->drg_no = $dbDetail->drg_no;
-                    if (isset($dbDetail->process_type)) $dVal->process_type = $dbDetail->process_type;
-                    if (isset($dbDetail->is_observation_sheet)) $dVal->is_observation_sheet = $dbDetail->is_observation_sheet;
-                    if (isset($dbDetail->test_report_rt_id)) $dVal->test_report_rt_id = $dbDetail->test_report_rt_id;
-                    if (isset($dbDetail->job_desc)) $dVal->job_desc = $dbDetail->job_desc;
-                }
-                $dVal->job_desc = $dVal->job_desc ?? ($dbDetail->job_desc ?? '');
-                $dVal->job_description = !empty($dVal->job_desc) ? $dVal->job_desc : ($dVal->job_description_name ?? ($dVal->job_description ?? ''));
-                $dVal->job_description_name = $dVal->job_description;
-
-                $rtReportId = $dVal->test_report_rt_id ?? ($dbDetail->test_report_rt_id ?? null);
-                if (!empty($rtReportId)) {
-                    $rtReport = DB::table('test_report_rt')
-                        ->select('revision_number')
-                        ->where('test_report_rt_id', $rtReportId)
-                        ->first();
-                    if ($rtReport && !empty($rtReport->revision_number)) {
-                        $dVal->revision_number = $rtReport->revision_number;
-                    }
-                }
-
-                /*
-                $used_qty_rt = DB::table('test_report_rt')
-                    ->where('material_inward_details_id', $dVal->material_inward_details_id)
-                    ->sum('rt_report_qty') ?? 0;
-                $used_qty_ut = DB::table('test_report_ut')
-                    ->where('material_inward_details_id', $dVal->material_inward_details_id)
-                    ->sum('total_qty') ?? 0;
-                $used_qty_dpt = DB::table('test_report_dpt')
-                    ->where('material_inward_details_id', $dVal->material_inward_details_id)
-                    ->sum('total_qty') ?? 0;
-                $used_qty_mpt = DB::table('test_report_mpt')
-                    ->where('material_inward_details_id', $dVal->material_inward_details_id)
-                    ->sum('total_qty') ?? 0;
-                $used_qty = $used_qty_rt + $used_qty_ut + $used_qty_dpt + $used_qty_mpt;
-                $dVal->used_qty = (float)$used_qty;
-
-                $used_qty_dc = DB::table('customer_dc_non_returnable_details')
-                    ->where('material_inward_details_id', $dVal->material_inward_details_id)
-                    ->sum('dc_qty') ?? 0;
-                $dVal->used_qty_dc = (float)$used_qty_dc;
-
-                $dVal->in_use = (in_array((string)$dVal->material_inward_details_id, $allUsedDetailIds) || (float)$used_qty > 0 || (float)$used_qty_dc > 0);
-                */
+                $dVal->thickness = $dVal->thickness ?? '';
+                $dVal->job_desc = $dVal->job_desc ?? '';
+                $dVal->process_type_fix = $dVal->process_type ?? 'Fresh';
+                $dVal->process_type_name = $dVal->type_of_testing_id_fix ?? '';
+                $dVal->offer_details_id = $dVal->offer_details_id ?? 0;
 
                 $detId = $dVal->material_inward_details_id;
                 $totUsed = $detail_used_map[$detId] ?? 0;
@@ -311,7 +268,6 @@ class MaterialInwardController extends Controller
 
         $min_report_date = null;
         if (!empty($detail_ids)) {
-            $min_dates = [];
             $min_report_date = DB::query()
                 ->fromSub(function ($query) use ($detail_ids) {
                     $query->from('test_report_rt')
@@ -324,7 +280,6 @@ class MaterialInwardController extends Controller
                                 ->select('test_report_date')
                                 ->whereIn('material_inward_details_id', $detail_ids)
                                 ->whereNotNull('test_report_date')
-                                ->where('test_report_date', '!=', '0000-00-00')
                                 ->where('test_report_date', '!=', '0000-00-00')
                         )
                         ->unionAll(
@@ -370,7 +325,12 @@ class MaterialInwardController extends Controller
     {
         DB::beginTransaction();
         try {
-            $usage = DB::select('CALL material_inward_used_list(?)', [$request->id]);
+            $usage = [];
+            try {
+                $usage = DB::select('CALL material_inward_used_list(?)', [$request->id]);
+            } catch (\Exception $e) {
+                $usage = [];
+            }
 
             if (!empty($usage)) {
                 $message = "You Can't Delete, Material Inward Is Used In " . $usage[0]->table_name . ".";
@@ -383,12 +343,11 @@ class MaterialInwardController extends Controller
             $materialInward = MaterialInward::find($request->id);
             if ($materialInward && !empty($materialInward->offer_id)) {
                 Offer::where('offer_id', $materialInward->offer_id)->update([
-                    'authorized_id' => 0,
+                    'authorized_id_fix' => 0,
                     'authorized_last_on' => Carbon::now('Asia/Kolkata')->toDateTimeString(),
-                    'authorized_last_by_user_id' => Auth::user()->id, 
+                    'authorized_last_by' => Auth::user()->id, 
                 ]);
             }
-
 
             MaterialInwardDetails::where('material_inward_id', $request->id)->delete();
             MaterialInward::where('material_inward_id', $request->id)->delete();
@@ -414,24 +373,14 @@ class MaterialInwardController extends Controller
         }
     }
 
-    /* ------------------------------------------------------------------ *
-     |  store / update / getPartsByJobDesc
-     * ------------------------------------------------------------------ */
-
     public function store(Request $request)
     {
         $year_data    = getCurrentYearData();
         $LocationData = getCurrentLocation();
 
-        // $validated = $request->validate([
-        //     'tpi_name' => 'required_if:is_any_tpi_witness,Yes',
-        // ], [
-        //     'tpi_name.required_if' => 'Enter TPI Name.',
-        // ]);
-
         DB::beginTransaction();
         try {
-            // Resolve / lock the auto number (re-fetch if the typed one was taken)
+            // Resolve / lock the auto number
             $existNumber = MaterialInward::where([
                 ['material_inward_sequence', $request->material_inward_sequence],
                 ['material_inward_no', $request->material_inward_no],
@@ -461,29 +410,27 @@ class MaterialInwardController extends Controller
                 'material_inward_no'       => $material_inward_no,
                 'material_inward_sequence' => $material_inward_sequence,
                 'material_inward_date'     => $request->material_inward_date ? Date::createFromFormat('d/m/Y', $request->material_inward_date)->format('Y-m-d') : null,
+                'form_type_value_fix'      => 'Manual',
                 'nabl_type_fix'            => $request->nabl_type_fix,
                 'test_at_fix'              => $request->test_at_fix,
                 'job_type_fix'             => $request->job_type_fix,
-                'inward_type_value_fix'    => $request->inward_type_value_fix,
                 'customer_id'              => $request->customer_id,
-                'dc_no'                    => $request->dc_no,
-                'dc_date'                  => $request->dc_date ? Date::createFromFormat('d/m/Y', $request->dc_date)->format('Y-m-d') : null,
-                'po_no'                    => $request->po_no,
-                'po_date'                  => !empty($request->po_date) ? Date::createFromFormat('d/m/Y', $request->po_date)->format('Y-m-d') : null,
-                'sample_drawn_by'          => $request->sample_drawn_by,
-                'is_any_tpi_witness'       => $request->is_any_tpi_witness,
-                'tpi_name'                 => $request->is_any_tpi_witness == 'Yes' ? $request->tpi_name : null,
-                'condition_of_sample'      => $request->condition_of_sample,
-                'is_equipment_available'   => $request->is_equipment_available,
-                'competent_personnel_available' => $request->competent_personnel_available,
-                'is_test_sub_contracted'   => $request->is_test_sub_contracted,
-                'test_feasible'            => $request->test_feasible,
-                'all_test_parameters_are_in_accredited_scope' => $request->all_test_parameters_are_in_accredited_scope,
-                'required_statement_of_conformity' => $request->required_statement_of_conformity,
-                'additional_requirement_from_customer' => $request->additional_requirement_from_customer,
+                'challan_no'               => $request->challan_no,
+                'challan_date'             => $request->challan_date ? Date::createFromFormat('d/m/Y', $request->challan_date)->format('Y-m-d') : null,
+                'offer_no'                 => $request->offer_no,
+                'offer_date'               => !empty($request->offer_date) ? Date::createFromFormat('d/m/Y', $request->offer_date)->format('Y-m-d') : null,
+                'material_type_id'         => $request->material_type_id,
+                'total_qty'                => $request->total_qty ?? 0,
+                'test_method_id'           => $request->test_method_id ?? $request->test_method_id,
+                'procedure_reference_id'   => $request->procedure_ref_id ?? $request->procedure_reference_id,
+                'evaluation_as_per_id'     => $request->evaluation_as_per_id,
+                'acceptance_standard_id'   => $request->acceptance_standard_id,
+                'radiation_energy_fix'     => $request->radiation_energy_fix ?? $request->radiation_energy,
+                'coverage_area'            => $request->coverage_area,
+                'procedure_submitted_fix'  => $request->procedure_submitted_fix ?? $request->procedure_submitted_fix,
+                'del_date'                 => $request->del_date ? Date::createFromFormat('d/m/Y', $request->del_date)->format('Y-m-d') : null,
                 'special_note'             => $request->special_note,
-                // prepared_by auto-set to the logged-in user (per spec)
-                'prepared_by_user_id'      => Auth::user()->id,
+                'offer_id'                 => null,
                 'assign_format_no'         => $assign_format_no,
                 'current_location_id'      => $LocationData->location_id ?? null,
                 'year_id'                  => $year_data->id,
@@ -495,53 +442,25 @@ class MaterialInwardController extends Controller
             $details = json_decode($request->material_inward_details_data, true);
             if (!empty($details)) {
                 foreach ($details as $row) {
-                    // dd($row);
                     if (($row['mode'] ?? '') == 'Delete') continue;
-                    if (empty($row['type_of_testing_id_fix'])) continue;
 
-                    if($request->nabl_type_fix == 'NABL' && $row['process_type'] != 'Repair'){
-                        $is_observation_sheet = 'Yes';
-                    }else if($row['process_type'] == 'Repair'){
-                        $is_observation_sheet = 'N/A';
-                    }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
-                        $is_observation_sheet = 'N/A';
-                    }else{
-                        $is_observation_sheet = 'No';
-                    }
-                    //$is_observation_sheet = $request->nabl_type_fix === 'NABL'  || $row['process_type'] === 'Repair' ? 'Yes' : 'No';
-
-                    $createdDetail = MaterialInwardDetails::create([
-                        'material_inward_id'     => $mi->material_inward_id,
-                        'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? null,
-                        'process_type'           => $row['process_type'] ?? 'Fresh',
-                        //'is_observation_sheet'   => $row['is_observation_sheet'] ?? 'No',
-                        'is_observation_sheet'   => $is_observation_sheet,
-                        'test_report_rt_id'      =>
-                         $row['test_report_rt_id'] != '' && $row['test_report_rt_id'] != 0 ? $row['test_report_rt_id'] : null,
-                        'type_of_job_id'         => !empty($row['type_of_job_id']) ? $row['type_of_job_id'] : null,
-                        'job_desc_id'            => !empty($row['job_desc_id']) ? $row['job_desc_id'] : null,
-                        'job_desc'               => !empty($row['job_desc']) ? $row['job_desc'] : null,
-                        'part_no'                => $row['part_no'] ?? null,
-                        'drg_no'                 => $row['drg_no'] ?? null,
-                        'material_id'            => $row['material_id'] ?? null,
-                        'heat_no'                => $row['heat_no'] ?? null,
-                        'rt_no'                  => $row['rt_no'] ?? null,
-                        'product_code'           => $row['product_code'] ?? null,
-                        'thickness'              => $row['thickness'] ?? null,
-                        'area_of_coverage_id'    => $row['area_of_coverage_id'] ?? null,
-                        'procedure_ref_id'       => !empty($row['procedure_ref_id']) ? $row['procedure_ref_id'] : null,
-                        'evaluation_as_per_id'   => !empty($row['evaluation_as_per_id']) ? $row['evaluation_as_per_id'] : null,
-                        'acceptance_standard_id' => !empty($row['acceptance_standard_id']) ? $row['acceptance_standard_id'] : null,
-                        'quantity'               => $row['quantity'] ?? 0,
-                        'approx_value'           => $row['approx_value'] !== '' ? ($row['approx_value'] ?? null) : null,
-                        'approx_weight'          => $row['approx_weight'] !== '' ? ($row['approx_weight'] ?? null) : null,
-                        'remark'                 => $row['remark'] ?? null,
+                    MaterialInwardDetails::create([
+                        'material_inward_id'   => $mi->material_inward_id,
+                        'process_type_fix'         => $row['process_type_fix'] ?? $row['process_type'] ?? 'Fresh',
+                        'type_of_testing_id_fix'  => $row['type_of_testing_id_fix'] ?? 'RT',
+                        'sr_no'                => $row['sr_no'] ?? null,
+                        'lab_id'               => $row['lab_id'] ?? '',
+                        'customer_id_no'       => $row['customer_id_no'] ?? null,
+                        'job_desc'             => $row['job_desc'] ?? '',
+                        'die_no'               => $row['die_no'] ?? null,
+                        'heat_no'              => $row['heat_no'] ?? null,
+                        'drg_no'               => $row['drg_no'] ?? null,
+                        'material_id'          => $row['material_id'] ?? null,
+                        'thickness'         => $row['thickness'] ?? $row['thickness'] ?? null,
+                        'quantity'             => $row['quantity'] ?? 1,
+                        'remark'               => $row['remark'] ?? null,
+                        'offer_details_id'     => null,
                     ]);
-
-                    $checkPending = $this->checkNegativePendingQty($createdDetail->material_inward_details_id, $row['type_of_testing_id_fix'] ?? '', 'I');
-                    if ($checkPending) {
-                        return $checkPending;
-                    }
                 }
             }
 
@@ -553,7 +472,9 @@ class MaterialInwardController extends Controller
             $cust_name = !empty($cust) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $cust) : "";
             $pdf_name = 'Material_Inward' . $mi_number . $cust_name;
 
-            GeneratePdf($mi->material_inward_id, $pdf_name, 'material_inward', 'add');
+            if (function_exists('GeneratePdf')) {
+                GeneratePdf($mi->material_inward_id, $pdf_name, 'material_inward', 'add');
+            }
             $encodedId = base64_encode($mi->material_inward_id);
             $url = hasAccess("material_inward", "print") ? url("/check-file_exists?id={$encodedId}&name={$pdf_name}&type=material_inward") : "";
 
@@ -589,11 +510,9 @@ class MaterialInwardController extends Controller
                     })
                     ->ignore($request->id, 'material_inward_id')
             ],
-            // 'tpi_name' => 'required_if:is_any_tpi_witness,Yes',
         ], [
             'material_inward_sequence.unique' => 'Duplicate Inward No. Found.',
             'material_inward_sequence.required' => 'Enter Inward No.',
-            // 'tpi_name.required_if' => 'Enter TPI Name.',
         ]);
 
         $checkInwardDup = checkReportDuplication(MaterialInward::class, 'material_inward_no', $request->material_inward_no, $request, "Duplicate Inward No. Found.", $request->id, 'material_inward_id');
@@ -607,6 +526,8 @@ class MaterialInwardController extends Controller
             if (!$mi) {
                 return response()->json(['response_code' => '0', 'response_message' => 'Record Does Not Exists']);
             }
+
+            $isFromOffer = ($mi->form_type_value_fix === 'From Offer' || (!empty($mi->offer_id) && $mi->offer_id > 0));
 
             if ($request->material_inward_date) {
                 $newDate = Date::createFromFormat('d/m/Y', $request->material_inward_date)->format('Y-m-d');
@@ -655,39 +576,60 @@ class MaterialInwardController extends Controller
                 }
             }
 
-            $page_id = getMenuIdBassedOnDisplayName('material_inward');
-            $assign_format_no = getAssignFormateNoForTransaction($LocationData->location_id, $page_id->id, $request->material_inward_date);
-
-            $mi->update([
-                'material_inward_no'     => $request->material_inward_no,
-                'material_inward_sequence'     => $request->material_inward_sequence,
+            $miUpdateData = [
+                'material_inward_no'       => $request->material_inward_no,
+                'material_inward_sequence' => $request->material_inward_sequence,
                 'material_inward_date'     => $request->material_inward_date ? Date::createFromFormat('d/m/Y', $request->material_inward_date)->format('Y-m-d') : null,
-                'nabl_type_fix'            => $request->nabl_type_fix,
-                'test_at_fix'              => $request->test_at_fix,
-                'job_type_fix'             => $request->job_type_fix,
-                'inward_type_value_fix'    => $request->inward_type_value_fix,
-                'customer_id'              => $request->customer_id,
-                'dc_no'                    => $request->dc_no,
-                'dc_date'                  => $request->dc_date ? Date::createFromFormat('d/m/Y', $request->dc_date)->format('Y-m-d') : null,
-                'po_no'                    => $request->po_no,
-                'po_date'                  => !empty($request->po_date) ? Date::createFromFormat('d/m/Y', $request->po_date)->format('Y-m-d') : null,
-                'sample_drawn_by'          => $request->sample_drawn_by,
-                'is_any_tpi_witness'       => $request->is_any_tpi_witness,
-                'tpi_name'                 => $request->is_any_tpi_witness == 'Yes' ? $request->tpi_name : null,
-                'condition_of_sample'      => $request->condition_of_sample,
-                'is_equipment_available'   => $request->is_equipment_available,
-                'competent_personnel_available' => $request->competent_personnel_available,
-                'is_test_sub_contracted'   => $request->is_test_sub_contracted,
-                'test_feasible'            => $request->test_feasible,
-                'all_test_parameters_are_in_accredited_scope' => $request->all_test_parameters_are_in_accredited_scope,
-                'required_statement_of_conformity' => $request->required_statement_of_conformity,
-                'additional_requirement_from_customer' => $request->additional_requirement_from_customer,
+                'challan_no'               => $request->challan_no,
+                'challan_date'             => $request->challan_date ? Date::createFromFormat('d/m/Y', $request->challan_date)->format('Y-m-d') : null,
+                'material_type_id'         => $request->material_type_id,
+                'total_qty'                => $request->total_qty ?? 0,
+                'test_method_id'           => $request->test_method_id ?? $request->test_method_id,
+                'procedure_reference_id'   => $request->procedure_ref_id ?? $request->procedure_reference_id,
+                'evaluation_as_per_id'     => $request->evaluation_as_per_id,
+                'acceptance_standard_id'   => $request->acceptance_standard_id,
+                'radiation_energy_fix'     => $request->radiation_energy_fix ?? $request->radiation_energy,
+                'coverage_area'            => $request->coverage_area,
+                'procedure_submitted_fix'      => $request->procedure_submitted_fix ?? $request->procedure_submitted_fix,
+                'del_date'                 => $request->del_date ? Date::createFromFormat('d/m/Y', $request->del_date)->format('Y-m-d') : null,
                 'special_note'             => $request->special_note,
-                // 'assign_format_no'         => $assign_format_no, // not update assign formate discussion ramde sir
                 'last_by'                  => Auth::user()->id,
                 'last_on'                  => Carbon::now('Asia/Kolkata')->toDateTimeString(),
-            ]);
+            ];
 
+            if (!$isFromOffer) {
+                $miUpdateData['customer_id']   = $request->customer_id;
+                $miUpdateData['nabl_type_fix'] = $request->nabl_type_fix;
+                $miUpdateData['job_type_fix']  = $request->job_type_fix;
+                $miUpdateData['test_at_fix']   = $request->test_at_fix;
+                $miUpdateData['offer_no']      = $request->offer_no;
+                $miUpdateData['offer_date']    = !empty($request->offer_date) ? Date::createFromFormat('d/m/Y', $request->offer_date)->format('Y-m-d') : null;
+            }
+
+            $mi->update($miUpdateData);
+
+            // 3) From Offer: Reverse synchronization to Offer
+            if ($isFromOffer && !empty($mi->offer_id)) {
+                Offer::where('offer_id', $mi->offer_id)->update([
+                    'challan_no'              => $request->challan_no,
+                    'challan_date'            => $request->challan_date ? Date::createFromFormat('d/m/Y', $request->challan_date)->format('Y-m-d') : null,
+                    'material_type_id'        => $request->material_type_id,
+                    'total_qty'               => $request->total_qty ?? 0,
+                    'test_method_id'          => $request->test_method_id ?? $request->test_method_id,
+                    'procedure_reference_id'  => $request->procedure_ref_id ?? $request->procedure_reference_id,
+                    'evaluation_as_per_id'    => $request->evaluation_as_per_id,
+                    'acceptance_standard_id'  => $request->acceptance_standard_id,
+                    'radiation_energy_fix'    => $request->radiation_energy_fix ?? $request->radiation_energy,
+                    'coverage_area'           => $request->coverage_area,
+                    'procedure_submitted_fix' => $request->procedure_submitted_fix ?? $request->procedure_submitted_fix,
+                    'del_date'                => $request->del_date ? Date::createFromFormat('d/m/Y', $request->del_date)->format('Y-m-d') : null,
+                    'special_note'            => $request->special_note ?? $request->special_note,
+                    'last_by'                 => Auth::id(),
+                    'last_on'                 => Carbon::now('Asia/Kolkata')->toDateTimeString(),
+                ]);
+            }
+
+            // 4) Details Processing & Reverse effect on offer_details
             $details = json_decode($request->material_inward_details_data, true);
 
             if (!empty($details)) {
@@ -696,151 +638,76 @@ class MaterialInwardController extends Controller
 
                     $mode = $row['mode'] ?? '';
 
-                    if($request->nabl_type_fix == 'NABL' && $row['process_type'] != 'Repair'){
-                        $is_observation_sheet = 'Yes';
-                    }else if($row['process_type'] == 'Repair'){
-                        $is_observation_sheet = 'N/A';
-                    }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
-                        $is_observation_sheet = 'N/A';
-                    }else{
-                        $is_observation_sheet = 'No';
-                    }
-
-                    //$is_observation_sheet = $request->nabl_type_fix === 'NABL'  || $row['process_type'] === 'Repair' ? 'Yes' : 'No';
-
                     if ($mode == 'Insert') {
-                        $createdDetail = MaterialInwardDetails::create([
-                            'material_inward_id'     => $mi->material_inward_id,
-                            'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? null,
-                            'process_type'           => $row['process_type'] ?? 'Fresh',
-                            // 'is_observation_sheet'   => $row['is_observation_sheet'] ?? 'No',
-                            'is_observation_sheet'   =>  $is_observation_sheet,
-                            'test_report_rt_id' =>  $row['test_report_rt_id'] != '' && $row['test_report_rt_id'] != 0 ? $row['test_report_rt_id'] : null,
-                            'type_of_job_id'         => !empty($row['type_of_job_id']) ? $row['type_of_job_id'] : null,
-                            'job_desc_id'            => !empty($row['job_desc_id']) ? $row['job_desc_id'] : null,
-                            'job_desc'               => !empty($row['job_desc']) ? $row['job_desc'] : null,
-                            'part_no'                => $row['part_no'] ?? null,
-                            'drg_no'                 => $row['drg_no'] ?? null,
-                            'material_id'            => $row['material_id'] ?? null,
-                            'heat_no'                => $row['heat_no'] ?? null,
-                            'rt_no'                  => $row['rt_no'] ?? null,
-                            'product_code'           => $row['product_code'] ?? null,
-                            'thickness'              => $row['thickness'] ?? null,
-                            'area_of_coverage_id'    => $row['area_of_coverage_id'] ?? null,
-                            'procedure_ref_id'       => !empty($row['procedure_ref_id']) ? $row['procedure_ref_id'] : null,
-                            'evaluation_as_per_id'   => !empty($row['evaluation_as_per_id']) ? $row['evaluation_as_per_id'] : null,
-                            'acceptance_standard_id' => !empty($row['acceptance_standard_id']) ? $row['acceptance_standard_id'] : null,
-                            'quantity'               => $row['quantity'] ?? 0,
-                            'approx_value'           => $row['approx_value'] !== '' ? ($row['approx_value'] ?? null) : null,
-                            'approx_weight'          => $row['approx_weight'] !== '' ? ($row['approx_weight'] ?? null) : null,
-                            'remark'                 => $row['remark'] ?? null,
-                        ]);
-
-                        $checkPending = $this->checkNegativePendingQty($createdDetail->material_inward_details_id, $row['type_of_testing_id_fix'] ?? '', 'U');
-                        if ($checkPending) {
-                            return $checkPending;
+                        // For From Offer: adding is disabled/not allowed
+                        if ($isFromOffer) {
+                            continue;
                         }
+
+                        MaterialInwardDetails::create([
+                            'material_inward_id'   => $mi->material_inward_id,
+                            'process_type_fix'         => $row['process_type_fix'] ?? $row['process_type'] ?? 'Fresh',
+                            'type_of_testing_id_fix'  => $row['type_of_testing_id_fix'] ?? 'RT',
+                            'sr_no'                => $row['sr_no'] ?? null,
+                            'lab_id'               => $row['lab_id'] ?? '',
+                            'customer_id_no'       => $row['customer_id_no'] ?? null,
+                            'job_desc'             => $row['job_desc'] ?? '',
+                            'die_no'               => $row['die_no'] ?? null,
+                            'heat_no'              => $row['heat_no'] ?? null,
+                            'drg_no'               => $row['drg_no'] ?? null,
+                            'material_id'          => $row['material_id'] ?? null,
+                            'thickness'         => $row['thickness'] ?? $row['thickness'] ?? null,
+                            'quantity'             => $row['quantity'] ?? 1,
+                            'remark'               => $row['remark'] ?? null,
+                            'offer_details_id'     => null,
+                        ]);
                     }
                     elseif ($mode == 'Update') {
-
                         if (!empty($row['material_inward_details_id'])) {
-                            $detailId = $row['material_inward_details_id'];
+                            $det = MaterialInwardDetails::where('material_inward_details_id', $row['material_inward_details_id'])->first();
+                            if ($det) {
+                                $det->update([
+                                    'process_type_fix'        => $row['process_type_fix'] ?? $row['process_type'] ?? 'Fresh',
+                                    'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? 'RT',
+                                    'sr_no'               => $row['sr_no'] ?? null,
+                                    'lab_id'              => $row['lab_id'] ?? '',
+                                    'customer_id_no'      => $row['customer_id_no'] ?? null,
+                                    'job_desc'            => $row['job_desc'] ?? '',
+                                    'die_no'              => $row['die_no'] ?? null,
+                                    'heat_no'             => $row['heat_no'] ?? null,
+                                    'drg_no'              => $row['drg_no'] ?? null,
+                                    'material_id'         => $row['material_id'] ?? null,
+                                    'thickness'        => $row['thickness'] ?? $row['thickness'] ?? null,
+                                    'quantity'            => $row['quantity'] ?? 1,
+                                    'remark'              => $row['remark'] ?? null,
+                                ]);
 
-                            $existsInDownstream = DB::table('observation_sheet_details')->where('material_inward_details_id', $detailId)->exists()
-                                || DB::table('test_report_rt')->where('material_inward_details_id', $detailId)->exists()
-                                || DB::table('test_report_ut')->where('material_inward_details_id', $detailId)->exists()
-                                || DB::table('test_report_mpt')->where('material_inward_details_id', $detailId)->exists()
-                                || DB::table('test_report_dpt')->where('material_inward_details_id', $detailId)->exists();
-
-                            if ($existsInDownstream) {
-                                $is_observation_sheet = DB::table('material_inward_details')
-                                    ->where('material_inward_details_id', $detailId)
-                                    ->value('is_observation_sheet');
-                            } else {
-                                if($request->nabl_type_fix == 'NABL' && $row['process_type'] != 'Repair'){
-                                    $is_observation_sheet = 'Yes';
-                                }else if($row['process_type'] == 'Repair'){
-                                    $is_observation_sheet = 'N/A';
-                                }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
-                                    $is_observation_sheet = 'N/A';
-                                }else{
-                                    $is_observation_sheet = 'No';
-                                }
-                            }
-                        } else {
-                            if($request->nabl_type_fix == 'NABL' && $row['process_type'] != 'Repair'){
-                                $is_observation_sheet = 'Yes';
-                            }else if($row['process_type'] == 'Repair'){
-                                $is_observation_sheet = 'N/A';
-                            }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
-                                $is_observation_sheet = 'N/A';
-                            }else{
-                                $is_observation_sheet = 'No';
-                            }
-                        }
-
-                        if (!empty($row['material_inward_details_id'])) {
-                            $is_used_in_os = DB::table('observation_sheet_details')
-                            ->where('from_type_id_fix', 1)
-                            ->where('material_inward_details_id', $row['material_inward_details_id'])
-                            ->first(); 
-
-                            if ($is_used_in_os && (float)$row['quantity'] != (float)$is_used_in_os->observation_qty) {
-                                    DB::rollBack();
-                                    return response()->json([
-                                        'response_code'    => '0',
-                                        'response_message' => "You Can't Update, Material Inward Qty. Is Used In Observation Sheet.",
+                                // Reverse effect on offer_details
+                                $offerDetId = $row['offer_details_id'] ?? $det->offer_details_id;
+                                if ($isFromOffer && !empty($offerDetId)) {
+                                    DB::table('offer_details')->where('offer_details_id', $offerDetId)->update([
+                                        'process_type_fix'    => $row['process_type_fix'] ?? $row['process_type'] ?? 'Fresh',
+                                        'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? 'RT',
+                                        'sr_no'               => $row['sr_no'] ?? null,
+                                        'lab_id'              => $row['lab_id'] ?? '',
+                                        'customer_id_no'      => $row['customer_id_no'] ?? null,
+                                        'job_desc'            => $row['job_desc'] ?? '',
+                                        'die_no'              => $row['die_no'] ?? null,
+                                        'heat_no'             => $row['heat_no'] ?? null,
+                                        'drg_no'              => $row['drg_no'] ?? null,
+                                        'material_id'         => $row['material_id'] ?? null,
+                                        'thickness'        => $row['thickness'] ?? $row['thickness'] ?? null,
+                                        'quantity'            => $row['quantity'] ?? 1,
+                                        'remark'              => $row['remark'] ?? null,
                                     ]);
                                 }
-                               $old_inward_qty = MaterialInwardDetails::where('material_inward_details_id', $row['material_inward_details_id'])->value('quantity');
-                               $next_qty = $old_inward_qty - $row['quantity'];
-                            //    dd($next_qty,$old_inward_qty);
-                            $checkQty = $this->qtyValidation($next_qty, $row['material_inward_details_id'], 'U');
-                            if ($checkQty) {
-                                return $checkQty;
-                            }
-
-
-                            MaterialInwardDetails::where('material_inward_details_id', $row['material_inward_details_id'])->update([
-                                'material_inward_id'     => $mi->material_inward_id,
-                                'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? null,
-                                'process_type'           => $row['process_type'] ?? 'Fresh',
-                                // 'is_observation_sheet'   => $row['is_observation_sheet'] ?? 'No',
-                                'is_observation_sheet'   =>  $is_observation_sheet,
-                                'test_report_rt_id'      =>  $row['test_report_rt_id'] != '' && $row['test_report_rt_id'] != 0 ? $row['test_report_rt_id'] : null,
-                                'type_of_job_id'         => !empty($row['type_of_job_id']) ? $row['type_of_job_id'] : null,
-                                'job_desc_id'            => !empty($row['job_desc_id']) ? $row['job_desc_id'] : null,
-                                'job_desc'               => !empty($row['job_desc']) ? $row['job_desc'] : null,
-                                'part_no'                => $row['part_no'] ?? null,
-                                'drg_no'                 => $row['drg_no'] ?? null,
-                                'material_id'            => $row['material_id'] ?? null,
-                                'heat_no'                => $row['heat_no'] ?? null,
-                                'rt_no'                  => $row['rt_no'] ?? null,
-                                'product_code'           => $row['product_code'] ?? null,
-                                'thickness'              => $row['thickness'] ?? null,
-                                'area_of_coverage_id'    => $row['area_of_coverage_id'] ?? null,
-                                'procedure_ref_id'       => !empty($row['procedure_ref_id']) ? $row['procedure_ref_id'] : null,
-                                'evaluation_as_per_id'   => !empty($row['evaluation_as_per_id']) ? $row['evaluation_as_per_id'] : null,
-                                'acceptance_standard_id' => !empty($row['acceptance_standard_id']) ? $row['acceptance_standard_id'] : null,
-                                'quantity'               => $row['quantity'] ?? 0,
-                                'approx_value'           => $row['approx_value'] !== '' ? ($row['approx_value'] ?? null) : null,
-                                'approx_weight'          => $row['approx_weight'] !== '' ? ($row['approx_weight'] ?? null) : null,
-                                'remark'                 => $row['remark'] ?? null,
-                            ]);
-
-                            $checkPending = $this->checkNegativePendingQty($row['material_inward_details_id'], $row['type_of_testing_id_fix'] ?? '', 'U');
-                            if ($checkPending) {
-                                return $checkPending;
                             }
                         }
                     }
                     elseif ($mode == 'Delete') {
                         if (!empty($row['material_inward_details_id'])) {
-                             $old_inward_qty = MaterialInwardDetails::where('material_inward_details_id', $row['material_inward_details_id'])->value('quantity');
-                            $checkQty = $this->qtyValidation($old_inward_qty, $row['material_inward_details_id'], 'D');
-                            if ($checkQty) {
-                                return $checkQty;
-                            }
+                            $det = MaterialInwardDetails::where('material_inward_details_id', $row['material_inward_details_id'])->first();
+                            $offerDetId = $row['offer_details_id'] ?? ($det ? $det->offer_details_id : null);
 
                             try {
                                 MaterialInwardDetails::where('material_inward_details_id', $row['material_inward_details_id'])->delete();
@@ -852,9 +719,14 @@ class MaterialInwardController extends Controller
                                         'response_code' => '0',
                                         'response_message' => "You Can't Delete, Material Inward Detail is Used Somewhere.",
                                     ]);
-                                  } else {
-                                      throw $e;
-                                  }
+                                } else {
+                                    throw $e;
+                                }
+                            }
+
+                            // Reverse effect: delete from offer_details
+                            if ($isFromOffer && !empty($offerDetId)) {
+                                DB::table('offer_details')->where('offer_details_id', $offerDetId)->delete();
                             }
                         }
                     }
@@ -862,13 +734,15 @@ class MaterialInwardController extends Controller
             }
 
             DB::commit();
-            // $url = "";
+
             $mi_number = !empty($mi->material_inward_no) ? '_' . str_replace('/', '_', $mi->material_inward_no) : "";
             $cust = DB::table('customers')->where('id', $mi->customer_id)->value('customer');
             $cust_name = !empty($cust) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $cust) : "";
             $pdf_name = 'Material_Inward' . $mi_number . $cust_name;
 
-            GeneratePdf($mi->material_inward_id, $pdf_name, 'material_inward', 'update');
+            if (function_exists('GeneratePdf')) {
+                GeneratePdf($mi->material_inward_id, $pdf_name, 'material_inward', 'update');
+            }
             $encodedId = base64_encode($mi->material_inward_id);
             $url = hasAccess("material_inward", "print") ? url("/check-file_exists?id={$encodedId}&name={$pdf_name}&type=material_inward") : "";
 
@@ -888,10 +762,6 @@ class MaterialInwardController extends Controller
         }
     }
 
-    /**
-     * Parts for the chosen Job Description (child modal dependency).
-     * (No drawing-number column exists; data-drg_no stays empty until a source is added.)
-     */
     public function getPartsByJobDesc(Request $request)
     {
         $parts = DB::table('part')
@@ -913,7 +783,6 @@ class MaterialInwardController extends Controller
         $customer_id   = $request->customer_id;
         $nabl_type_fix = $request->nabl_type_fix;
 
-        // Get location-wise last inward record for parent radios (regardless of customer)
         $latestLocationInward = MaterialInward::where('year_id', $year_data->id)
             ->where('current_location_id', $LocationData->location_id)
             ->orderBy('material_inward_id', 'desc')
@@ -928,7 +797,6 @@ class MaterialInwardController extends Controller
             ];
         }
 
-        // Strictly do NOT return any customer LNR data if no customer is selected
         if (empty($customer_id)) {
             return response()->json([
                 'response_code'       => 1,
@@ -948,7 +816,6 @@ class MaterialInwardController extends Controller
 
         $latestInward = $query->orderBy('material_inward_id', 'desc')->first();
 
-        // Fallback: If no record for specific customer + nabl_type_fix, try matching just customer
         if (!$latestInward) {
             $latestInward = MaterialInward::where('year_id', $year_data->id)
                 ->where('current_location_id', $LocationData->location_id)
@@ -978,7 +845,6 @@ class MaterialInwardController extends Controller
 
     public function qtyValidation($new_qty, $material_inward_details_id, $transaction_mode = 'U')
     {
-        // dd($material_inward_details_id);
         if ($material_inward_details_id > 0) {
             $used_qty_dc = DB::table('customer_dc_non_returnable_details')
                 ->where('material_inward_details_id', $material_inward_details_id)
@@ -996,35 +862,32 @@ class MaterialInwardController extends Controller
                     'response_message' => $message,
                 ]);
             }
-            // dd($new_qty);
             if($new_qty > 0)
             {
-                 $inward_detail = DB::table('material_inward_details')
-                ->where('material_inward_details_id', $material_inward_details_id)
-                ->first();
+                $inward_detail = DB::table('material_inward_details')
+                    ->where('material_inward_details_id', $material_inward_details_id)
+                    ->first();
                 $testing_type = $inward_detail->type_of_testing_id_fix ?? '';
+                $used_qty = 0;
                 if ($testing_type === 'RT') {
                     $pending_qty = DB::table('pending_material_inward_rt_qty')
                         ->where('material_inward_details_id', $material_inward_details_id)
                         ->whereNull('observation_sheet_details_id')
                         ->value('pending_qty');
-                    $used_qty =  (float)($pending_qty ?? 0);
+                    $used_qty = (float)($pending_qty ?? 0);
                 } elseif ($testing_type === 'UT') {
                     $pending_qty = DB::table('pending_material_inward_ut_qty')
                         ->where('material_inward_details_id', $material_inward_details_id)
-                        //   ->whereNull('observation_sheet_details_id')
                         ->value('pending_qty');
-                    $used_qty =(float)($pending_qty ?? 0);
+                    $used_qty = (float)($pending_qty ?? 0);
                 } elseif ($testing_type === 'DPT') {
                     $pending_qty = DB::table('pending_material_inward_dpt_qty')
                         ->where('material_inward_details_id', $material_inward_details_id)
-                        //   ->whereNull('observation_sheet_details_id')
                         ->value('pending_qty');
                     $used_qty = (float)($pending_qty ?? 0);
                 } elseif ($testing_type === 'MPT') {
                     $pending_qty = DB::table('pending_material_inward_mpt_qty')
                         ->where('material_inward_details_id', $material_inward_details_id)
-                        // ->whereNull('observation_sheet_details_id')
                         ->value('pending_qty');
                     $used_qty = (float)($pending_qty ?? 0);
                 }
@@ -1033,10 +896,9 @@ class MaterialInwardController extends Controller
                     ->where('material_inward_details_id', $material_inward_details_id)
                     ->where('from_type_id_fix', 1)
                     ->value('pending_qty');
-                $total_qty= (float)($used_qty) + (float)($obsPendingQty ?? 0);
+                $total_qty = (float)($used_qty) + (float)($obsPendingQty ?? 0);
 
                 if($transaction_mode == 'D'){
-                    // dd($total_qty , $new_qty);
                     if($total_qty < $new_qty){
                         DB::rollBack();
                         return response()->json([
@@ -1044,9 +906,7 @@ class MaterialInwardController extends Controller
                             'response_message' => "You Can't Delete, Material Inward Is Used.",
                         ]);
                     }
-
                 }else{
-                    // dd($total_qty,$new_qty);
                     if($total_qty < $new_qty){
                         DB::rollBack();
                         return response()->json([
@@ -1055,134 +915,10 @@ class MaterialInwardController extends Controller
                         ]);
                     }
                 }
-                        
             }
-           
-
-            // Separate Customer DC (Non-Returnable) Validation
-            
         }
-        return null; // No error
+        return null;
     }
-
-//     public function qtyValidation($new_qty, $material_inward_details_id, $transaction_mode = 'U')
-// {
-//     if ($material_inward_details_id > 0) {
-//         $inward_detail = DB::table('material_inward_details')
-//             ->where('material_inward_details_id', $material_inward_details_id)
-//             ->first();
-
-//         if (!$inward_detail) {
-//             return null;
-//         }
-
-//         $inward_qty   = (float)($inward_detail->quantity ?? 0);
-//         $testing_type = $inward_detail->type_of_testing_id_fix ?? '';
-
-//         // à«§. Customer DC (Non-Returnable) àª®àª¾àª‚ àªµàªªàª°àª¾àª¶ àªšà«‡àª• àª•àª°à«‹
-//         $used_qty_dc = (float)DB::table('customer_dc_non_returnable_details')
-//             ->where('material_inward_details_id', $material_inward_details_id)
-//             ->sum('dc_qty');
-
-//         if ($used_qty_dc > 0) {
-//             if ($transaction_mode === 'D') {
-//                 DB::rollBack();
-//                 return response()->json([
-//                     'response_code'    => '0',
-//                     'response_message' => "You Can't Delete, Material Inward Is Used In Customer DC (Non-Returnable).",
-//                 ]);
-//             }
-//             if ($transaction_mode === 'U' && (float)$new_qty < $used_qty_dc) {
-//                 DB::rollBack();
-//                 return response()->json([
-//                     'response_code'    => '0',
-//                     'response_message' => "You Can't Update, Inward Qty. cannot be less than Customer DC Qty. ({$used_qty_dc}).",
-//                 ]);
-//             }
-//         }
-
-//         // à«¨. Observation Sheet àª®àª¾àª‚ àªµàªªàª°àª¾àª¶ àªšà«‡àª• àª•àª°à«‹
-//         $obs_pending = DB::table('pending_observation_sheet_qty')
-//             ->where('material_inward_details_id', $material_inward_details_id)
-//             ->where(function($q) {
-//                 $q->whereNull('test_report_rt_id')->orWhere('test_report_rt_id', 0);
-//             })
-//             ->value('pending_qty');
-
-//         $used_obs_qty = ($obs_pending !== null) ? max(0, $inward_qty - (float)$obs_pending) : 0;
-
-//         if ($used_obs_qty > 0) {
-//             if ($transaction_mode === 'D') {
-//                 DB::rollBack();
-//                 return response()->json([
-//                     'response_code'    => '0',
-//                     'response_message' => "You Can't Delete, Material Inward Is Used In Observation Sheet.",
-//                 ]);
-//             }
-//             if ($transaction_mode === 'U' && (float)$new_qty < $used_obs_qty) {
-//                 DB::rollBack();
-//                 return response()->json([
-//                     'response_code'    => '0',
-//                     'response_message' => "You Can't Update, Inward Qty. cannot be less than Observation Sheet Qty. ({$used_obs_qty}).",
-//                 ]);
-//             }
-//         }
-
-//         // à«©. Direct Test Reports (RT / UT / DPT / MPT) àª®àª¾àª‚ àªµàªªàª°àª¾àª¶ àªšà«‡àª• àª•àª°à«‹
-//         $report_pending = null;
-//         $report_name = "Test Report ({$testing_type})";
-
-//         if ($testing_type === 'RT') {
-//             $report_pending = DB::table('pending_material_inward_rt_qty')
-//                 ->where('material_inward_details_id', $material_inward_details_id)
-//                 ->value('pending_qty');
-//         } elseif ($testing_type === 'UT') {
-//             $report_pending = DB::table('pending_material_inward_ut_qty')
-//                 ->where('material_inward_details_id', $material_inward_details_id)
-//                 ->value('pending_qty');
-//         } elseif ($testing_type === 'DPT') {
-//             $report_pending = DB::table('pending_material_inward_dpt_qty')
-//                 ->where('material_inward_details_id', $material_inward_details_id)
-//                 ->value('pending_qty');
-//         } elseif ($testing_type === 'MPT') {
-//             $report_pending = DB::table('pending_material_inward_mpt_qty')
-//                 ->where('material_inward_details_id', $material_inward_details_id)
-//                 ->value('pending_qty');
-//         }
-
-//         $used_report_qty = ($report_pending !== null) ? max(0, $inward_qty - (float)$report_pending) : 0;
-
-//         if ($used_report_qty > 0) {
-//             if ($transaction_mode === 'D') {
-//                 DB::rollBack();
-//                 return response()->json([
-//                     'response_code'    => '0',
-//                     'response_message' => "You Can't Delete, Material Inward Is Used In {$report_name}.",
-//                 ]);
-//             }
-//             if ($transaction_mode === 'U' && (float)$new_qty < $used_report_qty) {
-//                 DB::rollBack();
-//                 return response()->json([
-//                     'response_code'    => '0',
-//                     'response_message' => "You Can't Update, Inward Qty. cannot be less than {$report_name}.",
-//                 ]);
-//             }
-//         }
-
-//         // à«ª. àªœà«‹ àªàª• àª•àª°àª¤àª¾àª‚ àªµàª§à« àª®à«‹àª¡à«àª¯à«àª²àª®àª¾àª‚ àªªàª¾àª°à«àªŸàª¿àª¶àª¨ àª¥àª¯à«‡àª² àª¹à«‹àª¯ àª…àª¨à«‡ àª•à«àª² àªµàªªàª°àª¾àª¶ àª¨àªµà«€ àª•à«àªµàª¾àª¨à«àªŸàª¿àªŸà«€ àª•àª°àª¤àª¾àª‚ àªµàª§à« àª¹à«‹àª¯
-//         $total_used = $used_qty_dc + $used_obs_qty + $used_report_qty;
-//         if ($transaction_mode === 'U' && (float)$new_qty < $total_used) {
-//             DB::rollBack();
-//             return response()->json([
-//                 'response_code'    => '0',
-//                 'response_message' => "You Can't Update, Inward Qty. cannot be less than Total Used Qty. ({$total_used}).",
-//             ]);
-//         }
-//     }
-
-//     return null; // No error
-// }
-
 
     public function checkNegativePendingQty($material_inward_details_id, $testing_type, $transaction_mode = 'U')
     {
@@ -1240,46 +976,26 @@ class MaterialInwardController extends Controller
     {
         $term = $request->term ?? '';
         $job_desc = $request->job_desc ?? '';
-        $job_desc_id = $request->job_desc_id ?? '';
         $current_location_id = getCurrentLocation()->location_id;
 
         if (!empty($term)) {
-            $query = MaterialInwardDetails::select('material_inward_details.part_no')
+            $query = MaterialInwardDetails::select('material_inward_details.die_no as part_no')
                 ->join('material_inward', 'material_inward.material_inward_id', '=', 'material_inward_details.material_inward_id')
                 ->where('material_inward.current_location_id', $current_location_id)
-                ->whereNotNull('material_inward_details.part_no')
-                ->where('material_inward_details.part_no', '!=', '')
-                ->where('material_inward_details.part_no', 'LIKE', '%' . $term . '%');
+                ->whereNotNull('material_inward_details.die_no')
+                ->where('material_inward_details.die_no', '!=', '')
+                ->where('material_inward_details.die_no', 'LIKE', '%' . $term . '%');
 
             if (!empty($job_desc)) {
-                $query->where(function($q) use ($job_desc) {
-                    $q->where('material_inward_details.job_desc', $job_desc);
-                    if (is_numeric($job_desc)) {
-                        $q->orWhere('material_inward_details.job_desc_id', $job_desc);
-                    }
-                });
-            } elseif (!empty($job_desc_id)) {
-                $query->where('material_inward_details.job_desc_id', $job_desc_id);
+                $query->where('material_inward_details.job_desc', $job_desc);
             }
 
-            $partNos = $query->groupBy('material_inward_details.part_no')->orderBy('material_inward_details.part_no', 'asc')->get();
-
-            if ($partNos->isEmpty() && (!empty($job_desc) || !empty($job_desc_id))) {
-                $partNos = MaterialInwardDetails::select('material_inward_details.part_no')
-                    ->join('material_inward', 'material_inward.material_inward_id', '=', 'material_inward_details.material_inward_id')
-                    ->where('material_inward.current_location_id', $current_location_id)
-                    ->whereNotNull('material_inward_details.part_no')
-                    ->where('material_inward_details.part_no', '!=', '')
-                    ->where('material_inward_details.part_no', 'LIKE', '%' . $term . '%')
-                    ->groupBy('material_inward_details.part_no')
-                    ->orderBy('material_inward_details.part_no', 'asc')
-                    ->get();
-            }
+            $partNos = $query->groupBy('material_inward_details.die_no')->orderBy('material_inward_details.die_no', 'asc')->get();
 
             if ($partNos->isNotEmpty()) {
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($partNos as $row) {
-                    $output .= '<li parent-id="part_no" list-id="inward_part_no_list" class="list-group-item" tabindex="0">' . e($row->part_no) . '</li>';
+                    $output .= '<li parent-id="die_no" list-id="inward_die_no_list" class="list-group-item" tabindex="0">' . e($row->part_no) . '</li>';
                 }
                 $output .= '</ul>';
 
@@ -1334,34 +1050,6 @@ class MaterialInwardController extends Controller
 
     public function getInwardProductCodeList(Request $request)
     {
-        $term = $request->term ?? '';
-        $current_location_id = getCurrentLocation()->location_id;
-
-        if (!empty($term)) {
-            $productCodes = MaterialInwardDetails::select('material_inward_details.product_code')
-                ->join('material_inward', 'material_inward.material_inward_id', '=', 'material_inward_details.material_inward_id')
-                ->where('material_inward.current_location_id', $current_location_id)
-                ->whereNotNull('material_inward_details.product_code')
-                ->where('material_inward_details.product_code', '!=', '')
-                ->where('material_inward_details.product_code', 'LIKE', '%' . $term . '%')
-                ->groupBy('material_inward_details.product_code')
-                ->orderBy('material_inward_details.product_code', 'asc')
-                ->get();
-
-            if ($productCodes->isNotEmpty()) {
-                $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
-                foreach ($productCodes as $row) {
-                    $output .= '<li parent-id="product_code" list-id="inward_product_code_list" class="list-group-item" tabindex="0">' . e($row->product_code) . '</li>';
-                }
-                $output .= '</ul>';
-
-                return response()->json([
-                    'productCodeList' => $output,
-                    'response_code'   => 1,
-                ]);
-            }
-        }
-
         return response()->json([
             'productCodeList' => '',
             'response_code'   => 1,
@@ -1382,7 +1070,6 @@ class MaterialInwardController extends Controller
 
             $current_location_id = getCurrentLocation()->location_id;
 
-            // Find all inwards for this customer and job type within current location
             $inwardQuery = MaterialInward::where('customer_id', $customer)
                 ->where('job_type_fix', $jobTypeCasting)
                 ->where('current_location_id', $current_location_id);
@@ -1394,7 +1081,6 @@ class MaterialInwardController extends Controller
             $inwardIds = $inwardQuery->pluck('material_inward_id');
 
             if ($inwardIds->count() > 0) {
-                // Find all details matching the type of test
                 $query = MaterialInwardDetails::whereIn('material_inward_details.material_inward_id', $inwardIds)
                     ->join('material_inward', 'material_inward.material_inward_id', '=', 'material_inward_details.material_inward_id')
                     ->select('material_inward_details.*', 'material_inward.material_inward_no as inward_no', 'material_inward.material_inward_date as inward_date')

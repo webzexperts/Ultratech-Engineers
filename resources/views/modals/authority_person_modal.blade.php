@@ -79,15 +79,15 @@
                                 <!-- Operator Type (checkboxes -> hidden operator_type) -->
                                 <div class="row g-1  mb-2">
                                     <div class="col-lg-3">
-                                        <!-- <label class="form-check-label" for="tested_by">
+                                        <!-- <label class="form-check-label" for="performed_by">
                                             Tested By
                                         </label> -->
                                     </div>
                                     <div class="col-lg-4 d-flex gap-4 align-items-center">
                                         <div class="form-check">
-                                            <input class="form-check-input operator_type_chk" type="checkbox" name="tested_by" id="tested_by" value="Yes">
-                                            <label class="form-check-label" for="tested_by">
-                                            Tested By
+                                            <input class="form-check-input operator_type_chk" type="checkbox" name="performed_by" id="performed_by" value="Yes">
+                                            <label class="form-check-label" for="performed_by">
+                                            Performed By
                                         </label>
                                         </div>
                                     </div>
@@ -95,15 +95,15 @@
 
                                 <div class="row g-1  mb-2">
                                     <div class="col-lg-3">
-                                        <!-- <label class="form-check-label" for="reviewed_by">
+                                        <!-- <label class="form-check-label" for="examined_by">
                                             Reviewed By
                                         </label> -->
                                     </div>
                                     <div class="col-lg-4 d-flex gap-4 align-items-center">
                                         <div class="form-check">
-                                            <input class="form-check-input operator_type_chk" type="checkbox" name="reviewed_by" id="reviewed_by" value="Yes">
-                                            <label class="form-check-label" for="reviewed_by">
-                                            Reviewed By
+                                            <input class="form-check-input operator_type_chk" type="checkbox" name="examined_by" id="examined_by" value="Yes">
+                                            <label class="form-check-label" for="examined_by">
+                                            Examined By
                                         </label>
                                         </div>
                                     </div>
@@ -125,38 +125,7 @@
                                     </div>
                                 </div>
 
-                                <div class="row g-1  mb-2">
-                                    <div class="col-lg-3">
-                                        <!-- <label class="form-check-label" for="checked_by">
-                                            Checked By
-                                        </label> -->
-                                    </div>
-                                    <div class="col-lg-4 d-flex gap-4 align-items-center">
-                                        <div class="form-check">
-                                            <input class="form-check-input operator_type_chk" type="checkbox" name="checked_by" id="checked_by" value="Yes">
-                                             <label class="form-check-label" for="checked_by">
-                                            Checked By
-                                        </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row g-1  mb-2">
-                                    <div class="col-lg-3">
-                                        <!-- <label class="form-check-label" for="approved_by">
-                                            Approved By
-                                        </label> -->
-                                    </div>
-                                    <div class="col-lg-4 d-flex gap-4 align-items-center">
-                                        <div class="form-check">
-                                            <input class="form-check-input operator_type_chk" type="checkbox" name="approved_by" id="approved_by" value="Yes">
-                                            <label class="form-check-label" for="approved_by">
-                                            Approved By
-                                        </label>
-                                        </div>
-                                    </div>
-                                </div>
-
+                                
                                 <div class="row g-2 mb-2 position-relative">
                                     <div class="col-3">
                                         <label for="status" class="form-label">RSO / Radiographer</label>

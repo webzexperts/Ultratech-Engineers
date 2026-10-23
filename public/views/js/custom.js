@@ -773,6 +773,9 @@ jQuery(document).on('show.bs.modal', '.modal', function () {
 // new code start
 jQuery(document).on('shown.bs.modal', '.modal', function () {
     const $modal = jQuery(this);
+    if ($modal.attr('id') === 'OfferModal' || $modal.attr('id') === 'MaterialInwardModal') {
+        return;
+    }
     jQuery.fn.modal.Constructor.prototype._enforceFocus = function () { };
 
     const firstSelect2 = $modal.find('.select2-container--open .select2-search__field');
@@ -2310,6 +2313,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+/* =====================================================================
+ *  GLOBAL FIX: Prevent only-space (whitespace) from bypassing 'required'
+ *  Applies across ALL Detail Forms, Master Modals, and Main Transaction Forms.
+ * ===================================================================== */
+// 1. Submit Event Capture Phase: runs BEFORE any form's direct submit handler
+document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (form && form.elements) {
+        Array.from(form.elements).forEach(function (el) {
+            if ((el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.type !== 'password' && el.type !== 'file') {
+                if (typeof el.value === 'string' && el.value.length > 0 && el.value.trim() === '') {
+                    el.value = '';
+                }
+            }
+        });
+    }
+}, true); // Capture phase = true
+
+
 // function setSelect2Readonly(selector, state) {
 //     const el = $(selector);
 //     el.toggleClass('select2-readonly', state);
@@ -2383,11 +2405,29 @@ function setSelect2Readonly(selector, state) {
 function setRadioReadonly(selector, enable) {
     const $radios = jQuery(selector);
     $radios.off('.readonly');
+    $radios.removeClass('skip-tab');
     if (enable) {
         let selectedValue = $radios.filter(':checked').val();
-        $radios.addClass('skip-tab');
+        if (!selectedValue) {
+            selectedValue = $radios.first().val();
+            $radios.filter('[value="' + selectedValue + '"]').prop('checked', true);
+        }
+        $radios.attr('tabindex', '-1');
+        let $checked = $radios.filter(':checked');
+        if ($checked.length) {
+            $checked.attr('tabindex', '0');
+        } else {
+            $radios.first().attr('tabindex', '0');
+        }
 
-        $radios.on('click.readonly keydown.readonly', function (e) {
+        $radios.on('click.readonly', function (e) {
+            e.preventDefault();
+        });
+
+        $radios.on('keydown.readonly', function (e) {
+            if (e.key === 'Tab' || e.keyCode === 9) {
+                return;
+            }
             e.preventDefault();
         });
 
@@ -2398,7 +2438,13 @@ function setRadioReadonly(selector, enable) {
 
     } else {
         $radios.off('.readonly');
-        $radios.removeClass('skip-tab');
+        $radios.attr('tabindex', '-1');
+        let $checked = $radios.filter(':checked');
+        if ($checked.length) {
+            $checked.attr('tabindex', '0');
+        } else {
+            $radios.first().attr('tabindex', '0');
+        }
     }
 }
 
