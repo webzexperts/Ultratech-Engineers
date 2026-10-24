@@ -50,25 +50,25 @@
                             <th class="action_col">Actions</th>
                             <th>Inward No.</th>
                             <th>Date</th>
+                            <th>Process Type</th>
+                            <th>Job Type</th>
                             <th>NABL</th>
-                            <th>Test At</th>
-                            <th>Type</th>
+                            <!-- <th>Test At</th> -->
                             <th>Customer</th>
-                            <th>DC No.</th>
-                            <th>DC Date</th>
-                            <th>PO No.</th>
-                            <th>PO Date</th>
-                            <th>Type of Test</th>
-                            <!-- <th>Type of Job</th> -->
+                            <th>Process</th>
+                            <th>Challan No.</th>
+                            <!-- <th>Challan Date</th> -->
+                            <!-- <th>Offer No.</th> -->
+                            <!-- <th>Offer Date</th> -->
+                            <th>Lab ID</th>
+                            <th>Customer ID No.</th>
                             <th>Job Desc.</th>
-                            <th>Part No. / Die No.</th>
-                            <th>Drg. No.</th>
-                            <th>Material</th>
+                            <th>Die No.</th>
                             <th>Heat No.</th>
-                            <th>RT No.</th>
-                            <th>Product Code</th>
-                            <th>Qty.</th>
-                            <!-- <th>Prepared By</th> -->
+                            <th>Drg. No.</th>
+                            <th>Thick.</th>
+                            <th>Material</th>
+                            <th>Quantity.</th>
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -94,7 +94,7 @@
             "processing": false,
             "serverSide": true,
             "scrollX": true,
-            "order": [[1, 'desc'],[24, 'desc']],
+            "order": [[2, 'desc'],[22, 'desc']],
             dom: 'Blfrtip',
             buttons: [{
                 extend:'excel',
@@ -127,26 +127,25 @@
                 { data: 'options', name: 'options', orderable: false, searchable: false, },
                 { data: 'material_inward_no', name: 'material_inward.material_inward_no', },
                 { data: 'material_inward_date', name: 'material_inward.material_inward_date', },
-                { data: 'nabl_type_fix', name: 'material_inward.nabl_type_fix', },
-                { data: 'test_at_fix', name: 'material_inward.test_at_fix', },
+                { data: 'process_type_fix', name: 'material_inward_details.process_type_fix', },
                 { data: 'job_type_fix', name: 'material_inward.job_type_fix', },
+                { data: 'nabl_type_fix', name: 'material_inward.nabl_type_fix', },
+                // { data: 'test_at_fix', name: 'material_inward.test_at_fix', },
                 { data: 'customer', name: 'customers.customer', },
-                { data: 'dc_no', name: 'material_inward.dc_no', },
-                { data: 'dc_date', name: 'material_inward.dc_date', },
-                { data: 'po_no', name: 'material_inward.po_no', },
-                { data: 'po_date', name: 'material_inward.po_date', },
                 { data: 'type_of_testing_id_fix', name: 'material_inward_details.type_of_testing_id_fix', },
-                // { data: 'type_of_job', name: 'type_of_job.type_of_job', },
-                // { data: 'job_description', name: 'job_descriptions.job_description', },
+                { data: 'challan_no', name: 'material_inward.challan_no', },
+                // { data: 'challan_date', name: 'material_inward.challan_date', },
+                // { data: 'offer_no', name: 'material_inward.offer_no', },
+                // { data: 'offer_date', name: 'material_inward.offer_date', },
+                { data: 'lab_id', name: 'material_inward_details.lab_id', },
+                { data: 'customer_id_no', name: 'material_inward_details.customer_id_no', },
                 { data: 'job_description', name: 'material_inward_details.job_desc', },
-                { data: 'part_no', name: 'material_inward_details.part_no', },
-                { data: 'drg_no', name: 'material_inward_details.drg_no', },
-                { data: 'material', name: 'materials.material', },
+                { data: 'die_no', name: 'material_inward_details.die_no', },
                 { data: 'heat_no', name: 'material_inward_details.heat_no', },
-                { data: 'rt_no', name: 'material_inward_details.rt_no', },
-                { data: 'product_code', name: 'material_inward_details.product_code', },
+                { data: 'drg_no', name: 'material_inward_details.drg_no', },
+                { data: 'thickness', name: 'material_inward_details.thickness', },
+                { data: 'material', name: 'materials.material', },
                 { data: 'quantity', name: 'material_inward_details.quantity', },
-                // { data: 'prepared_by', name: 'prepared_by.person_name', },
                 { data: 'last_by', name: 'last_by', },
                 { data: 'last_on', name: 'material_inward.last_on', },
                 { data: 'created_by', name: 'created_by', },

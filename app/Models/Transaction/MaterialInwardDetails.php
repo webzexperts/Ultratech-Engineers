@@ -16,9 +16,14 @@ class MaterialInwardDetails extends Model
         'material_inward_details_id',
         'material_inward_id',
         'type_of_testing_id_fix',
+        'process_type_fix',
         'type_of_job_id',
         'job_desc_id',
         'job_desc',
+        'sr_no',
+        'lab_id',
+        'customer_id_no',
+        'die_no',
         'part_no',
         'drg_no',
         'material_id',
@@ -34,9 +39,9 @@ class MaterialInwardDetails extends Model
         'approx_value',
         'approx_weight',
         'remark',
-        'process_type',
         'is_observation_sheet',
         'test_report_rt_id',
-        'offer_details_id'
+        'offer_details_id',
     ];
+
 }

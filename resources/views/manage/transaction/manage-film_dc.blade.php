@@ -59,7 +59,7 @@
 
 @section('script-manage')
 <script>
-    var checkFileRoute = "{{ route('check-file_exists') }}";
+    // var checkFileRoute = "{{ route('check-file_exists') }}";
     var headerOpt = {
         'Authorization': 'Bearer {{ Auth::user()->auth_token }}',
         'X-CSRF-TOKEN': '{{ csrf_token() }}'

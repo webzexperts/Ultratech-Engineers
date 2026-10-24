@@ -43,31 +43,39 @@ function fetchAndFillOffer(id) {
 
                 jQuery('#OfferModal').find('input[name="nabl_type_fix"][value="' + d.nabl_type_fix + '"]').prop('checked', true);
                 jQuery('#OfferModal').find('input[name="test_at_fix"][value="' + d.test_at_fix + '"]').prop('checked', true);
-                jQuery('#OfferModal').find('input[name="job_type_fix"], input[name="nabl_type_fix"][value="' + d.job_type_fix + '"]').prop('checked', true);
+                jQuery('#OfferModal').find('input[name="job_type_fix"][value="' + d.job_type_fix + '"]').prop('checked', true);
 
                 filterTestsByNabl();
 
                 jQuery('#OfferModal').find('#customer_id').val(d.customer_id ?? "").trigger('change.select2');
-                jQuery('#OfferModal').find('#dc_no').val(d.dc_no ?? "");
-                jQuery('#OfferModal').find('#dc_date').val(d.dc_date ?? "");
-                jQuery('#OfferModal').find('#po_no').val(d.po_no ?? "");
-                jQuery('#OfferModal').find('#po_date').val(d.po_date ?? "");
-                jQuery('#OfferModal').find('#sample_drawn_by').val(d.sample_drawn_by ?? "");
+                jQuery('#OfferModal').find('#challan_no').val(d.challan_no ?? "");
+                jQuery('#OfferModal').find('#challan_date').val(d.challan_date ?? "");
+                validateChallanNoDate();
+                jQuery('#OfferModal').find('#material_type_id').val(d.material_type_id ?? "").trigger('change.select2');
+                jQuery('#OfferModal').find('#total_qty').val(d.total_qty ?? "");
+                jQuery('#OfferModal').find('#test_method').val(d.test_method_id ?? (d.test_method ?? "")).trigger('change.select2');
+                jQuery('#OfferModal').find('#procedure_ref_id').val(d.procedure_reference_id ?? (d.procedure_ref_id ?? "")).trigger('change.select2');
+                jQuery('#OfferModal').find('#evaluation_as_per_id').val(d.evaluation_as_per_id ?? "").trigger('change.select2');
+                jQuery('#OfferModal').find('#acceptance_standard_id').val(d.acceptance_standard_id ?? "").trigger('change.select2');
+                jQuery('#OfferModal').find('#radiation_energy_fix').val(d.radiation_energy_fix ?? "").trigger('change.select2');
+                jQuery('#OfferModal').find('#coverage_area').val(d.coverage_area ?? "");
+                jQuery('#OfferModal').find('#procedure_submitted_fix').val(d.procedure_submitted_fix ?? "").trigger('change.select2');
+                jQuery('#OfferModal').find('#del_date').val(d.del_date ?? "");
+                jQuery('#OfferModal').find('#special_note').val(d.special_note ?? (d.sp_note ?? ""));
 
-                jQuery('#OfferModal').find('#is_any_tpi_witness').val(d.is_any_tpi_witness ?? "").trigger('change.select2');
-                toggleTpiName();
-                jQuery('#OfferModal').find('#tpi_name').val(d.tpi_name ?? "");
-
-                jQuery('#OfferModal').find('#condition_of_sample').val(d.condition_of_sample ?? "");
-                jQuery('#OfferModal').find('#is_equipment_available').val(d.is_equipment_available ?? "").trigger('change.select2');
-                jQuery('#OfferModal').find('#competent_personnel_available').val(d.competent_personnel_available ?? "").trigger('change.select2');
-                jQuery('#OfferModal').find('#is_test_sub_contracted').val(d.is_test_sub_contracted ?? "").trigger('change.select2');
-                jQuery('#OfferModal').find('#test_feasible').val(d.test_feasible ?? "").trigger('change.select2');
-                jQuery('#OfferModal').find('#all_test_parameters_are_in_accredited_scope').val(d.all_test_parameters_are_in_accredited_scope ?? "").trigger('change.select2');
-                jQuery('#OfferModal').find('#required_statement_of_conformity').val(d.required_statement_of_conformity ?? "").trigger('change.select2');
-                jQuery('#OfferModal').find('#additional_requirement_from_customer').val(d.additional_requirement_from_customer ?? "");
-                jQuery('#OfferModal').find('#special_note').val(d.special_note ?? "");
-                jQuery('#OfferModal').find('#prepared_by_user_id').val(d.prepared_by_user_id ?? "").trigger('change.select2');
+                // Fill Extra Details Main Hidden fields & Modal fields
+                jQuery('#main_test_witness_tpi_fix').val(d.test_witness_tpi_fix ?? "");
+                jQuery('#main_tpi_person').val(d.tpi_person ?? "");
+                jQuery('#main_test_items_condition').val(d.test_items_condition ?? (d.test_item_condition ?? ""));
+                jQuery('#main_public_domain_agree_fix').val(d.public_domain_agree_fix ?? "");
+                jQuery('#main_conformity_statement_fix').val(d.conformity_statement_fix ?? "");
+                jQuery('#main_test_methods_defined_fix').val(d.test_methods_defined_fix ?? "");
+                jQuery('#main_laboratory_capability_fix').val(d.laboratory_capability_fix ?? "");
+                jQuery('#main_appropriate_test_method_fix').val(d.appropriate_test_method_fix ?? "");
+                jQuery('#main_pertinent_discussions').val(d.pertinent_discussions ?? "");
+                jQuery('#main_deviation_intimate').val(d.deviation_intimate ?? "");
+                jQuery('#main_contract_review_repeated_fix').val(d.contract_review_repeated_fix ?? "");
+                syncMainHiddenToExtraDetailsModal();
 
                 offer_details_data = [];
                 if (data.offer_details_data && data.offer_details_data.length > 0) {
@@ -86,12 +94,12 @@ function fetchAndFillOffer(id) {
 
                 // Reset datepicker maxDate to default (endDate) first
                 jQuery('#OfferModal').find('#offer_date').datepicker('option', 'maxDate', endDate);
-                var parentInUse = offer_details_data.some(item => item.in_use == true || item.in_use == "true" || (item.used_qty && parseFloat(item.used_qty) > 0));
+                var parentInUse = (data.offer_data && (data.offer_data.in_use == true || data.offer_data.in_use == "true" || data.offer_data.authorized_id_fix == 1 || data.offer_data.authorized_id_fix == "1"))
+                    || offer_details_data.some(item => item.in_use == true || item.in_use == "true" || (item.used_qty && parseFloat(item.used_qty) > 0));
+                lockParentRadios(true);
                 if (parentInUse) {
-                    lockParentRadios(true);
                     jQuery('#OfferModal').find('#offer_sequence').prop('readonly', true).addClass('skip-tab');
                 } else {
-                    lockParentRadios(false);
                     jQuery('#OfferModal').find('#offer_sequence').prop('readonly', false).removeClass('skip-tab');
                 }
                 updateParentRadiosLockState();
@@ -108,7 +116,15 @@ function fetchAndFillOffer(id) {
 
                 const form = document.getElementById("commonOfferForm");
                 if (form) form.classList.remove('was-validated');
-                jQuery('#OfferModal').find('#submitbtn').prop('disabled', false);
+
+                var isAuthorized = (d.authorized_id_fix == 1 || d.authorized_id_fix == "1");
+                window.isOfferAuthorized = isAuthorized;
+                if (isAuthorized) {
+                    jQuery('#OfferModal').find('#submitbtn').prop('disabled', true).addClass('disabled').attr('title', 'Offer is Authorized');
+                } else {
+                    jQuery('#OfferModal').find('#submitbtn').prop('disabled', false).removeClass('disabled').removeAttr('title');
+                }
+
                 jQuery('#OfferModal').find('#add_new').show();
                 jQuery('#OfferModal').find('#preview_btn').show();
             } else {
@@ -143,9 +159,9 @@ jQuery('#OfferModal').on('shown.bs.modal', function () {
     var formId = jQuery('#commonOfferForm').find('input[name="id"]').val();
     if (formId && formId !== "") {
         setTimeout(() => {
-            var parentInUse = offer_details_data.some(item => item.in_use == true || item.in_use == "true" || (item.used_qty && parseFloat(item.used_qty) > 0));
-            if (parentInUse) {
-                jQuery('#OfferModal').find('#dc_no').focus().select();
+            var isSeqReadonly = jQuery('#OfferModal').find('#offer_sequence').prop('readonly');
+            if (isSeqReadonly) {
+                jQuery('#OfferModal').find('#challan_no').focus().select();
             } else {
                 jQuery('#OfferModal').find('#offer_sequence').focus().select();
             }
@@ -153,7 +169,7 @@ jQuery('#OfferModal').on('shown.bs.modal', function () {
     } else {
         setTimeout(() => {
             focusInitialOfferField();
-        }, 100);
+        }, 150);
     }
 });
 
@@ -187,39 +203,71 @@ function resetParentForm(fetchLatest = false) {
         form.reset();
         form.classList.remove('was-validated');
     }
+
+    var extraForm = document.getElementById("OfferExtraDetailsForm");
+    if (extraForm) {
+        extraForm.reset();
+        jQuery('#OfferExtraDetailsModal select.js-example-basic-single').val('').trigger('change.select2');
+        jQuery('#OfferExtraDetailsModal #tpi_person').prop('readonly', true).addClass('skip-tab').css('pointer-events', 'none');
+    }
+    jQuery('#commonOfferForm input[id^="main_"]').val('');
+
     jQuery('#OfferModal').find('#id').val('');
     jQuery('#OfferModal').find('#old_offer_date').val('');
     setSelect2Readonly(jQuery('#OfferModal').find('#customer_id'), false);
     jQuery('#OfferModal').find('#customer_id').removeClass('skip-tab');
-    jQuery('#OfferModal').find('#offer_date').prop('readonly', false).css('pointer-events', 'auto').removeClass('skip-tab').datepicker('option', 'maxDate', endDate).data('min-report-date', '');
-    jQuery('#OfferModal').find('#offer_sequence').prop('readonly', false).removeClass('skip-tab');
-    lockParentRadios(false);
+    jQuery('#OfferModal').find('#offer_date').val(currentDate).prop('readonly', false).css('pointer-events', 'auto').removeClass('skip-tab').datepicker('option', 'maxDate', endDate).data('min-report-date', '');
+    jQuery('#OfferModal').find('#offer_sequence').val('').prop('readonly', false).removeClass('skip-tab');
+    jQuery('#OfferModal').find('#offer_no').val('');
+    jQuery('#OfferModal').find('#total_qty').val('');
+    jQuery('#OfferModal').find('#challan_no').val('');
+    jQuery('#OfferModal').find('#challan_date').val('');
+    validateChallanNoDate();
+    jQuery('#OfferModal').find('#coverage_area').val('');
+    jQuery('#OfferModal').find('#del_date').val(currentDate);
+    jQuery('#OfferModal').find('#special_note').val('');
     window.lastCustomerTestingType = null;
     offer_details_data = [];
-    jQuery('#OfferDetailTable tbody').empty().append('<tr><td colspan="20" id="noDetails" class="text-center">No Offer Details Added</td></tr>');
+    jQuery('#OfferDetailTable tbody').empty().append('<tr><td colspan="14" id="noDetails" class="text-center">No Offer Details Added</td></tr>');
 
     // Reset select2 dropdowns
     jQuery('#OfferModal').find('#customer_id').val('').trigger('change');
-    ['is_any_tpi_witness', 'is_equipment_available', 'competent_personnel_available', 'is_test_sub_contracted', 'test_feasible', 'all_test_parameters_are_in_accredited_scope', 'required_statement_of_conformity'].forEach(function (f) {
-        jQuery('#OfferModal').find('#' + f).val('Yes').trigger('change.select2');
+    ['material_type_id', 'test_method', 'procedure_ref_id', 'evaluation_as_per_id', 'acceptance_standard_id', 'radiation_energy_fix'].forEach(function (f) {
+        jQuery('#OfferModal').find('#' + f).val('').trigger('change.select2');
     });
-    jQuery('#OfferModal').find('#prepared_by_user_id').val(loginUserId).trigger('change.select2');
-    toggleTpiName();
+    jQuery('#OfferModal').find('#procedure_submitted_fix').val('').trigger('change.select2');
 
-    // Check defaults
-    jQuery('#OfferModal').find('input[name="test_at_fix"][value="At Lab"]').prop('checked', true);
-    jQuery('#OfferModal').find('input[name="job_type_fix"][value="Non-Welding"]').prop('checked', true);
-    if (typeof window.locationNablDefault !== 'undefined') {
-        jQuery('#OfferModal').find('input[name="nabl_type_fix"][value="' + window.locationNablDefault + '"]').prop('checked', true);
-    }
+    // Check defaults first
+    jQuery('#OfferModal').find('input[name="test_at_fix"][value="Inhouse"]').prop('checked', true);
+    jQuery('#OfferModal').find('input[name="job_type_fix"][value="Casting"]').prop('checked', true);
+    jQuery('#OfferModal').find('input[name="nabl_type_fix"][value="Non NABL"]').prop('checked', true);
+
+    lockParentRadios(false);
+
+    ['nabl_type_fix', 'job_type_fix', 'test_at_fix'].forEach(function (name) {
+        let $group = jQuery('#OfferModal').find('input[name="' + name + '"]');
+        $group.attr('tabindex', '-1');
+        let $chk = $group.filter(':checked');
+        if (!$chk.length) $chk = $group.first();
+        $chk.attr('tabindex', '0');
+    });
     filterTestsByNabl();
 
     jQuery('#OfferModal').find('#add_new').hide();
     jQuery('#OfferModal').find('#preview_btn').hide();
+    window.isOfferAuthorized = false;
+    jQuery('#OfferModal').find('#submitbtn').prop('disabled', false).removeClass('disabled').removeAttr('title');
+    jQuery('#OfferModal .PIselected button[data-bs-target="#OfferDetailsModal"]').show();
+    jQuery('#OfferModal #resetbtn').prop('disabled', false);
 
+    var currentCustId = jQuery('#OfferModal').find('#customer_id').val();
     if (fetchLatest) {
-        getLatestOfferNo();
-        getLNRData();
+        if (currentCustId) {
+            getLatestOfferNo(currentCustId);
+            getLNRData(currentCustId);
+        } else {
+            getLNRData();
+        }
     }
 }
 
@@ -241,9 +289,55 @@ function validateOfferDateAgainstReports() {
     return true;
 }
 
-// On blur date validation
-jQuery('#OfferModal').on('blur', '#offer_date', function () {
+// Validate Del. Date against Offer Date (del_date cannot be less than offer_date)
+function validateDelDateAgainstOfferDate() {
+    var offerDateVal = (jQuery('#OfferModal #offer_date').val() || '').trim();
+    var delDateVal = (jQuery('#OfferModal #del_date').val() || '').trim();
+    if (offerDateVal && delDateVal) {
+        var offerParts = offerDateVal.split('/');
+        var delParts = delDateVal.split('/');
+        if (offerParts.length === 3 && delParts.length === 3) {
+            var offerDateObj = new Date(parseInt(offerParts[2], 10), parseInt(offerParts[1], 10) - 1, parseInt(offerParts[0], 10));
+            var delDateObj = new Date(parseInt(delParts[2], 10), parseInt(delParts[1], 10) - 1, parseInt(delParts[0], 10));
+            if (delDateObj < offerDateObj) {
+                toastr.error("Del. Date Must Be Greater Than Or Equal To Offer Date.");
+                jQuery('#OfferModal #del_date').focus();
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// When Offer Date is changed by user, auto set Del. Date equal to Offer Date
+jQuery('#OfferModal').on('change', '#offer_date', function () {
     validateOfferDateAgainstReports();
+    var offDate = jQuery(this).val();
+    if (offDate && isValidDate(offDate)) {
+        jQuery('#OfferModal #del_date').val(offDate);
+    }
+});
+
+/* ---------------------------------------------------------------------
+ *  Challan No & Date mutual required validation
+ * ------------------------------------------------------------------- */
+function validateChallanNoDate() {
+    var cNo = (jQuery('#OfferModal #challan_no').val() || '').trim();
+    var cDate = (jQuery('#OfferModal #challan_date').val() || '').trim();
+
+    if (cNo || cDate) {
+        jQuery('#OfferModal #challan_no').prop('required', true);
+        jQuery('#OfferModal #challan_date').prop('required', true);
+        jQuery('#challan_label sup.astric').show();
+    } else {
+        jQuery('#OfferModal #challan_no').prop('required', false).removeClass('is-invalid');
+        jQuery('#OfferModal #challan_date').prop('required', false).removeClass('is-invalid');
+        jQuery('#challan_label sup.astric').hide();
+    }
+}
+
+jQuery(document).on('input change blur', '#OfferModal #challan_no, #OfferModal #challan_date', function () {
+    validateChallanNoDate();
 });
 
 /* ---------------------------------------------------------------------
@@ -273,13 +367,80 @@ function toggleTpiName() {
     }
 }
 
-// NABL drives which tests are selectable (NABL = location-accredited subset, Non NABL = all).
-jQuery('#OfferModal').on('change', 'input[name="nabl_type_fix"]', function () {
-    filterTestsByNabl();
+// Parent radios drive tests and LNR (1/2/3/4 wise)
+jQuery('#OfferModal').on('change', 'input[name="nabl_type_fix"], input[name="job_type_fix"], input[name="test_at_fix"]', function () {
+    let name = jQuery(this).attr('name');
+    jQuery('#OfferModal').find('input[name="' + name + '"]').attr('tabindex', '-1');
+    jQuery(this).attr('tabindex', '0');
+    if (name === 'nabl_type_fix') {
+        filterTestsByNabl();
+    }
     var formId = jQuery('#OfferModal').find('#id').val();
     var customerId = jQuery('#OfferModal').find('#customer_id').val();
     if (!formId && customerId) {
         getLNRData(customerId);
+    }
+});
+
+// Tab navigation across top parent radios: nabl_type_fix -> job_type_fix -> test_at_fix -> customer_id
+jQuery(document).on('keydown', '#OfferModal input[name="nabl_type_fix"]', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && !e.shiftKey) {
+        e.preventDefault();
+        let $target = jQuery('#OfferModal input[name="job_type_fix"]:checked');
+        if (!$target.length) $target = jQuery('#OfferModal input[name="job_type_fix"]').first();
+        $target.attr('tabindex', '0');
+        if ($target.length) $target[0].focus();
+    }
+});
+
+jQuery(document).on('keydown', '#OfferModal input[name="job_type_fix"]', function (e) {
+    if (e.key === 'Tab' || e.keyCode === 9) {
+        if (e.shiftKey) {
+            e.preventDefault();
+            let $prev = jQuery('#OfferModal input[name="nabl_type_fix"]:checked');
+            if (!$prev.length) $prev = jQuery('#OfferModal input[name="nabl_type_fix"]').first();
+            $prev.attr('tabindex', '0');
+            if ($prev.length) $prev[0].focus();
+        } else {
+            e.preventDefault();
+            let $next = jQuery('#OfferModal input[name="test_at_fix"]:checked');
+            if (!$next.length) $next = jQuery('#OfferModal input[name="test_at_fix"]').first();
+            $next.attr('tabindex', '0');
+            if ($next.length) $next[0].focus();
+        }
+    }
+});
+
+jQuery(document).on('keydown', '#OfferModal input[name="test_at_fix"]', function (e) {
+    if (e.key === 'Tab' || e.keyCode === 9) {
+        if (e.shiftKey) {
+            e.preventDefault();
+            let $prev = jQuery('#OfferModal input[name="job_type_fix"]:checked');
+            if (!$prev.length) $prev = jQuery('#OfferModal input[name="job_type_fix"]').first();
+            $prev.attr('tabindex', '0');
+            if ($prev.length) $prev[0].focus();
+        } else {
+            e.preventDefault();
+            let $next = jQuery('#OfferModal #customer_id');
+            if ($next.hasClass('select2-hidden-accessible')) {
+                $next.next('.select2-container').find('.select2-selection').focus();
+            } else {
+                $next.focus();
+            }
+        }
+    }
+});
+
+jQuery(document).on('keydown', '#OfferModal .select2-selection', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && e.shiftKey) {
+        let $select = jQuery(this).closest('.select2-container').prev('select#customer_id');
+        if ($select.length) {
+            e.preventDefault();
+            let $target = jQuery('#OfferModal input[name="test_at_fix"]:checked');
+            if (!$target.length) $target = jQuery('#OfferModal input[name="test_at_fix"]').first();
+            $target.attr('tabindex', '0');
+            if ($target.length) $target[0].focus();
+        }
     }
 });
 
@@ -292,31 +453,28 @@ function handleProcessTypeRules(isUserChange = false) {
 }
 
 function handleTestingTypeProcessTypeRules() {
-    let testType = jQuery('#OfferDetailsForm #type_of_testing_id_fix').val();
-    let $radios = jQuery('#OfferDetailsForm input[name="process_type"]');
+    let $radios = jQuery('#OfferDetailsForm input[name="process_type_fix"]');
     let $container = jQuery('#process_type_container');
 
-    // Remove pointer-events from container so Copy button is not affected
+    // Fresh / Repair radios must NOT be readonly
+    setRadioReadonly("#OfferDetailsForm input[name='process_type_fix']", false);
+    $radios.prop('disabled', false);
     $container.css('pointer-events', 'auto').css('opacity', '1');
+    $container.find('.form-check').css('pointer-events', 'auto').css('opacity', '1');
 
-    if (testType === 'RT') {
-        setRadioReadonly("#OfferDetailsForm input[name='process_type']", false);
-        $radios.prop('disabled', false);
-        $container.find('.form-check').css('pointer-events', 'auto').css('opacity', '1');
-    } else {
-        jQuery('#OfferDetailsForm input[name="process_type"][value="Fresh"]').prop('checked', true);
-        setRadioReadonly("#OfferDetailsForm input[name='process_type']", true);
-        $radios.prop('disabled', true);
-        $container.find('.form-check').css('pointer-events', 'none').css('opacity', '0.7');
-        handleProcessTypeRules();
+    // Process is RT and readonly using select2 readonly (not disabled)
+    let $proc = jQuery('#OfferDetailsForm #type_of_testing_id_fix');
+    if (!$proc.val()) {
+        $proc.val('RT').trigger('change.select2');
     }
+    setSelect2Readonly('#OfferDetailsModal #type_of_testing_id_fix', true);
 }
 
 jQuery('#OfferDetailsForm').on('change', '#type_of_testing_id_fix', function () {
     handleTestingTypeProcessTypeRules();
 });
 
-jQuery('#OfferDetailsForm').on('change', 'input[name="process_type"]', function () {
+jQuery('#OfferDetailsForm').on('change', 'input[name="process_type_fix"]', function () {
     handleProcessTypeRules(true);
 });
 
@@ -326,11 +484,7 @@ function filterTestsByNabl() {
         { value: "RT", text: "RT" },
         { value: "UT", text: "UT" },
         { value: "MPT", text: "MPT" },
-        { value: "DPT", text: "DPT" },
-        { value: "ET", text: "ET" },
-        { value: "VT", text: "VT" },
-        { value: "PAUT", text: "PAUT" },
-        { value: "UTT", text: "UTT" }
+        { value: "DPT", text: "DPT" }
     ];
 
     let filtered = [...allTestingOptions];
@@ -367,70 +521,81 @@ function filterTestsByNabl() {
     }
 }
 
+function getNextDetailSrNo() {
+    let maxSr = 0;
+    if (Array.isArray(offer_details_data)) {
+        offer_details_data.forEach(function (row) {
+            if (row && row.mode !== 'Delete') {
+                let sr = parseInt(row.sr_no, 10);
+                if (!isNaN(sr) && sr > maxSr) {
+                    maxSr = sr;
+                }
+            }
+        });
+    }
+    return maxSr + 1;
+}
+
 jQuery('#OfferDetailsModal').on('show.bs.modal', function () {
     validateCopyButton();
     filterTestsByNabl();
     var formType = jQuery('#OfferDetailsModal').find("#form_type").val();
     if (formType !== 'edit') {
+        jQuery('#OfferDetailsModal #sr_no').val(getNextDetailSrNo());
         jQuery('#OfferDetailsModal #repeat_item_row').show();
         resetPendingRepairFields();
         jQuery('#OfferDetailsModal').find("#quantity").removeAttr("min");
 
-        setSelect2Readonly(jQuery('#OfferDetailsModal').find('#type_of_testing_id_fix'), false);
-        jQuery('#OfferDetailsModal').find('#type_of_testing_id_fix').removeClass('skip-tab');
+        jQuery('#OfferDetailsForm #type_of_testing_id_fix').val('RT').trigger('change.select2');
+        jQuery('#OfferDetailsForm #type_of_testing_id_fix').addClass('skip-tab');
+        setSelect2Readonly('#OfferDetailsModal #type_of_testing_id_fix', true);
+        jQuery('#OfferDetailsModal #type_of_testing_id_fix').next('.select2-container').css('pointer-events', 'none');
 
-        setRadioReadonly("#OfferDetailsForm input[name='process_type']", false);
-
-        setSelect2Readonly(jQuery('#OfferDetailsModal').find('#type_of_job_id'), false);
-        jQuery('#OfferDetailsModal').find('#type_of_job_id').removeClass('skip-tab');
-
-        setSelect2Readonly(jQuery('#OfferDetailsModal').find('#inward_job_desc_id'), false);
-        jQuery('#OfferDetailsModal').find('#inward_job_desc_id').removeClass('skip-tab');
-        jQuery('#OfferDetailsModal').find('#job_desc').prop('readonly', false).removeClass('skip-tab');
-
-        setSelect2Readonly(jQuery('#OfferDetailsModal').find('#area_of_coverage_id'), false);
-        jQuery('#OfferDetailsModal').find('#area_of_coverage_id').removeClass('skip-tab');
-
-        if (window.lastCustomerTestingType) {
-            jQuery('#OfferDetailsModal').find('#type_of_testing_id_fix').val(window.lastCustomerTestingType).trigger('change.select2');
-        }
+        setRadioReadonly("#OfferDetailsForm input[name='process_type_fix']", false);
+        jQuery('#OfferDetailsForm input[name="process_type_fix"]').prop('disabled', false);
+        jQuery('#process_type_container').css('pointer-events', 'auto').css('opacity', '1');
+    } else {
+        jQuery('#OfferDetailsForm #type_of_testing_id_fix').addClass('skip-tab');
+        setSelect2Readonly('#OfferDetailsModal #type_of_testing_id_fix', true);
+        jQuery('#OfferDetailsModal #type_of_testing_id_fix').next('.select2-container').css('pointer-events', 'none');
     }
 });
 
 jQuery('#OfferDetailsModal').on('shown.bs.modal', function () {
     validateCopyButton();
+    jQuery('#OfferDetailsForm #type_of_testing_id_fix').addClass('skip-tab');
+    setSelect2Readonly('#OfferDetailsModal #type_of_testing_id_fix', true);
+    jQuery('#OfferDetailsModal #type_of_testing_id_fix').next('.select2-container').css('pointer-events', 'none');
+    var formType = jQuery('#OfferDetailsModal').find("#form_type").val();
+    if (formType === 'edit') {
+        jQuery('#copy_from_sr_no').prop('readonly', true).prop('disabled', true).addClass('skip-tab').attr('tabindex', '-1').val('');
+    } else {
+        jQuery('#copy_from_sr_no').prop('readonly', false).prop('disabled', false).removeClass('skip-tab').removeAttr('tabindex').val('');
+        let currentSr = jQuery('#OfferDetailsModal #sr_no').val();
+        if (!currentSr || currentSr === '') {
+            jQuery('#OfferDetailsModal #sr_no').val(getNextDetailSrNo());
+        }
+    }
     setTimeout(() => {
         var parentId = jQuery('#OfferModal').find("#id").val();
         var isParentStored = (parentId && parentId !== "" && parentId != 0 && parentId !== "0");
         var formType = jQuery('#OfferDetailsModal').find("#form_type").val();
-        let processType = jQuery('#OfferDetailsModal input[name="process_type"]:checked').val() || 'Fresh';
-        let testReportRtId = jQuery('#OfferDetailsModal #test_report_rt_id').val();
-        let isRepair = processType === 'Repair' || (testReportRtId && testReportRtId !== '' && testReportRtId != 0);
+        let processType = jQuery('#OfferDetailsModal input[name="process_type_fix"]:checked').val() || 'Fresh';
+        let isRepair = processType === 'Repair';
 
         if (formType === 'edit') {
             var formIndx = jQuery('#OfferDetailsModal').find("#form_index").val();
             if (formIndx !== "") {
                 var d = offer_details_data[formIndx];
                 let isRowInUse = d && (d.in_use == true || d.in_use == "true" || (d.used_qty && parseFloat(d.used_qty) > 0));
-                let isRepairRow = d && (d.process_type === 'Repair' || (d.test_report_rt_id && parseInt(d.test_report_rt_id) > 0));
+                let isRepairRow = d && ((d.process_type_fix || d.process_type) === 'Repair');
 
                 if (isRepairRow) {
                     setRepairFieldsReadonly(true);
                 }
 
-                if (isRowInUse) {
-                    setSelect2Readonly(jQuery('#OfferDetailsModal').find('#type_of_testing_id_fix'), true);
-                    jQuery('#OfferDetailsModal').find('#type_of_testing_id_fix').addClass('skip-tab');
-
-                    setRadioReadonly("#OfferDetailsForm input[name='process_type']", true);
-                    setSelect2Readonly(jQuery('#OfferDetailsModal').find('#type_of_job_id'), true);
-                    jQuery('#OfferDetailsModal').find('#type_of_job_id').addClass('skip-tab');
-                    setSelect2Readonly(jQuery('#OfferDetailsModal').find('#inward_job_desc_id'), true);
-                    jQuery('#OfferDetailsModal').find('#inward_job_desc_id').addClass('skip-tab');
-                    jQuery('#OfferDetailsModal').find('#job_desc').prop('readonly', true).addClass('skip-tab');
-                    setSelect2Readonly(jQuery('#OfferDetailsModal').find('#area_of_coverage_id'), true);
-                    jQuery('#OfferDetailsModal').find('#area_of_coverage_id').addClass('skip-tab');
-                }
+                setSelect2Readonly('#OfferDetailsModal #type_of_testing_id_fix', true);
+                setRadioReadonly("#OfferDetailsForm input[name='process_type_fix']", false);
 
                 let focusTarget = isRepairRow ? '#thickness' : (isRowInUse ? '#part_no' : null);
                 if (focusTarget) {
@@ -523,6 +688,24 @@ function suggestInwardProductCode(e, $this) {
     });
 }
 
+function resequenceOfferDetailSrNos() {
+    let activeSrNo = 1;
+    if (Array.isArray(offer_details_data)) {
+        offer_details_data.forEach(function (item) {
+            if (item && item.mode !== "Delete") {
+                let currentSr = parseInt(item.sr_no, 10);
+                if (currentSr !== activeSrNo) {
+                    item.sr_no = activeSrNo;
+                    if (item.mode !== "Insert") {
+                        item.mode = "Update";
+                    }
+                }
+                activeSrNo++;
+            }
+        });
+    }
+}
+
 /* ---------------------------------------------------------------------
  *  Detail row remove / edit
  * ------------------------------------------------------------------- */
@@ -535,6 +718,7 @@ function removeOfferDetails(th) {
         } else {
             offer_details_data.splice(formIndx, 1);
         }
+        resequenceOfferDetailSrNos();
         jQuery('#OfferDetailTable tbody').empty();
         fillOfferDetailTable();
     });
@@ -556,73 +740,25 @@ function fillOfferDetailsForm(formIndx, rawIndx) {
     thisForm.find("#form_index").val(formIndx);
     thisForm.find("#row_index").val(rawIndx);
     thisForm.find("#offer_details_id").val(d.offer_details_id ?? d.offer_detail_id ?? 0);
-    thisForm.find("#test_report_rt_id").val(d.test_report_rt_id ?? d.test_report_rt_id ?? null);
-    thisForm.find("#revision_number").val(d.revision_number ?? "");
 
-    if (d.in_use == true || d.in_use == "true" || (d.used_qty && parseFloat(d.used_qty) > 0)) {
-        var usedQtyVal = d.used_qty ? parseInt(d.used_qty) : 0;
-        thisForm.find("#quantity").attr('min', usedQtyVal);
-    } else {
-        thisForm.find("#quantity").removeAttr('min');
-    }
+    let pType = d.process_type_fix || 'Fresh';
+    thisForm.find('input[name="process_type_fix"][value="' + pType + '"]').prop('checked', true);
 
-    let $select = thisForm.find("#type_of_testing_id_fix");
-    $select.attr('data-target-val', d.type_of_testing_id_fix ?? "");
-    filterTestsByNabl();
-
-    thisForm.find("#type_of_testing_id_fix").val(d.type_of_testing_id_fix ?? "").trigger('change.select2');
-    thisForm.find("#type_of_job_id").val(zeroToEmpty(d.type_of_job_id)).trigger('change.select2');
-    thisForm.find("#material_id").val(zeroToEmpty(d.material_id)).trigger('change.select2');
-    thisForm.find("#area_of_coverage_id").val(zeroToEmpty(d.area_of_coverage_id)).trigger('change.select2');
-    thisForm.find("#procedure_ref_id").val(zeroToEmpty(d.procedure_ref_id)).trigger('change.select2');
-    thisForm.find("#evaluation_as_per_id").val(zeroToEmpty(d.evaluation_as_per_id)).trigger('change.select2');
-    thisForm.find("#acceptance_standard_id").val(zeroToEmpty(d.acceptance_standard_id)).trigger('change.select2');
+    thisForm.find("#sr_no").val(d.sr_no ?? "");
+    thisForm.find("#type_of_testing_id_fix").val(d.type_of_testing_id_fix || 'RT').trigger('change.select2');
+    thisForm.find("#type_of_testing_id_fix").addClass('skip-tab');
+    setSelect2Readonly('#OfferDetailsModal #type_of_testing_id_fix', true);
+    thisForm.find("#type_of_testing_id_fix").next('.select2-container').css('pointer-events', 'none');
+    thisForm.find("#lab_id").val(d.lab_id ?? "");
+    thisForm.find("#customer_id_no").val(d.customer_id_no ?? "");
+    thisForm.find("#job_desc").val(d.job_desc ?? d.job_description ?? "");
+    thisForm.find("#die_no").val(d.die_no ?? "");
     thisForm.find("#heat_no").val(d.heat_no ?? "");
-    thisForm.find("#rt_no").val(d.rt_no ?? "");
-    thisForm.find("#product_code").val(d.product_code ?? "");
-    thisForm.find("#thickness").val(d.thickness ?? "");
-    thisForm.find("#quantity").val(d.quantity || '1').prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
-    let pType = d.process_type || 'Fresh';
-    thisForm.find('input[name="process_type"][value="' + pType + '"]').prop('checked', true);
-    let isRepairRow = (pType === 'Repair') || (d.test_report_rt_id && parseInt(d.test_report_rt_id) > 0);
-    if (isRepairRow) {
-        setRepairFieldsReadonly(true);
-    } else {
-        setRepairFieldsReadonly(false);
-    }
-
-    if (d && (d.in_use == true || d.in_use == "true" || (d.used_qty && parseFloat(d.used_qty) > 0))) {
-        setSelect2Readonly(thisForm.find('#type_of_testing_id_fix'), true);
-        thisForm.find('#type_of_testing_id_fix').addClass('skip-tab');
-
-        setRadioReadonly("#OfferDetailsForm input[name='process_type']", true);
-
-        setSelect2Readonly(thisForm.find('#type_of_job_id'), true);
-        thisForm.find('#type_of_job_id').addClass('skip-tab');
-
-        setSelect2Readonly(thisForm.find('#inward_job_desc_id'), true);
-        thisForm.find('#inward_job_desc_id').addClass('skip-tab');
-        thisForm.find('#job_desc').prop('readonly', true).addClass('skip-tab');
-
-        setSelect2Readonly(thisForm.find('#area_of_coverage_id'), true);
-        thisForm.find('#area_of_coverage_id').addClass('skip-tab');
-    }
-    thisForm.find('#is_observation_sheet').val(d.is_observation_sheet);
-    handleTestingTypeProcessTypeRules();
-    handleProcessTypeRules();
-    thisForm.find("#approx_value").val(d.approx_value != 0 ? parseFloat(d.approx_value).toFixed(2) : "");
-    thisForm.find("#approx_weight").val(d.approx_weight != 0 ? parseFloat(d.approx_weight).toFixed(3) : "");
-    thisForm.find("#remark").val(d.remark ?? "");
-
-    // Job Description + Part No + Drg No
-    thisForm.find("#inward_job_desc_id").val(zeroToEmpty(d.job_desc_id)).trigger('change');
-    thisForm.find("#job_desc").val(d.job_desc ?? d.job_description_name ?? d.job_description ?? "");
-    thisForm.find("#part_no").val(d.part_no ?? d.part_name ?? "");
     thisForm.find("#drg_no").val(d.drg_no ?? "");
-
-    if (d && (d.is_direct_obs_used === true || d.is_direct_obs_used === "true")) {
-        thisForm.find("#quantity").prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
-    }
+    thisForm.find("#material_id").val(zeroToEmpty(d.material_id)).trigger('change.select2');
+    thisForm.find("#thickness").val(d.thickness ?? d.thickness_mm ?? "");
+    thisForm.find("#quantity").val(d.quantity).prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
+    thisForm.find("#remark").val(d.remark ?? "");
 
     thisForm.modal('show');
 }
@@ -631,70 +767,66 @@ function fillOfferDetailsForm(formIndx, rawIndx) {
  *  Grid rebuild
  * ------------------------------------------------------------------- */
 function fillOfferDetailTable() {
-    if (offer_details_data.length > 0) {
-        var tblHtml = '';
+    resequenceOfferDetailSrNos();
+    let tbody = jQuery('#OfferDetailTable tbody');
+    tbody.empty();
+    let totalQty = 0;
+    let visibleRowCount = 0;
+
+    if (offer_details_data && offer_details_data.length > 0) {
         for (let key in offer_details_data) {
             let item = offer_details_data[key];
             if (item.mode == "Delete") continue;
+            visibleRowCount++;
             let formIndx = offer_details_data.indexOf(item);
-            if (jQuery('#OfferDetailTable tbody').find('#noDetails').length > 0) {
-                jQuery('#OfferDetailTable tbody').empty();
-            }
 
-            var test = item.type_of_testing_id_fix ?? '';
-            // var toj = item.type_of_job_name ?? '';
-            var jd = item.job_description_name ?? '';
-            var drg = item.drg_no ?? '';
-            var part = item.part_no || item.part_name || '';
-            var mat = item.material_name ?? '';
-            var heat = item.heat_no ?? '';
-            var rt = item.rt_no ?? '';
-            var pcode = item.product_code ?? '';
-            var thick = item.thickness ?? '';
-            var aoc = item.area_of_coverage_name ?? '';
-            var pr = item.procedure_ref_name ?? '';
-            var eap = item.evaluation_as_per_name ?? '';
-            var acs = item.acceptance_standard_name ?? '';
-            var qty = item.quantity ?? '';
-            var aval = item.approx_value && item.approx_value != 0 ? parseFloat(item.approx_value).toFixed(2) : '';
-            var awt = item.approx_weight && item.approx_weight != 0 ? parseFloat(item.approx_weight).toFixed(3) : '';
-            var rem = item.remark ?? '';
-            var process_type = item.process_type ?? '';
+            let process_type = item.process_type_fix || 'Fresh';
+            let process_name = item.process_type_name || item.type_of_testing_id_fix || '';
+            let lab_id = item.lab_id || '';
+            let sr_no = item.sr_no || '';
+            let customer_id_no = item.customer_id_no || '';
+            let job_desc = item.job_desc || item.job_description || '';
+            let die_no = item.die_no || '';
+            let heat_no = item.heat_no || '';
+            let drg_no = item.drg_no || '';
+            let mat = item.material_name || '';
+            let thick = item.thickness || item.thickness_mm || '';
+            let qty = item.quantity;
+            let rem = item.remark || '';
 
-            tblHtml += `<tr>`;
-            tblHtml += `<td>`;
-            var in_use = (item.in_use == true || item.in_use == "true" || (item.used_qty && parseFloat(item.used_qty) > 0)) ? true : false;
-            tblHtml += in_use ? DetailsActionDropdown('editOfferDetails') : DetailsActionDropdown('editOfferDetails', 'removeOfferDetails');
-            tblHtml += `<input type="hidden" name="form_indx" value="${formIndx}"/></td>`;
-            tblHtml += `<td>${test}</td>`;
-            tblHtml += `<td>${process_type}</td>`;
-            // tblHtml += `<td>${toj}</td>`;
-            tblHtml += `<td>${jd}</td>`;
-            tblHtml += `<td>${part}</td>`;
-            tblHtml += `<td>${drg}</td>`;
-            tblHtml += `<td>${mat}</td>`;
-            tblHtml += `<td>${heat}</td>`;
-            tblHtml += `<td>${rt}</td>`;
-            tblHtml += `<td>${pcode}</td>`;
-            tblHtml += `<td>${thick}</td>`;
-            tblHtml += `<td>${aoc}</td>`;
-            tblHtml += `<td>${pr}</td>`;
-            tblHtml += `<td>${eap}</td>`;
-            tblHtml += `<td>${acs}</td>`;
-            tblHtml += `<td>${qty}</td>`;
-            tblHtml += `<td>${aval}</td>`;
-            tblHtml += `<td>${awt}</td>`;
-            tblHtml += `<td>${rem}</td>`;
-            tblHtml += `</tr>`;
+            totalQty += parseInt(qty) || 0;
+
+            let in_use = (item.in_use == true || item.in_use == "true" || (item.used_qty && parseFloat(item.used_qty) > 0)) ? true : false;
+            let actionBtn = '';
+
+            actionBtn = in_use ? DetailsActionDropdown('editOfferDetails') : DetailsActionDropdown('editOfferDetails', 'removeOfferDetails');
+
+
+            let tblHtml = `<tr>
+                <td>${actionBtn}<input type="hidden" name="form_indx" value="${formIndx}"/></td>
+                <td>${sr_no}</td>
+                <td>${process_type}</td>
+                <td>${process_name}</td>
+                <td>${lab_id}</td>
+                <td>${customer_id_no}</td>
+                <td>${job_desc}</td>
+                <td>${die_no}</td>
+                <td>${heat_no}</td>
+                <td>${drg_no}</td>
+                <td>${mat}</td>
+                <td>${thick}</td>
+                <td>${qty}</td>
+                <td>${rem}</td>
+            </tr>`;
+            tbody.append(tblHtml);
         }
-        jQuery('#OfferDetailTable tbody').empty().append(tblHtml);
-        if (jQuery('#OfferDetailTable tbody tr').length == 0) {
-            jQuery('#OfferDetailTable tbody').append('<tr><td colspan="20" id="noDetails" class="text-center">No Offer Details Added</td></tr>');
-        }
-    } else {
-        jQuery('#OfferDetailTable tbody').empty().append('<tr><td colspan="20" id="noDetails" class="text-center">No Offer Details Added</td></tr>');
     }
 
+    if (visibleRowCount == 0) {
+        tbody.append('<tr><td colspan="14" id="noDetails" class="text-center">No Offer Details Added</td></tr>');
+    }
+
+    jQuery('#OfferModal #total_qty').val(totalQty > 0 ? totalQty : '');
     updateParentRadiosLockState();
 }
 
@@ -702,8 +834,9 @@ function fillOfferDetailTable() {
  *  Detail modal lifecycle
  * ------------------------------------------------------------------- */
 jQuery('#OfferDetailsForm').on('reset', function () {
+    jQuery('#copy_from_sr_no').val('');
     setTimeout(function () {
-        jQuery('#OfferDetailsForm input[name="process_type"][value="Fresh"]').prop('checked', true);
+        jQuery('#OfferDetailsForm input[name="process_type_fix"][value="Fresh"]').prop('checked', true);
         handleTestingTypeProcessTypeRules();
         handleProcessTypeRules();
     }, 50);
@@ -711,6 +844,8 @@ jQuery('#OfferDetailsForm').on('reset', function () {
 
 jQuery('#OfferDetailsModal').on('hide.bs.modal', function (e) {
     let thisModal = jQuery('#OfferDetailsModal');
+    thisModal.find('#copy_from_sr_no').val('').prop('readonly', false).prop('disabled', false).removeClass('skip-tab').removeAttr('tabindex');
+    thisModal.find('#sr_no').val('');
     thisModal.find("#form_type").val("add");
     thisModal.find("#form_index").val("");
     thisModal.find("#row_index").val("");
@@ -720,7 +855,7 @@ jQuery('#OfferDetailsModal').on('hide.bs.modal', function (e) {
     thisModal.find("#repeat_item_row").show();
     setSelect2Readonly(thisModal.find('#type_of_testing_id_fix'), false);
     thisModal.find('#type_of_testing_id_fix').removeClass('skip-tab');
-    setRadioReadonly("#OfferDetailsForm input[name='process_type']", false);
+    setRadioReadonly("#OfferDetailsForm input[name='process_type_fix']", false);
     setSelect2Readonly(thisModal.find('#type_of_job_id'), false);
     thisModal.find('#type_of_job_id').removeClass('skip-tab');
     setSelect2Readonly(thisModal.find('#inward_job_desc_id'), false);
@@ -730,7 +865,7 @@ jQuery('#OfferDetailsModal').on('hide.bs.modal', function (e) {
     thisModal.find('#area_of_coverage_id').removeClass('skip-tab');
     resetPendingRepairFields();
     jQuery('#OfferDetailsForm').trigger("reset");
-    jQuery('#OfferDetailsForm input[name="process_type"][value="Fresh"]').prop('checked', true);
+    jQuery('#OfferDetailsForm input[name="process_type_fix"][value="Fresh"]').prop('checked', true);
 
     handleTestingTypeProcessTypeRules();
     handleProcessTypeRules();
@@ -743,6 +878,50 @@ jQuery('#OfferDetailsModal').on('hide.bs.modal', function (e) {
         setTimeout(() => {
             input.focus();
         }, 200);
+    }
+});
+
+// Copy data from specified Sr. No. on Blur / Change
+jQuery(document).on('blur change', '#copy_from_sr_no', function () {
+    let copySrNo = jQuery(this).val().trim();
+    if (!copySrNo) return;
+
+    let targetRow = offer_details_data.find(r => r.mode !== 'Delete' && String(r.sr_no).trim() === copySrNo);
+    if (targetRow) {
+        let currentSrNo = jQuery('#OfferDetailsModal #sr_no').val();
+        let form = jQuery('#OfferDetailsForm');
+
+        form.find('#lab_id').val(targetRow.lab_id || '');
+        form.find('#customer_id_no').val(targetRow.customer_id_no || '');
+        form.find('#job_desc').val(targetRow.job_desc || targetRow.job_description || '');
+        form.find('#die_no').val(targetRow.die_no || '');
+        form.find('#heat_no').val(targetRow.heat_no || '');
+        form.find('#drg_no').val(targetRow.drg_no || '');
+        if (targetRow.material_id) {
+            form.find('#material_id').val(targetRow.material_id).trigger('change.select2');
+        }
+        form.find('#thickness').val(targetRow.thickness || targetRow.thickness_mm || '');
+        form.find('#remark').val(targetRow.remark || '');
+
+        // Maintain latest Sr. No. (Do not overwrite with copied Sr. No.)
+        jQuery('#OfferDetailsModal #sr_no').val(currentSrNo);
+
+        // Clear Copy From Sr. No. input after copy
+        jQuery(this).val('');
+    } else {
+        // Clear Copy From Sr. No. input if not found
+        jQuery(this).val('');
+    }
+});
+
+// Tab key navigation from Copy From Sr. No. directly to Sr. No.
+jQuery(document).on('keydown', '#copy_from_sr_no', function (e) {
+    if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        jQuery(this).trigger('blur');
+        setTimeout(() => {
+            jQuery('#OfferDetailsModal #sr_no').focus().select();
+        }, 50);
     }
 });
 
@@ -760,56 +939,32 @@ jQuery('#OfferDetailsForm').on('submit', function (e) {
         return;
     }
 
-    let currentProcessType = jQuery('#OfferDetailsForm input[name="process_type"]:checked').val() || 'Fresh';
-    let currentTestReportRtId = jQuery('#OfferDetailsForm #test_report_rt_id').val();
-    if (currentProcessType === 'Repair' && (!currentTestReportRtId || currentTestReportRtId === '' || currentTestReportRtId == 0 || currentTestReportRtId === '0')) {
-        toastr.error('Please Select At Least One Report Form Pending.');
-        return false;
-    }
-
-    if (currentProcessType === 'Repair' && currentTestReportRtId) {
-        let isEditMode = jQuery('#OfferDetailsForm #form_type').val() === "edit";
-        let editFormIndex = jQuery('#OfferDetailsForm #form_index').val();
-        let isDuplicate = offer_details_data.some(function (row, idx) {
-            if (row.mode === "Delete") return false;
-            if (isEditMode && idx == editFormIndex) return false;
-            return row.test_report_rt_id && (row.test_report_rt_id == currentTestReportRtId);
-        });
-        if (isDuplicate) {
-            toastr.error("Duplicate Report Found!");
-            return false;
-        }
-    }
-
     var qty = parseInt(jQuery('#OfferDetailsForm #quantity').val()) || 0;
     if (qty <= 0) { toastr.error('Enter Quantity greater than 0.'); return; }
 
-    var minQty = parseInt(jQuery('#OfferDetailsForm #quantity').attr('min')) || 0;
-    if (qty < minQty) {
-        toastr.error('Quantity cannot be less than used quantity (' + minQty + ').');
-        return;
-    }
-
-    // form -> object
     let formValue = {};
     jQuery.each(jQuery('#OfferDetailsForm').serializeArray(), function (i, f) { formValue[f.name] = f.value; });
 
-    let processTypeVal = jQuery('#OfferDetailsModal input[name="process_type"]:checked').val() || 'Fresh';
-    formValue.process_type = processTypeVal;
-    formValue.is_observation_sheet = jQuery('#OfferDetailsForm #is_observation_sheet').val() || (formValue.is_observation_sheet || '');
-    formValue.type_of_job_id = formValue.type_of_job_id || null;
-    formValue.type_of_job_name = jQuery('#type_of_job_id option:selected').val() ? jQuery('#type_of_job_id option:selected').text() : '';
-    formValue.job_desc_id = formValue.job_desc_id || null;
-    formValue.job_desc = jQuery('#OfferDetailsForm #job_desc').val() || '';
-    formValue.job_description_name = formValue.job_desc || (jQuery('#inward_job_desc_id option:selected').val() ? jQuery('#inward_job_desc_id option:selected').text() : '');
-    formValue.part_no = jQuery('#OfferDetailsForm #part_no').val() || '';
-    formValue.drg_no = jQuery('#OfferDetailsForm #drg_no').val() || '';
-    formValue.part_name = formValue.part_no;
-    formValue.material_name = jQuery('#material_id option:selected').text();
-    formValue.area_of_coverage_name = jQuery('#area_of_coverage_id option:selected').val() ? jQuery('#area_of_coverage_id option:selected').text() : '';
-    formValue.procedure_ref_name = jQuery('#procedure_ref_id option:selected').val() ? jQuery('#procedure_ref_id option:selected').text() : '';
-    formValue.evaluation_as_per_name = jQuery('#evaluation_as_per_id option:selected').val() ? jQuery('#evaluation_as_per_id option:selected').text() : '';
-    formValue.acceptance_standard_name = jQuery('#acceptance_standard_id option:selected').val() ? jQuery('#acceptance_standard_id option:selected').text() : '';
+    let enteredSrNo = (formValue.sr_no || '').toString().trim();
+    if (enteredSrNo !== '') {
+        let editIndex = formValue.form_type === 'edit' ? parseInt(formValue.form_index, 10) : -1;
+        let isDuplicate = offer_details_data.some(function (row, idx) {
+            if (!row || row.mode === 'Delete') return false;
+            if (editIndex >= 0 && idx === editIndex) return false;
+            return (row.sr_no || '').toString().trim() === enteredSrNo;
+        });
+
+        if (isDuplicate) {
+            toastr.error('Duplicate Sr. No. Found.');
+            jQuery('#OfferDetailsForm #sr_no').focus();
+            return;
+        }
+    }
+
+    formValue.process_type_fix = jQuery('#OfferDetailsModal input[name="process_type_fix"]:checked').val() || 'Fresh';
+    formValue.process_type = formValue.process_type_fix;
+    formValue.process_type_name = jQuery('#OfferDetailsModal #type_of_testing_id_fix option:selected').val() ? jQuery('#OfferDetailsModal #type_of_testing_id_fix option:selected').text() : (formValue.type_of_testing_id_fix || '');
+    formValue.material_name = jQuery('#OfferDetailsModal #material_id option:selected').val() ? jQuery('#OfferDetailsModal #material_id option:selected').text() : '';
 
     if (formValue.form_type == "edit") {
         formValue.mode = (formValue.offer_details_id && formValue.offer_details_id != 0) ? "Update" : "Insert";
@@ -817,162 +972,92 @@ jQuery('#OfferDetailsForm').on('submit', function (e) {
             ...offer_details_data[formValue.form_index],
             ...formValue
         };
-        var d = offer_details_data[formValue.form_index];
-        var test = d.type_of_testing_id_fix ?? '';
-        var toj = d.type_of_job_name ?? '';
-        var jd = d.job_description_name ?? '';
-        var drg = d.drg_no ?? '';
-        var part = d.part_no || d.part_name || '';
-        var mat = d.material_name ?? '';
-        var heat = d.heat_no ?? '';
-        var rt = d.rt_no ?? '';
-        var pcode = d.product_code ?? '';
-        var thick = d.thickness ?? '';
-        var aoc = d.area_of_coverage_name ?? '';
-        var pr = d.procedure_ref_name ?? '';
-        var eap = d.evaluation_as_per_name ?? '';
-        var acs = d.acceptance_standard_name ?? '';
-        var qty = d.quantity ?? '';
-        var aval = d.approx_value && d.approx_value != 0 ? parseFloat(d.approx_value).toFixed(2) : '';
-        var awt = d.approx_weight && d.approx_weight != 0 ? parseFloat(d.approx_weight).toFixed(3) : '';
-        var rem = d.remark ?? '';
-
-        let tblHtml = `<td>`;
-        var in_use = (d.in_use == true || d.in_use == "true" || (d.used_qty && parseFloat(d.used_qty) > 0)) ? true : false;
-        tblHtml += in_use ? DetailsActionDropdown('editOfferDetails') : DetailsActionDropdown('editOfferDetails', 'removeOfferDetails');
-        tblHtml += `<input type="hidden" name="form_indx" value="${formValue.form_index}"/></td>`;
-        tblHtml += `<td>${test}</td>`;
-        tblHtml += `<td>${formValue.process_type}</td>`;
-        tblHtml += `<td>${toj}</td>`;
-        tblHtml += `<td>${jd}</td>`;
-        tblHtml += `<td>${part}</td>`;
-        tblHtml += `<td>${drg}</td>`;
-        tblHtml += `<td>${mat}</td>`;
-        tblHtml += `<td>${heat}</td>`;
-        tblHtml += `<td>${rt}</td>`;
-        tblHtml += `<td>${pcode}</td>`;
-        tblHtml += `<td>${thick}</td>`;
-        tblHtml += `<td>${aoc}</td>`;
-        tblHtml += `<td>${pr}</td>`;
-        tblHtml += `<td>${eap}</td>`;
-        tblHtml += `<td>${acs}</td>`;
-        tblHtml += `<td>${qty}</td>`;
-        tblHtml += `<td>${aval}</td>`;
-        tblHtml += `<td>${awt}</td>`;
-        tblHtml += `<td>${rem}</td>`;
-
-        jQuery('#OfferDetailTable tbody').find('tr').eq(formValue.row_index).empty().append(tblHtml);
+        fillOfferDetailTable();
         toastSuccess("Record Updated.");
-        updateParentRadiosLockState();
         thisModal.modal('hide');
     } else {
         formValue.mode = "Insert";
         formValue.offer_details_id = 0;
         offer_details_data.push(formValue);
-        let formIndx = offer_details_data.indexOf(formValue);
-        if (jQuery('#OfferDetailTable tbody').find('#noDetails').length > 0) {
-            jQuery('#OfferDetailTable tbody').empty();
-        }
-
-        var test = formValue.type_of_testing_id_fix ?? '';
-        var toj = formValue.type_of_job_name ?? '';
-        var jd = formValue.job_description_name ?? '';
-        var drg = formValue.drg_no ?? '';
-        var part = formValue.part_no || formValue.part_name || '';
-        var mat = formValue.material_name ?? '';
-        var heat = formValue.heat_no ?? '';
-        var rt = formValue.rt_no ?? '';
-        var pcode = formValue.product_code ?? '';
-        var thick = formValue.thickness ?? '';
-        var aoc = formValue.area_of_coverage_name ?? '';
-        var pr = formValue.procedure_ref_name ?? '';
-        var eap = formValue.evaluation_as_per_name ?? '';
-        var acs = formValue.acceptance_standard_name ?? '';
-        var qty = formValue.quantity ?? '';
-        var aval = formValue.approx_value && formValue.approx_value != 0 ? parseFloat(formValue.approx_value).toFixed(2) : '';
-        var awt = formValue.approx_weight && formValue.approx_weight != 0 ? parseFloat(formValue.approx_weight).toFixed(3) : '';
-        var rem = formValue.remark ?? '';
-
-        let tblHtml = `<tr>`;
-        tblHtml += `<td>`;
-        tblHtml += DetailsActionDropdown('editOfferDetails', 'removeOfferDetails');
-        tblHtml += `<input type="hidden" name="form_indx" value="${formIndx}"/></td>`;
-        tblHtml += `<td>${test}</td>`;
-        tblHtml += `<td>${formValue.process_type}</td>`;
-        tblHtml += `<td>${toj}</td>`;
-        tblHtml += `<td>${jd}</td>`;
-        tblHtml += `<td>${part}</td>`;
-        tblHtml += `<td>${drg}</td>`;
-        tblHtml += `<td>${mat}</td>`;
-        tblHtml += `<td>${heat}</td>`;
-        tblHtml += `<td>${rt}</td>`;
-        tblHtml += `<td>${pcode}</td>`;
-        tblHtml += `<td>${thick}</td>`;
-        tblHtml += `<td>${aoc}</td>`;
-        tblHtml += `<td>${pr}</td>`;
-        tblHtml += `<td>${eap}</td>`;
-        tblHtml += `<td>${acs}</td>`;
-        tblHtml += `<td>${qty}</td>`;
-        tblHtml += `<td>${aval}</td>`;
-        tblHtml += `<td>${awt}</td>`;
-        tblHtml += `<td>${rem}</td>`;
-        tblHtml += `</tr>`;
-
-        jQuery('#OfferDetailTable tbody').append(tblHtml);
+        fillOfferDetailTable();
         toastSuccess("Record Inserted.");
-        updateParentRadiosLockState();
 
-        let isRepeat = jQuery('#repeat_item').is(':checked');
-        if (isRepeat) {
-            jQuery('#OfferDetailsForm #quantity').val('1').prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
+        // ADD Mode: LNR behavior - keep all details, only increment sr_no (+1), modal stays open
+        jQuery('#OfferDetailsModal #sr_no').val(getNextDetailSrNo());
+        jQuery('#copy_from_sr_no').val('');
+        jQuery('#OfferDetailsForm #quantity').val('1').prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
 
-            setTimeout(function () {
-                $(form).removeClass('was-validated');
-                $(form).find('.is-invalid, .is-valid').removeClass('is-invalid is-valid');
-                jQuery('#OfferDetailsForm').find('.error').removeClass('error');
-            }, 150);
-        } else {
-            // reset for next entry
-            form.reset();
-            resetPendingRepairFields();
-            setTimeout(function () {
-                $(form).removeClass('was-validated');
-                $(form).find('.is-invalid, .is-valid').removeClass('is-invalid is-valid');
-                jQuery('#OfferDetailsForm').find('.error').removeClass('error');
-            }, 150);
-            jQuery('#OfferDetailsForm').find('.js-example-basic-single').val('').trigger('change.select2');
-            if (window.lastCustomerTestingType) {
-                jQuery('#OfferDetailsForm #type_of_testing_id_fix').val(window.lastCustomerTestingType).trigger('change.select2');
-            }
-            jQuery('#OfferDetailsForm #job_desc').val('');
-            jQuery('#OfferDetailsForm #part_no').val('');
-            jQuery('#OfferDetailsForm #drg_no').val('');
-            jQuery('#OfferDetailsForm #heat_no').val('');
-            jQuery('#OfferDetailsForm #rt_no').val('');
-            jQuery('#OfferDetailsForm #product_code').val('');
-            jQuery('#OfferDetailsForm #thickness').val('');
-            jQuery('#OfferDetailsForm #quantity').val('1').prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
-            jQuery('#OfferDetailsForm #approx_value').val('');
-            jQuery('#OfferDetailsForm #approx_weight').val('');
-            jQuery('#OfferDetailsForm #remark').val('');
-            jQuery('#inward_part_no_list').empty();
-            jQuery('#inward_drg_no_list').empty();
-            jQuery('#inward_product_code_list').empty();
-            setTimeout(function () {
-                let $select = jQuery('#OfferDetailsForm #type_of_testing_id_fix');
-                $select.one('select2:opening', function (e) {
-                    e.preventDefault();
-                });
+        // Process remains RT and readonly
+        jQuery('#OfferDetailsForm #type_of_testing_id_fix').val('RT').trigger('change.select2');
+        jQuery('#OfferDetailsForm #type_of_testing_id_fix').addClass('skip-tab');
+        setSelect2Readonly('#OfferDetailsModal #type_of_testing_id_fix', true);
+        jQuery('#OfferDetailsModal #type_of_testing_id_fix').next('.select2-container').css('pointer-events', 'none');
 
-                let sel = $select.next('.select2-container').find('.select2-selection');
-                if (sel.length) {
-                    sel.attr('tabindex', 0).focus();
-                }
-
-                $select.select2('close');
-            }, 150);
-        }
+        setTimeout(function () {
+            $(form).removeClass('was-validated');
+            $(form).find('.is-invalid, .is-valid').removeClass('is-invalid is-valid');
+            jQuery('#OfferDetailsForm').find('.error').removeClass('error');
+            jQuery('#OfferDetailsForm #sr_no').focus().select();
+        }, 150);
     }
+});
+
+/* ---------------------------------------------------------------------
+ *  Extra Details Sync Helpers (Main Form Hidden Fields <-> Modal)
+ * ------------------------------------------------------------------- */
+function syncExtraDetailsToMainHidden() {
+    jQuery('#main_test_witness_tpi_fix').val(jQuery('#OfferExtraDetailsModal #test_witness_tpi_fix').val() || '');
+    jQuery('#main_tpi_person').val(jQuery('#OfferExtraDetailsModal #tpi_person').val() || '');
+    jQuery('#main_test_items_condition').val(jQuery('#OfferExtraDetailsModal #test_items_condition').val() || '');
+    jQuery('#main_public_domain_agree_fix').val(jQuery('#OfferExtraDetailsModal #public_domain_agree_fix').val() || '');
+    jQuery('#main_conformity_statement_fix').val(jQuery('#OfferExtraDetailsModal #conformity_statement_fix').val() || '');
+    jQuery('#main_test_methods_defined_fix').val(jQuery('#OfferExtraDetailsModal #test_methods_defined_fix').val() || '');
+    jQuery('#main_laboratory_capability_fix').val(jQuery('#OfferExtraDetailsModal #laboratory_capability_fix').val() || '');
+    jQuery('#main_appropriate_test_method_fix').val(jQuery('#OfferExtraDetailsModal #appropriate_test_method_fix').val() || '');
+    jQuery('#main_pertinent_discussions').val(jQuery('#OfferExtraDetailsModal #pertinent_discussions').val() || '');
+    jQuery('#main_deviation_intimate').val(jQuery('#OfferExtraDetailsModal #deviation_intimate').val() || '');
+    jQuery('#main_contract_review_repeated_fix').val(jQuery('#OfferExtraDetailsModal #contract_review_repeated_fix').val() || '');
+}
+
+function syncMainHiddenToExtraDetailsModal() {
+    let tpiFix = jQuery('#main_test_witness_tpi_fix').val() || '';
+    jQuery('#OfferExtraDetailsModal #test_witness_tpi_fix').val(tpiFix).trigger('change');
+    jQuery('#OfferExtraDetailsModal #tpi_person').val(jQuery('#main_tpi_person').val() || '');
+    if (tpiFix === 'Yes') {
+        jQuery('#OfferExtraDetailsModal #tpi_person').prop('readonly', false).removeClass('skip-tab').css('pointer-events', 'auto');
+    } else {
+        jQuery('#OfferExtraDetailsModal #tpi_person').prop('readonly', true).addClass('skip-tab').css('pointer-events', 'none');
+    }
+    jQuery('#OfferExtraDetailsModal #test_items_condition, #OfferExtraDetailsModal #test_item_condition').val(jQuery('#main_test_items_condition').val() || '');
+    jQuery('#OfferExtraDetailsModal #public_domain_agree_fix').val(jQuery('#main_public_domain_agree_fix').val() || '').trigger('change');
+    jQuery('#OfferExtraDetailsModal #conformity_statement_fix').val(jQuery('#main_conformity_statement_fix').val() || '').trigger('change');
+    jQuery('#OfferExtraDetailsModal #test_methods_defined_fix').val(jQuery('#main_test_methods_defined_fix').val() || '').trigger('change');
+    jQuery('#OfferExtraDetailsModal #laboratory_capability_fix').val(jQuery('#main_laboratory_capability_fix').val() || '').trigger('change');
+    jQuery('#OfferExtraDetailsModal #appropriate_test_method_fix').val(jQuery('#main_appropriate_test_method_fix').val() || '').trigger('change');
+    jQuery('#OfferExtraDetailsModal #pertinent_discussions').val(jQuery('#main_pertinent_discussions').val() || '');
+    jQuery('#OfferExtraDetailsModal #deviation_intimate').val(jQuery('#main_deviation_intimate').val() || '');
+    jQuery('#OfferExtraDetailsModal #contract_review_repeated_fix').val(jQuery('#main_contract_review_repeated_fix').val() || '').trigger('change');
+}
+
+jQuery(document).on('click', '#OfferExtraDetailsModal #add_extra_details_btn', function () {
+    syncExtraDetailsToMainHidden();
+    toastSuccess("Extra Details Inserted.");
+    jQuery('#OfferExtraDetailsModal').modal('hide');
+    setTimeout(() => {
+        jQuery('#OfferModal #special_note').focus();
+    }, 200);
+});
+
+jQuery(document).on('click', '#extra_btn', function () {
+    syncMainHiddenToExtraDetailsModal();
+});
+
+jQuery('#OfferExtraDetailsModal').on('hide.bs.modal', function () {
+    syncExtraDetailsToMainHidden();
+});
+
+jQuery('#OfferExtraDetailsModal').on('show.bs.modal', function () {
+    syncMainHiddenToExtraDetailsModal();
 });
 
 /* ---------------------------------------------------------------------
@@ -999,32 +1084,60 @@ jQuery('#commonOfferForm').on('submit', function (e) {
         return;
     }
 
-    if (!form.checkValidity()) {
-        e.stopPropagation();
-        jQuery(form).addClass('was-validated');
+    validateChallanNoDate();
+
+    var challanDate = (jQuery('#OfferModal #challan_date').val() || '').trim();
+    if (challanDate && !isValidDate(challanDate)) {
+        toastr.error("Enter A Valid Challan Date!");
         jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
         jQuery('#OfferModal').find('#submitbtn').prop('disabled', false);
         return;
     }
 
-    let currentProcessType = jQuery('#OfferDetailsForm input[name="process_type"]:checked').val() || 'Fresh';
-    let currentTestReportRtId = jQuery('#OfferDetailsForm #test_report_rt_id').val();
-    if (currentProcessType === 'Repair' && (!currentTestReportRtId || currentTestReportRtId === '' || currentTestReportRtId == 0 || currentTestReportRtId === '0')) {
-        toastr.error('Please Select At Least One Report Form Pending.');
-        return false;
+    if (!form.checkValidity() || jQuery(form).find('.is-invalid').length > 0) {
+        e.stopPropagation();
+        jQuery(form).addClass('was-validated');
+        let $firstInvalid = jQuery(form).find(':invalid, .is-invalid').first();
+        if ($firstInvalid.length) {
+            $firstInvalid.focus();
+        }
+        jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
+        jQuery('#OfferModal').find('#submitbtn').prop('disabled', false);
+        return;
     }
+
+
     if (!validateOfferDateAgainstReports()) {
         jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
         jQuery('#OfferModal').find('#submitbtn').prop('disabled', false);
         return;
     }
 
-    var poNo = jQuery('#OfferModal').find('#commonOfferForm').find('#po_no').val();
-    var poDate = jQuery('#OfferModal').find('#commonOfferForm').find('#po_date').val();
+    if (!validateDelDateAgainstOfferDate()) {
+        jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
+        jQuery('#OfferModal').find('#submitbtn').prop('disabled', false);
+        return;
+    }
+
+    // syncExtraDetailsToMainHidden();
+
+
 
     var formIdnew = jQuery('#OfferModal').find('#commonOfferForm').find('#id').val();
     var formUrl = formIdnew != undefined && formIdnew != "" ? "update-offer" : "store-offer";
     var data = new FormData(form);
+
+    // Ensure all 11 Extra Detail fields are explicitly included in FormData
+    const extraFields = [
+        'test_witness_tpi_fix', 'tpi_person', 'test_items_condition',
+        'public_domain_agree_fix', 'conformity_statement_fix', 'test_methods_defined_fix',
+        'laboratory_capability_fix', 'appropriate_test_method_fix', 'pertinent_discussions',
+        'deviation_intimate', 'contract_review_repeated_fix'
+    ];
+    extraFields.forEach(function (f) {
+        data.set(f, jQuery('#OfferModal').find('#main_' + f).val() || '');
+    });
+
     data.append('offer_details_data', JSON.stringify(offer_details_data ?? []));
     data.append('_token', jQuery('meta[name="csrf-token"]').attr('content'));
 
@@ -1101,13 +1214,21 @@ jQuery('#commonOfferForm').on('submit', function (e) {
 /* ---------------------------------------------------------------------
  *  Auto-number + sequence duplicate check
  * ------------------------------------------------------------------- */
-function getLatestOfferNo() {
+function getLatestOfferNo(customerId = '') {
+    if (!customerId) {
+        customerId = jQuery('#OfferModal').find('#customer_id').val();
+    }
+    if (!customerId) {
+        jQuery('#offer_no').val('');
+        jQuery('#offer_sequence').val('');
+        return;
+    }
     jQuery.ajax({
         url: "get-latest_offer_number",
         type: 'GET',
         headers: headerOpt,
+        data: { customer_id: customerId },
         dataType: 'json',
-        processData: false,
         success: function (data) {
             if (data.response_code == 1) {
                 jQuery('#offer_date').val(currentDate);
@@ -1132,6 +1253,13 @@ function checkSequence() {
     let thisForm = jQuery('#commonOfferForm');
     if (thisForm.find('#offer_sequence').prop('readonly')) return;
     let val = thisForm.find('#offer_sequence').val();
+    let customerId = thisForm.find('#customer_id').val();
+
+    if (!customerId) {
+        toastr.error('Please Select Customer First.');
+        thisForm.find('#offer_sequence').val('');
+        return;
+    }
 
     if (val > 0 == false) {
         toastr.error('Enter Valid Offer No.');
@@ -1143,10 +1271,10 @@ function checkSequence() {
         jQuery('#offer_sequence').addClass('file-loader');
         jQuery('#offer_sequence').parent().parent().parent('div.control-group').removeClass('error');
 
-        var urL = "check-offer_number_duplication?for=add&offer_sequence=" + val;
+        var urL = "check-offer_number_duplication?for=add&offer_sequence=" + val + "&customer_id=" + customerId;
         var formId = jQuery('#commonOfferForm').find('input[name="id"]').val();
         if (formId !== undefined && formId != "") {
-            urL = "check-offer_number_duplication?for=edit&offer_sequence=" + val + "&id=" + formId;
+            urL = "check-offer_number_duplication?for=edit&offer_sequence=" + val + "&id=" + formId + "&customer_id=" + customerId;
         }
 
         jQuery.ajax({
@@ -1195,22 +1323,30 @@ function checkSequence() {
     }
 }
 
-// Customer change handler for Customer-wise LNR
+// Customer change handler for Customer-wise Offer Number & LNR
 jQuery('#OfferModal').on('change', '#customer_id', function () {
     var customerId = jQuery(this).val();
     var formId = jQuery('#OfferModal').find('#id').val();
-    if (!formId && customerId) {
-        getLNRData(customerId);
+    if (!formId) {
+        if (customerId) {
+            getLatestOfferNo(customerId);
+            getLNRData(customerId);
+        } else {
+            jQuery('#OfferModal').find('#offer_no').val('');
+            jQuery('#OfferModal').find('#offer_sequence').val('');
+        }
     }
 });
 
-// Get Last Note Reset (LNR) Data
+// Get Last Note Reset (LNR) Data (1/2/3/4 wise)
 function getLNRData(customerId = '') {
     var isInitial = !customerId;
     if (!customerId) {
         customerId = jQuery('#OfferModal').find('#customer_id').val();
     }
     var nablTypeFix = jQuery('#OfferModal').find('input[name="nabl_type_fix"]:checked').val();
+    var jobTypeFix = jQuery('#OfferModal').find('input[name="job_type_fix"]:checked').val();
+    var testAtFix = jQuery('#OfferModal').find('input[name="test_at_fix"]:checked').val();
 
     jQuery.ajax({
         url: "get-offer_lnr_data",
@@ -1218,7 +1354,9 @@ function getLNRData(customerId = '') {
         headers: headerOpt,
         data: {
             customer_id: customerId,
-            nabl_type_fix: nablTypeFix
+            nabl_type_fix: nablTypeFix,
+            job_type_fix: jobTypeFix,
+            test_at_fix: testAtFix
         },
         dataType: 'json',
         success: function (data) {
@@ -1239,28 +1377,26 @@ function getLNRData(customerId = '') {
                         jQuery('#OfferModal').find('input[name="job_type_fix"][value="' + locLnr.job_type_fix + '"]').prop('checked', true);
                     }
                     filterTestsByNabl();
+                    focusInitialOfferField();
                 }
                 if (data.lnr_data != null) {
                     var lnr = data.lnr_data;
-                    jQuery('#OfferModal').find('#sample_drawn_by').val(lnr.sample_drawn_by ?? "");
-                    jQuery('#OfferModal').find('#is_any_tpi_witness').val(lnr.is_any_tpi_witness ?? "Yes").trigger('change.select2');
-                    toggleTpiName();
-                    jQuery('#OfferModal').find('#tpi_name').val(lnr.tpi_name ?? "");
-                    jQuery('#OfferModal').find('#condition_of_sample').val(lnr.condition_of_sample ?? "");
-                    jQuery('#OfferModal').find('#is_equipment_available').val(lnr.is_equipment_available ?? "Yes").trigger('change.select2');
-                    jQuery('#OfferModal').find('#competent_personnel_available').val(lnr.competent_personnel_available ?? "Yes").trigger('change.select2');
-                    jQuery('#OfferModal').find('#is_test_sub_contracted').val(lnr.is_test_sub_contracted ?? "Yes").trigger('change.select2');
-                    jQuery('#OfferModal').find('#test_feasible').val(lnr.test_feasible ?? "Yes").trigger('change.select2');
-                    jQuery('#OfferModal').find('#all_test_parameters_are_in_accredited_scope').val(lnr.all_test_parameters_are_in_accredited_scope ?? "Yes").trigger('change.select2');
-                    jQuery('#OfferModal').find('#required_statement_of_conformity').val(lnr.required_statement_of_conformity ?? "Yes").trigger('change.select2');
+                    // Auto-fill OfferExtraDetails Main Hidden fields & Modal
+                    jQuery('#main_test_witness_tpi_fix').val(lnr.test_witness_tpi_fix ?? "");
+                    jQuery('#main_tpi_person').val(lnr.tpi_person ?? "");
+                    jQuery('#main_test_items_condition').val(lnr.test_items_condition ?? "");
+                    jQuery('#main_public_domain_agree_fix').val(lnr.public_domain_agree_fix ?? "");
+                    jQuery('#main_conformity_statement_fix').val(lnr.conformity_statement_fix ?? "");
+                    jQuery('#main_test_methods_defined_fix').val(lnr.test_methods_defined_fix ?? "");
+                    jQuery('#main_laboratory_capability_fix').val(lnr.laboratory_capability_fix ?? "");
+                    jQuery('#main_appropriate_test_method_fix').val(lnr.appropriate_test_method_fix ?? "");
+                    jQuery('#main_pertinent_discussions').val(lnr.pertinent_discussions ?? "");
+                    jQuery('#main_deviation_intimate').val(lnr.deviation_intimate ?? "");
+                    jQuery('#main_contract_review_repeated_fix').val(lnr.contract_review_repeated_fix ?? "");
+                    syncMainHiddenToExtraDetailsModal();
                 } else {
-                    jQuery('#OfferModal').find('#sample_drawn_by').val("");
-                    ['is_any_tpi_witness', 'is_equipment_available', 'competent_personnel_available', 'is_test_sub_contracted', 'test_feasible', 'all_test_parameters_are_in_accredited_scope', 'required_statement_of_conformity'].forEach(function (f) {
-                        jQuery('#OfferModal').find('#' + f).val('Yes').trigger('change.select2');
-                    });
-                    toggleTpiName();
-                    jQuery('#OfferModal').find('#tpi_name').val("");
-                    jQuery('#OfferModal').find('#condition_of_sample').val("");
+                    jQuery('#commonOfferForm input[id^="main_"]').val('');
+                    syncMainHiddenToExtraDetailsModal();
                 }
                 if (data.lnr_detail_testing_type) {
                     window.lastCustomerTestingType = data.lnr_detail_testing_type;
@@ -1289,8 +1425,15 @@ function updateParentRadiosLockState() {
     var parentId = jQuery('#OfferModal').find('#id').val();
     let isAdd = (parentId == "" || parentId == undefined || parentId == 0);
 
+    if (!isAdd) {
+        setSelect2Readonly(jQuery('#OfferModal #customer_id'), true);
+        jQuery('#OfferModal #customer_id').addClass('skip-tab');
+        lockParentRadios(true);
+        return;
+    }
+
     let hasRepairDetail = offer_details_data.some(function (item) {
-        return item.mode !== "Delete" && item.process_type === 'Repair';
+        return item.mode !== "Delete" && ((item.process_type_fix || item.process_type) === 'Repair');
     });
     let parentInUse = offer_details_data.some(function (item) {
         return item.mode !== "Delete" && (item.in_use == true || item.in_use == "true" || (item.used_qty && parseFloat(item.used_qty) > 0));
@@ -1301,35 +1444,26 @@ function updateParentRadiosLockState() {
         jQuery('#OfferModal #customer_id').addClass('skip-tab');
         lockParentRadios(true);
     } else {
-        if (isAdd) {
-            setSelect2Readonly(jQuery('#OfferModal #customer_id'), false);
-            jQuery('#OfferModal #customer_id').removeClass('skip-tab');
-            lockParentRadios(false);
-        } else {
-            setSelect2Readonly(jQuery('#OfferModal #customer_id'), true);
-            lockParentRadios(false);
-        }
+        setSelect2Readonly(jQuery('#OfferModal #customer_id'), false);
+        jQuery('#OfferModal #customer_id').removeClass('skip-tab');
+        lockParentRadios(false);
     }
 }
 
 function focusInitialOfferField() {
     let modal = jQuery('#OfferModal');
-    let nablRadio = modal.find('input[name="nabl_type_fix"]');
-    if (nablRadio.hasClass('skip-tab')) {
-        let testAtRadio = modal.find('input[name="test_at_fix"]');
-        if (testAtRadio.hasClass('skip-tab')) {
-            let jobTypeRadio = modal.find('input[name="job_type_fix"]');
-            if (jobTypeRadio.hasClass('skip-tab')) {
-                modal.find('#offer_sequence').focus().select();
-            } else {
-                modal.find('input[name="job_type_fix"]:checked').focus();
-            }
-        } else {
-            modal.find('input[name="test_at_fix"]:checked').focus();
-        }
-    } else {
-        modal.find('input[name="nabl_type_fix"]:checked').focus();
-    }
+    ['nabl_type_fix', 'job_type_fix', 'test_at_fix'].forEach(function (name) {
+        let $group = modal.find('input[name="' + name + '"]');
+        $group.attr('tabindex', '-1');
+        let $chk = $group.filter(':checked');
+        if (!$chk.length) $chk = $group.first();
+        $chk.attr('tabindex', '0');
+    });
+    let $target = modal.find('input[name="nabl_type_fix"]:checked');
+    if (!$target.length) $target = modal.find('input[name="nabl_type_fix"]').first();
+    setTimeout(() => {
+        if ($target.length) $target[0].focus();
+    }, 30);
 }
 
 jQuery('#CustomerModal').on('hide.bs.modal', function (e) {
@@ -1497,7 +1631,7 @@ function validateCopyButton() {
     var formType = jQuery('#OfferDetailsModal').find("#form_type").val();
     var detailId = jQuery('#OfferDetailsModal').find("#offer_details_id").val();
     var isSavedDetailEdit = formType === 'edit' || (detailId && detailId !== '0');
-    var processType = jQuery('#OfferDetailsModal input[name="process_type"]:checked').val() || 'Fresh';
+    var processType = jQuery('#OfferDetailsModal input[name="process_type_fix"]:checked').val() || 'Fresh';
 
     // In EDIT mode or REPAIR case: always keep Past Inward button disabled
     if (isSavedDetailEdit || processType === 'Repair') {
@@ -1669,7 +1803,7 @@ jQuery('#CopyOfferDetailsModal').on('hidden.bs.modal', function () {
  *  Pending Repair Reports Logic
  * ------------------------------------------------------------------- */
 jQuery(document).ready(function () {
-    jQuery('#OfferDetailsForm').on('change', 'input[name="process_type"]', function () {
+    jQuery('#OfferDetailsForm').on('change', 'input[name="process_type_fix"]', function () {
         let processType = jQuery(this).val();
         if (processType === 'Repair') {
             jQuery('#pendingBtn').prop('disabled', false);
@@ -1779,7 +1913,7 @@ jQuery(document).ready(function () {
         // Auto-fill core values
         jQuery('#OfferDetailsForm #test_report_rt_id').val(reportData.test_report_rt_id);
         jQuery('#OfferDetailsForm #revision_number').val(revNo);
-        jQuery('#OfferDetailsForm input[name="process_type"][value="Repair"]').prop('checked', true);
+        jQuery('#OfferDetailsForm input[name="process_type_fix"][value="Repair"]').prop('checked', true);
         jQuery('#OfferDetailsForm #type_of_testing_id_fix').val('RT').trigger('change.select2');
 
         // Auto-fill detail fields from pending repair report data
@@ -1832,7 +1966,7 @@ function setRepairFieldsReadonly(isReadonly, isRevision = false) {
     if (typeof setSelect2Readonly === 'function') {
         setSelect2Readonly(form.find('#type_of_testing_id_fix'), isReadonly);
     }
-    setRadioReadonly("#OfferDetailsForm input[name='process_type']", isReadonly);
+    setRadioReadonly("#OfferDetailsForm input[name='process_type_fix']", isReadonly);
 
     // Lock detail fields for all Repair cases
     let lockDetailFields = isReadonly;
@@ -1871,12 +2005,17 @@ function resetPendingRepairFields() {
     form.find('#test_report_rt_id').val(null);
     form.find('#revision_number').val('');
 
-    setRadioReadonly("#OfferDetailsForm input[name='process_type']", false);
-    form.find('input[name="process_type"][value="Fresh"]').prop('checked', true);
+    setRadioReadonly("#OfferDetailsForm input[name='process_type_fix']", false);
+    form.find('input[name="process_type_fix"]').prop('disabled', false);
+    jQuery('#process_type_container').css('pointer-events', 'auto').css('opacity', '1');
+    form.find('input[name="process_type_fix"][value="Fresh"]').prop('checked', true);
 
     setRepairFieldsReadonly(false, false);
 
-    form.find('#type_of_testing_id_fix').off('select2:opening.s2readonly');
+    form.find('#type_of_testing_id_fix').val('RT').trigger('change.select2');
+    form.find('#type_of_testing_id_fix').addClass('skip-tab');
+    setSelect2Readonly('#OfferDetailsModal #type_of_testing_id_fix', true);
+    form.find('#type_of_testing_id_fix').next('.select2-container').css('pointer-events', 'none');
 
     form.find('#quantity').val('1').prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
     jQuery('#pendingBtn').prop('disabled', true);
