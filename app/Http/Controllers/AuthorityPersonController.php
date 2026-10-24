@@ -22,14 +22,12 @@ class AuthorityPersonController extends Controller
      * Build the comma-separated operator_type label string from the
      * individual Yes/No flags, preserving the defined order.
      */
-    private function buildOperatorType($tested, $reviewed, $authorized, $checked, $approved)
+    private function buildOperatorType($performed, $examined, $authorized)
     {
         $labels = [];
-        if ($tested == 'Yes')     { $labels[] = 'Tested By'; }
-        if ($reviewed == 'Yes')   { $labels[] = 'Reviewed By'; }
+        if ($performed == 'Yes')     { $labels[] = 'Performed By'; }
+        if ($examined == 'Yes')   { $labels[] = 'Examined By'; }
         if ($authorized == 'Yes') { $labels[] = 'Authorized By'; }
-        if ($checked == 'Yes')    { $labels[] = 'Checked By'; }
-        if ($approved == 'Yes')   { $labels[] = 'Approved By'; }
         return implode(', ', $labels);
     }
 
@@ -184,20 +182,18 @@ class AuthorityPersonController extends Controller
         DB::beginTransaction();
         try
         {
-            $tested_by     = $request->tested_by == 'Yes' ? 'Yes' : 'No';
-            $reviewed_by   = $request->reviewed_by == 'Yes' ? 'Yes' : 'No';
+            $performed_by     = $request->performed_by == 'Yes' ? 'Yes' : 'No';
+            $examined_by   = $request->examined_by == 'Yes' ? 'Yes' : 'No';
             $authorized_by = $request->authorized_by == 'Yes' ? 'Yes' : 'No';
-            $checked_by    = $request->checked_by == 'Yes' ? 'Yes' : 'No';
-            $approved_by   = $request->approved_by == 'Yes' ? 'Yes' : 'No';
 
-            if ($tested_by != 'Yes' && $reviewed_by != 'Yes' && $authorized_by != 'Yes' && $checked_by != 'Yes' && $approved_by != 'Yes') {
+            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes') {
                 return response()->json([
                     'response_code' => '0',
                     'response_message' => 'Select At Least One Operator Type.',
                 ]);
             }
 
-            $operator_type = $this->buildOperatorType($tested_by, $reviewed_by, $authorized_by, $checked_by, $approved_by);
+            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by);
 
             $signaturePath = null;
             $blobImage = null;
@@ -233,11 +229,9 @@ class AuthorityPersonController extends Controller
                 'signature'      => $signaturePath,
                 'signature_blob' => $blobImage,
                 'status'         => $request->status ?? 'Active',
-                'tested_by'      => $tested_by,
-                'reviewed_by'    => $reviewed_by,
+                'performed_by'      => $performed_by,
+                'examined_by'    => $examined_by,
                 'authorized_by'  => $authorized_by,
-                'checked_by'     => $checked_by,
-                'approved_by'    => $approved_by,
                 'operator_type'  => $operator_type,
                 'certificate'      => $certificatePath,
                 'certificate_blob' => $blobImageCertificate,
@@ -325,20 +319,18 @@ class AuthorityPersonController extends Controller
 
         try
         {
-            $tested_by     = $request->tested_by == 'Yes' ? 'Yes' : 'No';
-            $reviewed_by   = $request->reviewed_by == 'Yes' ? 'Yes' : 'No';
+            $performed_by  = $request->performed_by == 'Yes' ? 'Yes' : 'No';
+            $examined_by   = $request->examined_by == 'Yes' ? 'Yes' : 'No';
             $authorized_by = $request->authorized_by == 'Yes' ? 'Yes' : 'No';
-            $checked_by    = $request->checked_by == 'Yes' ? 'Yes' : 'No';
-            $approved_by   = $request->approved_by == 'Yes' ? 'Yes' : 'No';
 
-            if ($tested_by != 'Yes' && $reviewed_by != 'Yes' && $authorized_by != 'Yes' && $checked_by != 'Yes' && $approved_by != 'Yes') {
+            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes') {
                 return response()->json([
                     'response_code' => '0',
                     'response_message' => 'Please Select At Least One Operator Type.',
                 ]);
             }
 
-            $operator_type = $this->buildOperatorType($tested_by, $reviewed_by, $authorized_by, $checked_by, $approved_by);
+            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by);
 
             $imgs = AuthorityPerson::where('authority_person_id', $request->id)->value('signature');
             $file = new File();
@@ -411,11 +403,9 @@ class AuthorityPersonController extends Controller
                 'operator'       => $request->operator,
                 'designation'    => $request->designation,
                 'status'         => $request->status ?? 'Active',
-                'tested_by'      => $tested_by,
-                'reviewed_by'    => $reviewed_by,
+                'performed_by'   => $performed_by,
+                'examined_by'    => $examined_by,
                 'authorized_by'  => $authorized_by,
-                'checked_by'     => $checked_by,
-                'approved_by'    => $approved_by,
                 'operator_type'  => $operator_type,
                 'signature'      => $signaturePath != "" ? $signaturePath : null,
                 'signature_blob' => $blobImage,

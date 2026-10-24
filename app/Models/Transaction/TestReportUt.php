@@ -26,6 +26,21 @@ class TestReportUt extends Model
         'from_type_id_fix',
         'customer_client',
         'type_of_job_id',
+        'type_of_job',
+        'project',
+        'test_method_id',
+        'job_desc_label',
+        'extent_of_exa',
+        'stage_of_exa',
+        'method',
+        'ref_sensitivity',
+        'worksheet_no',
+        'cable_type',
+        'connector_type',
+        'performed_by_authority_person_id',
+        'examined_by_authority_person_id',
+        'reviewed_by',
+        'witness_by',
         'job_desc_id',
         'job_desc',
         'part_no',
@@ -89,6 +104,21 @@ class TestReportUt extends Model
     public function setFromTypeIdFixAttribute($value)
     {
         $this->attributes['from_type_id_fix'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
+
+    public function setTestMethodIdAttribute($value)
+    {
+        $this->attributes['test_method_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
+
+    public function setPerformedByAuthorityPersonIdAttribute($value)
+    {
+        $this->attributes['performed_by_authority_person_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
+
+    public function setExaminedByAuthorityPersonIdAttribute($value)
+    {
+        $this->attributes['examined_by_authority_person_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
     }
 }
 

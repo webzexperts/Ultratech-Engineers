@@ -109,7 +109,7 @@ function fillReportDetailTable() {
     let validRows = test_report_ut_details_data.filter(row => row.mode !== 'Delete');
 
     if (validRows.length === 0) {
-        tbody.append(`<tr><td colspan="7" class="text-center">No Test Report Details Added</td></tr>`);
+        tbody.append(`<tr><td colspan="10" class="text-center">No Test Report Details Added</td></tr>`);
     } else {
         validRows.forEach((row) => {
             let formIndx = test_report_ut_details_data.indexOf(row);
@@ -120,10 +120,13 @@ function fillReportDetailTable() {
                     <input type="hidden" name="form_indx" value="${formIndx}"/>
                 </td>
                 <td>${row.sr_no}</td>
+                <td>${row.job_description || ''}</td>
+                <td>${row.material_name || ''}</td>
+                <td>${row.thickness || ''}</td>
                 <td>${row.ut_test_no || ''}</td>
                 <td>${row.heat_no || ''}</td>
                 <td>${row.quantity || 0}</td>
-                <td>${row.discontinuity_evaluation || ''}</td>
+                <td>${row.observation || ''}</td>
                 <td>${row.result_name || ''}</td>
             </tr>`;
             tbody.append(rowHtml);
@@ -141,10 +144,16 @@ function updateQtySummary(rows) {
 }
 
 function applyDynamicDetailLabels() {
+    let rawJobDesc = jQuery('#job_desc_label').val();
     let rawUt = jQuery('#ut_test_no_label').val();
     let rawHeat = jQuery('#heat_no_label').val();
+
+    let jobDescLabel = (rawJobDesc && rawJobDesc.trim() !== '') ? rawJobDesc.trim() : 'Job Desc.';
     let utLabel = (rawUt && rawUt.trim() !== '') ? rawUt.trim() : 'UT Test No.';
     let heatLabel = (rawHeat && rawHeat.trim() !== '') ? rawHeat.trim() : 'Heat No.';
+
+    jQuery('#th_job_description').text(jobDescLabel);
+    jQuery('#lbl_det_job_description').text(jobDescLabel);
 
     jQuery('#th_ut_test_no').text(utLabel);
     jQuery('#lbl_det_ut_test_no').html(`${utLabel} <sup class="astric">*</sup>`);
@@ -154,7 +163,7 @@ function applyDynamicDetailLabels() {
     jQuery('#lbl_det_heat_no').text(heatLabel);
 }
 
-jQuery(document).on('change blur', '#ut_test_no_label, #heat_no_label', function () {
+jQuery(document).on('change blur input', '#job_desc_label, #ut_test_no_label, #heat_no_label', function () {
     applyDynamicDetailLabels();
 });
 
@@ -488,9 +497,9 @@ jQuery(document).on('change', '#material_inward_details_id', function () {
         jQuery('#pend_qty').val(selectedItem.pending_qty || 0);
 
         if (!_openForEdit) {
-            let initialQty = 1;
-            if (selectedItem.nabl_type_fix !== 'NABL') {
-                initialQty = parseInt(selectedItem.pending_qty || 0);
+            let initialQty = parseInt(selectedItem.pending_qty || 0);
+            if (initialQty < 1) {
+                initialQty = 1;
             }
             test_report_ut_details_data = [{
                 test_report_ut_details_id: 0,
@@ -513,9 +522,10 @@ jQuery(document).on('change', '#material_inward_details_id', function () {
 function resetReportDetailsForm() {
     jQuery('#UTReportDetailsForm')[0].reset();
     jQuery('#UTReportDetailsForm').removeClass('was-validated');
+    jQuery('#det_material_id').val('').trigger('change.select2');
     jQuery('#detail_result_id').val('').trigger('change.select2');
     jQuery('#UTReportDetailsForm input[type="hidden"]').val('');
-    jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
+    jQuery('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
 }
 
 function resetEquipmentForm() {
@@ -538,7 +548,7 @@ function resetProbeForm() {
 jQuery(document).on('click', '#addDetailRowBtn', function () {
     resetReportDetailsForm();
     jQuery('#det_form_type').val('add');
-    jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
+    jQuery('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
     jQuery('#UTReportDetailsModal').modal('show');
 });
 
@@ -570,6 +580,8 @@ jQuery(document).on('click', '#submitDetailsRowBtn', function () {
         toastr.error('Enter Quantity greater than 0.');
         return;
     }
+    let material_id = jQuery('#det_material_id').val();
+    let material_name = jQuery('#det_material_id option:selected').val() ? jQuery('#det_material_id option:selected').text() : '';
     let result_id = jQuery('#detail_result_id').val();
     let result_name = jQuery('#detail_result_id option:selected').text();
 
@@ -584,10 +596,15 @@ jQuery(document).on('click', '#submitDetailsRowBtn', function () {
 
     let rowData = {
         test_report_ut_details_id: serialized.test_report_ut_details_id || 0,
+        job_description: serialized.job_description || '',
+        material_id: material_id || null,
+        material_name: material_name,
+        thickness: serialized.thickness || '',
         ut_test_no: serialized.ut_test_no,
         heat_no: serialized.heat_no,
         quantity: parseInt(serialized.quantity || 0),
-        discontinuity_evaluation: serialized.discontinuity_evaluation,
+        observation: serialized.observation || '',
+        discontinuity_evaluation: serialized.discontinuity_evaluation || '',
         detail_result_id: result_id,
         result_name: result_name,
         mode: serialized.form_type === 'add' ? 'Insert' : 'Update'
@@ -601,7 +618,7 @@ jQuery(document).on('click', '#submitDetailsRowBtn', function () {
         // Reset form and keep modal open for next entry
         resetReportDetailsForm();
         jQuery('#det_form_type').val('add');
-        jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
+        jQuery('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
         //toastr.success('Details added successfully.');
         jQuery('#det_ut_test_no').focus();
     } else {
@@ -750,10 +767,14 @@ function editReportDetails(ele) {
     jQuery('#det_row_index').val(row.sr_no);
     jQuery('#test_report_ut_details_id').val(row.test_report_ut_details_id || 0);
 
+    jQuery('#det_job_description').val(row.job_description || '');
+    jQuery('#det_material_id').val(row.material_id).trigger('change.select2');
+    jQuery('#det_thickness').val(row.thickness || '');
     jQuery('#det_ut_test_no').val(row.ut_test_no);
     jQuery('#det_heat_no').val(row.heat_no);
-    jQuery('#det_quantity').val(row.quantity || 1).prop('readonly', true).attr('tabindex', '-1');
-    jQuery('#det_discontinuity_evaluation').val(row.discontinuity_evaluation);
+    jQuery('#det_quantity').val(row.quantity || '').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
+    jQuery('#det_observation').val(row.observation || '');
+    jQuery('#det_discontinuity_evaluation').val(row.discontinuity_evaluation || '');
     jQuery('#detail_result_id').val(row.detail_result_id).trigger('change.select2');
 
     jQuery('#UTReportDetailsModal').modal('show');
@@ -910,12 +931,15 @@ function fillCustomerDropdown() {
 function resetMainForm() {
     _openForEdit = false;
     var lastNote = jQuery('#note').val();
+    var lastJobDescLabel = jQuery('#job_desc_label').val();
     var lastUtTestNoLabel = jQuery('#ut_test_no_label').val();
     var lastHeatNoLabel = jQuery('#heat_no_label').val();
     jQuery('#commonTestReportUtForm')[0].reset();
     jQuery('#note').val(lastNote);
-    if (lastUtTestNoLabel) jQuery('#ut_test_no_label').val(lastUtTestNoLabel);
-    if (lastHeatNoLabel) jQuery('#heat_no_label').val(lastHeatNoLabel);
+    jQuery('#job_desc_label').val(lastJobDescLabel || "Job Desc.");
+    jQuery('#ut_test_no_label').val(lastUtTestNoLabel || "UT Test No.");
+    jQuery('#heat_no_label').val(lastHeatNoLabel || "Heat No.");
+    applyDynamicDetailLabels();
     jQuery('#commonTestReportUtForm').removeClass('was-validated');
     jQuery('#entry_type_manual').prop('checked', true);
     jQuery('#id').val('');
@@ -938,6 +962,9 @@ function resetMainForm() {
     jQuery('#procedure_ref_id').val('').trigger('change.select2');
     jQuery('#acceptance_standard_id').val('').trigger('change.select2');
     jQuery('#ulr_id').val('').trigger('change.select2');
+    jQuery('#test_method_id').val('').trigger('change.select2');
+    jQuery('#performed_by_authority_person_id').val('').trigger('change.select2');
+    jQuery('#examined_by_authority_person_id').val('').trigger('change.select2');
     jQuery('#tested_by_authority_person_id').val('').trigger('change.select2');
     jQuery('#reviewed_by_authority_person_id').val('').trigger('change.select2');
     jQuery('#authorized_by_authority_person_id').val('').trigger('change.select2');
@@ -956,6 +983,10 @@ function resetMainForm() {
     jQuery('#scanning_area_suggestion').val('');
     jQuery('#scan_plan_no_suggestion').val('');
     jQuery('#product_code_suggestion').val('');
+    jQuery('#reviewed_by_suggestion').val('');
+    jQuery('#witness_by_suggestion').val('');
+    jQuery('#reviewed_by_list').html('');
+    jQuery('#witness_by_list').html('');
     jQuery('#ulr_year').val('');
     applyDynamicDetailLabels();
 
@@ -1024,8 +1055,6 @@ function resetMainForm() {
     setRadioReadonly('input[name="entry_type_fix"]', false);
     setRadioReadonly('input[name="nabl_type_fix"]', false);
     setRadioReadonly('input[name="job_type_fix"]', false);
-    jQuery('#nabl_non_nabl').prop('checked', true);
-    jQuery('#job_casting').prop('checked', true);
 
     setSelect2Readonly('#customer_id', false);
     jQuery('#material_inward_details_id').val('');
@@ -1177,6 +1206,10 @@ jQuery(document).on('click', '#submitbtn', function () {
 
     for (let i = 0; i < activeDetails.length; i++) {
         let row = activeDetails[i];
+        if (!row.material_id) {
+            toastr.error('Select Material in Test Report Details.');
+            return;
+        }
         if (!row.ut_test_no || row.ut_test_no.trim() === '') {
             toastr.error(`Enter UT Test No.`);
             return;
@@ -1185,10 +1218,10 @@ jQuery(document).on('click', '#submitbtn', function () {
             toastr.error('Enter Quantity greater than 0.');
             return;
         }
-        if (!row.discontinuity_evaluation || row.discontinuity_evaluation.trim() === '') {
-            toastr.error(`Enter Discontinuity Evaluation`);
-            return;
-        }
+        // if (!row.discontinuity_evaluation || row.discontinuity_evaluation.trim() === '') {
+        //     toastr.error(`Enter Discontinuity Evaluation`);
+        //     return;
+        // }
         if (!row.detail_result_id || row.detail_result_id === '') {
             toastr.error(`Enter Result`);
             return;
@@ -1334,7 +1367,11 @@ function fetchAndFillTestReportUt(id) {
                 // jQuery('#type_of_job_id').val(zeroToEmpty(reportMasterData.type_of_job_id)).trigger('change.select2');
                 // jQuery('#job_desc_id').val(zeroToEmpty(reportMasterData.job_desc_id)).trigger('change.select2');
                 jQuery('#type_of_job_id').val(zeroToEmpty(reportMasterData.type_of_job_id));
-                jQuery('#job_desc').val(reportMasterData.job_description || reportMasterData.job_desc || '');
+                jQuery('#type_of_job').val(reportMasterData.type_of_job || '');
+                jQuery('#project').val(reportMasterData.project || '');
+                jQuery('#test_method_id').val(zeroToEmpty(reportMasterData.test_method_id)).trigger('change.select2');
+                jQuery('#job_desc_label').val(reportMasterData.job_desc_label || '');
+                // jQuery('#job_desc').val(reportMasterData.job_description || reportMasterData.job_desc || '');
                 jQuery('#part_no').val(reportMasterData.part_no || '');
                 jQuery('#drg_no').val(reportMasterData.drg_no || '');
                 jQuery('#material_id').val(zeroToEmpty(reportMasterData.material_id)).trigger('change.select2');
@@ -1352,9 +1389,16 @@ function fetchAndFillTestReportUt(id) {
                 jQuery('#stage_of_test').val(reportMasterData.stage_of_test || '');
                 jQuery('#area_of_coverage_id').val(zeroToEmpty(reportMasterData.area_of_coverage_id)).trigger('change.select2');
                 jQuery('#surface_condition').val(reportMasterData.surface_condition || '');
+                jQuery('#extent_of_exa').val(reportMasterData.extent_of_exa || '');
+                jQuery('#stage_of_exa').val(reportMasterData.stage_of_exa || '');
                 jQuery('#surface_temp').val(reportMasterData.surface_temp || '');
                 jQuery('#thickness').val(reportMasterData.thickness || '');
                 jQuery('#couplant').val(reportMasterData.couplant || '');
+                jQuery('#method').val(reportMasterData.method || '');
+                jQuery('#ref_sensitivity').val(reportMasterData.ref_sensitivity || '');
+                jQuery('#worksheet_no').val(reportMasterData.worksheet_no || '');
+                jQuery('#cable_type').val(reportMasterData.cable_type || '');
+                jQuery('#connector_type').val(reportMasterData.connector_type || '');
                 jQuery('#test_technique').val(reportMasterData.test_technique || '');
                 jQuery('#ref_block_used').val(reportMasterData.ref_block_used || '');
                 jQuery('#scanning_area').val(reportMasterData.scanning_area || '');
@@ -1393,10 +1437,14 @@ function fetchAndFillTestReportUt(id) {
                     dbUlrYear = null;
                 }
 
-                // Tested / Reviewed / Authorized By
+                // Tested / Reviewed / Authorized / Performed / Examined By
+                jQuery('#performed_by_authority_person_id').val(zeroToEmpty(reportMasterData.performed_by_authority_person_id)).trigger('change.select2');
+                jQuery('#examined_by_authority_person_id').val(zeroToEmpty(reportMasterData.examined_by_authority_person_id)).trigger('change.select2');
                 jQuery('#tested_by_authority_person_id').val(zeroToEmpty(reportMasterData.tested_by_authority_person_id)).trigger('change.select2');
                 jQuery('#reviewed_by_authority_person_id').val(zeroToEmpty(reportMasterData.reviewed_by_authority_person_id)).trigger('change.select2');
                 jQuery('#authorized_by_authority_person_id').val(zeroToEmpty(reportMasterData.authorized_by_authority_person_id)).trigger('change.select2');
+                jQuery('#reviewed_by').val(reportMasterData.reviewed_by || '');
+                jQuery('#witness_by').val(reportMasterData.witness_by || '');
 
                 jQuery('#sp_note').val(reportMasterData.sp_note || '');
                 jQuery('#note').val(reportMasterData.note || '');
@@ -1425,6 +1473,9 @@ function fetchAndFillTestReportUt(id) {
                 test_report_ut_details_data = data.report_details_data.map((row, idx) => ({
                     ...row,
                     sr_no: idx + 1,
+                    detail_material_id: row.material_id,
+                    material_id: row.material_id,
+                    material_name: row.material || row.material_name || '',
                     detail_result_id: row.result_id,
                     mode: 'Active'
                 }));
@@ -1884,6 +1935,22 @@ function suggestProductCode(e, element) {
         responseListKey: 'productCodeList'
     });
 }
+function suggestReviewedBy(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#reviewed_by_list',
+        url: 'test_report_ut_reviewed_by-list',
+        responseListKey: 'reviewedByList'
+    });
+}
+function suggestWitnessBy(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#witness_by_list',
+        url: 'test_report_ut_witness_by-list',
+        responseListKey: 'witnessByList'
+    });
+}
 
 function validateAmendmentFields() {
     var amendmentNo = jQuery('#amendment_no').val() ? jQuery('#amendment_no').val().trim() : '';
@@ -2145,9 +2212,20 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
 
                 if (copyMaster) {
                     jQuery('#customer_client').val(d.customer_client || '');
+                    jQuery('#type_of_job').val(d.type_of_job || '');
+                    jQuery('#project').val(d.project || '');
+                    jQuery('#test_method_id').val(zeroToEmpty(d.test_method_id)).trigger('change.select2');
+                    jQuery('#job_desc_label').val(d.job_desc_label || '');
                     jQuery('#surface_condition').val(d.surface_condition || '');
+                    jQuery('#extent_of_exa').val(d.extent_of_exa || '');
+                    jQuery('#stage_of_exa').val(d.stage_of_exa || '');
                     jQuery('#surface_temp').val(d.surface_temp || '');
                     jQuery('#couplant').val(d.couplant || '');
+                    jQuery('#method').val(d.method || '');
+                    jQuery('#ref_sensitivity').val(d.ref_sensitivity || '');
+                    jQuery('#worksheet_no').val(d.worksheet_no || '');
+                    jQuery('#cable_type').val(d.cable_type || '');
+                    jQuery('#connector_type').val(d.connector_type || '');
                     jQuery('#test_technique').val(d.test_technique || '');
                     jQuery('#ref_block_used').val(d.ref_block_used || '');
                     jQuery('#scanning_area').val(d.scanning_area || '');
@@ -2158,11 +2236,15 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
                     if (d.sp_note) {
                         jQuery('#sp_note').val(d.sp_note || '');
                     }
+                    // jQuery('#performed_by_authority_person_id').val(zeroToEmpty(d.performed_by_authority_person_id)).trigger('change.select2');
+                    // jQuery('#examined_by_authority_person_id').val(zeroToEmpty(d.examined_by_authority_person_id)).trigger('change.select2');
+                    jQuery('#reviewed_by').val(d.reviewed_by || '');
+                    jQuery('#witness_by').val(d.witness_by || '');
                     applyDynamicDetailLabels();
 
                     // Do not copy required fields (tested_by_authority_person_id is required, reviewed & authorized are not)
                     jQuery('#reviewed_by_authority_person_id').val(zeroToEmpty(d.reviewed_by_authority_person_id)).trigger('change.select2');
-                    jQuery('#authorized_by_authority_person_id').val(zeroToEmpty(d.authorized_by_authority_person_id)).trigger('change.select2');
+                    // jQuery('#authorized_by_authority_person_id').val(zeroToEmpty(d.authorized_by_authority_person_id)).trigger('change.select2');
                 }
 
                 /*
@@ -2324,9 +2406,20 @@ function getTRLNRData() {
             if (data.response_code == 1 && data.lnr_data != null) {
                 var lnr = data.lnr_data;
                 jQuery('#note').val(lnr.note ?? "");
-                jQuery('#ut_test_no_label').val(lnr.ut_test_no_label ?? "");
-                jQuery('#heat_no_label').val(lnr.heat_no_label ?? "");
+                jQuery('#job_desc_label').val(lnr.job_desc_label ?? "Job Desc.");
+                jQuery('#ut_test_no_label').val(lnr.ut_test_no_label ?? "UT Test No.");
+                jQuery('#heat_no_label').val(lnr.heat_no_label ?? "Heat No.");
                 applyDynamicDetailLabels();
+
+                if (!_openForEdit) {
+                    if (lnr.nabl_type_fix) {
+                        jQuery('input[name="nabl_type_fix"][value="' + lnr.nabl_type_fix + '"]').prop('checked', true);
+                        handleNablTypeChange();
+                    }
+                    if (lnr.job_type_fix) {
+                        jQuery('input[name="job_type_fix"][value="' + lnr.job_type_fix + '"]').prop('checked', true);
+                    }
+                }
             }
         },
         error: function () {

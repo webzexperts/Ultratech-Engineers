@@ -12,6 +12,7 @@
 @include('modals.modals-transaction.offer_modal')
 @include('modals.modals-details.offer_details_modal')
 @include('modals.modals-details.copy_offer_details_modal')
+@include('modals.modals-details.offer_extra_details_modal')
 @include('modals.modals-pending.pending_repair_reports_modal')
 @include('modals.customer_modal')
 @include('modals.modals-details.contact_modal')
@@ -48,24 +49,22 @@
                             <th class="action_col">Actions</th>
                             <th>Offer No.</th>
                             <th>Date</th>
-                            <th>NABL</th>
-                            <th>Test At</th>
-                            <th>Type</th>
+                            <th>Process Type</th>
+                            <th>Job Type</th>
+                            <th>NABL Type</th>
                             <th>Customer</th>
-                            <th>DC No.</th>
-                            <th>DC Date</th>
-                            <th>PO No.</th>
-                            <th>PO Date</th>
-                            <th>Test</th>
-                            <!-- <th>Type of Job</th> -->
+                            <th>Process</th>
+                            <th>Challan No.</th>
+                            <th>Lab ID</th>
+                            <th>Customer ID No.</th>
                             <th>Job Desc.</th>
-                            <th>Part No. / Die No.</th>
-                            <th>Drg. No.</th>
-                            <th>Material</th>
+                            <th>Die No.</th>
                             <th>Heat No.</th>
-                            <th>RT No.</th>
-                            <th>Product Code</th>
-                            <th>Qty.</th>
+                            <th>Drg. No.</th>
+                            <th>Thick.</th>
+                            <th>Material</th>
+                            <th>Quantity</th>
+                            <th>Sp. Note</th>
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -91,7 +90,7 @@
             "processing": false,
             "serverSide": true,
             "scrollX": true,
-            "order": [[1, 'desc'],[24, 'desc']],
+            "order": [[1, 'desc'],[23, 'desc']],
             dom: 'Blfrtip',
             buttons: [{
                 extend:'excel',
@@ -128,24 +127,22 @@
                 { data: 'options', name: 'options', orderable: false, searchable: false, },
                 { data: 'offer_no', name: 'offer.offer_no', },
                 { data: 'offer_date', name: 'offer.offer_date', },
-                { data: 'nabl_type_fix', name: 'offer.nabl_type_fix', },
-                { data: 'test_at_fix', name: 'offer.test_at_fix', },
+                { data: 'process_type_fix', name: 'offer_details.process_type_fix', },
                 { data: 'job_type_fix', name: 'offer.job_type_fix', },
+                { data: 'nabl_type_fix', name: 'offer.nabl_type_fix', },
                 { data: 'customer', name: 'customers.customer', },
-                { data: 'dc_no', name: 'offer.dc_no', },
-                { data: 'dc_date', name: 'offer.dc_date', },
-                { data: 'po_no', name: 'offer.po_no', },
-                { data: 'po_date', name: 'offer.po_date', },
                 { data: 'type_of_testing_id_fix', name: 'offer_details.type_of_testing_id_fix', },
-                // { data: 'type_of_job', name: 'type_of_job.type_of_job', },
-                { data: 'job_description', name: 'job_descriptions.job_description', },
-                { data: 'part_no', name: 'offer_details.part_no', },
-                { data: 'drg_no', name: 'offer_details.drg_no', },
-                { data: 'material', name: 'materials.material', },
+                { data: 'challan_no', name: 'offer.challan_no', },
+                { data: 'lab_id', name: 'offer_details.lab_id', },
+                { data: 'customer_id_no', name: 'offer_details.customer_id_no', },
+                { data: 'job_description', name: 'offer_details.job_desc', },
+                { data: 'die_no', name: 'offer_details.die_no', },
                 { data: 'heat_no', name: 'offer_details.heat_no', },
-                { data: 'rt_no', name: 'offer_details.rt_no', },
-                { data: 'product_code', name: 'offer_details.product_code', },
+                { data: 'drg_no', name: 'offer_details.drg_no', },
+                { data: 'thickness', name: 'offer_details.thickness', },
+                { data: 'material', name: 'materials.material', },
                 { data: 'quantity', name: 'offer_details.quantity', },
+                { data: 'special_note', name: 'offer.special_note', },
                 { data: 'last_by', name: 'last_by', },
                 { data: 'last_on', name: 'offer.last_on', },
                 { data: 'created_by', name: 'created_by', },

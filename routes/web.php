@@ -122,12 +122,14 @@ use App\Http\Controllers\IqiSensitivityController;
 use App\Http\Controllers\AreaOfCoverageController;
 use App\Http\Controllers\FilmBrandController;
 use App\Http\Controllers\FilmTypeController;
+use App\Http\Controllers\MaterialTypeController;
 use App\Http\Controllers\FindingLevelController;
 use App\Http\Controllers\FindingController;
 use App\Http\Controllers\AuthorityPersonController;
 use App\Http\Controllers\EnclosureController;
 use App\Http\Controllers\AerbDocumentController;
 use App\Http\Controllers\FilmResultController;
+use App\Http\Controllers\TestMethodController;
 use App\Http\Controllers\Reports\EnclosureRPDetailController;
 use App\Http\Controllers\Reports\CameraMovementDetailReportController;
 use App\Http\Controllers\Reports\CameraHistoryReportController;
@@ -236,6 +238,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/manage-area_of_coverage', [AreaOfCoverageController::class, 'manage'])->name('manage-area_of_coverage');
     Route::get('/manage-film_brand', [FilmBrandController::class, 'manage'])->name('manage-film_brand');
     Route::get('/manage-film_type', [FilmTypeController::class, 'manage'])->name('manage-film_type');
+    Route::get('/manage-material_type', [MaterialTypeController::class, 'manage'])->name('manage-material_type');
+    Route::get('/manage-test_method', [TestMethodController::class, 'manage'])->name('manage-test_method');
     Route::get('/manage-finding_level', [FindingLevelController::class, 'manage'])->name('manage-finding_level');
     Route::get('/manage-finding', [FindingController::class, 'manage'])->name('manage-finding');
     Route::get('/manage-authority_person', [AuthorityPersonController::class, 'manage'])->name('manage-authority_person');
@@ -359,6 +363,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('/listing-area_of_coverage', [AreaOfCoverageController::class, 'index'])->name('listing-area_of_coverage');
     Route::post('/listing-film_brand', [FilmBrandController::class, 'index'])->name('listing-film_brand');
     Route::post('/listing-film_type', [FilmTypeController::class, 'index'])->name('listing-film_type');
+    Route::post('/listing-test_method', [TestMethodController::class, 'index'])->name('listing-test_method');
     Route::post('/listing-finding_level', [FindingLevelController::class, 'index'])->name('listing-finding_level');
     Route::post('/listing-finding', [FindingController::class, 'index'])->name('listing-finding');
     Route::post('/listing-authority_person', [AuthorityPersonController::class, 'index'])->name('listing-authority_person');
@@ -375,6 +380,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('listing-film_dc',                           [FilmDCController::class, 'index'])->name('listing-film_dc');
     Route::post('listing-invoice',                           [InvoiceController::class, 'index'])->name('listing-invoice');
     Route::post('listing-observation_sheet', [ObservationSheetController::class, 'index'])->name('listing-observation_sheet');
+    Route::post('/listing-material_type', [MaterialTypeController::class, 'index'])->name('listing-material_type');
 
 
 
@@ -482,6 +488,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('/store-area_of_coverage', [AreaOfCoverageController::class, 'store'])->name('store-area_of_coverage');
     Route::post('/store-film_brand', [FilmBrandController::class, 'store'])->name('store-film_brand');
     Route::post('/store-film_type', [FilmTypeController::class, 'store'])->name('store-film_type');
+    Route::post('/store-test_method', [TestMethodController::class, 'store'])->name('store-test_method');
     Route::post('/store-finding_level', [FindingLevelController::class, 'store'])->name('store-finding_level');
     Route::post('/store-finding', [FindingController::class, 'store'])->name('store-finding');
     Route::post('/store-authority_person', [AuthorityPersonController::class, 'store'])->name('store-authority_person');
@@ -498,6 +505,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('store-film_dc',                             [FilmDCController::class, 'store'])->name('store-film_dc');
     Route::post('store-invoice',                             [InvoiceController::class, 'store'])->name('store-invoice');
     Route::post('store-observation_sheet', [ObservationSheetController::class, 'store'])->name('store-observation_sheet');
+    Route::post('/store-material_type', [MaterialTypeController::class, 'store'])->name('store-material_type');
     
 
     /* Edit Route */
@@ -564,6 +572,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/edit-area_of_coverage', [AreaOfCoverageController::class, 'edit'])->name('edit-area_of_coverage');
     Route::get('/edit-film_brand', [FilmBrandController::class, 'edit'])->name('edit-film_brand');
     Route::get('/edit-film_type', [FilmTypeController::class, 'edit'])->name('edit-film_type');
+    Route::get('/edit-test_method', [TestMethodController::class, 'edit'])->name('edit-test_method');
     Route::get('/edit-finding_level', [FindingLevelController::class, 'edit'])->name('edit-finding_level');
     Route::get('/edit-finding', [FindingController::class, 'edit'])->name('edit-finding');
     Route::get('/edit-authority_person', [AuthorityPersonController::class, 'edit'])->name('edit-authority_person');
@@ -581,6 +590,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('edit-invoice',                               [InvoiceController::class, 'edit'])->name('edit-invoice');
 
      Route::get('edit-observation_sheet', [ObservationSheetController::class, 'edit'])->name('edit-observation_sheet');
+     Route::get('/edit-material_type', [MaterialTypeController::class, 'edit'])->name('edit-material_type');
     
 
 
@@ -648,6 +658,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('/update-area_of_coverage', [AreaOfCoverageController::class, 'update'])->name('update-area_of_coverage');
     Route::post('/update-film_brand', [FilmBrandController::class, 'update'])->name('update-film_brand');
     Route::post('/update-film_type', [FilmTypeController::class, 'update'])->name('update-film_type');
+    Route::post('/update-test_method', [TestMethodController::class, 'update'])->name('update-test_method');
     Route::post('/update-finding_level', [FindingLevelController::class, 'update'])->name('update-finding_level');
     Route::post('/update-finding', [FindingController::class, 'update'])->name('update-finding');
     Route::post('/update-authority_person', [AuthorityPersonController::class, 'update'])->name('update-authority_person');
@@ -664,6 +675,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('update-film_dc',                            [FilmDCController::class, 'update'])->name('update-film_dc');
     Route::post('update-invoice',                            [InvoiceController::class, 'update'])->name('update-invoice');
      Route::post('update-observation_sheet', [ObservationSheetController::class, 'update'])->name('update-observation_sheet');
+     Route::post('/update-material_type', [MaterialTypeController::class, 'update'])->name('update-material_type');
     
     
 
@@ -734,6 +746,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/delete-iqi_sensitivity', [IqiSensitivityController::class, 'destroy'])->name('delete-iqi_sensitivity');Route::get('/delete-area_of_coverage', [AreaOfCoverageController::class, 'destroy'])->name('delete-area_of_coverage');
     Route::get('/delete-film_brand', [FilmBrandController::class, 'destroy'])->name('delete-film_brand');
     Route::get('/delete-film_type', [FilmTypeController::class, 'destroy'])->name('delete-film_type');
+    Route::get('/delete-test_method', [TestMethodController::class, 'destroy'])->name('delete-test_method');
     Route::get('/delete-finding_level', [FindingLevelController::class, 'destroy'])->name('delete-finding_level');
     Route::get('/delete-finding', [FindingController::class, 'destroy'])->name('delete-finding');
     Route::get('/delete-authority_person', [AuthorityPersonController::class, 'destroy'])->name('delete-authority_person');
@@ -750,8 +763,9 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('delete-film_dc',                            [FilmDCController::class, 'destroy'])->name('delete-film_dc');
     Route::get('delete-invoice',                            [InvoiceController::class, 'destroy'])->name('delete-invoice');
      Route::get('delete-observation_sheet', [ObservationSheetController::class, 'destroy'])->name('delete-observation_sheet');
+     Route::get('/delete-material_type', [MaterialTypeController::class, 'destroy'])->name('delete-material_type');
      Route::get('view-pdf-observation_sheet', [ObservationSheetController::class, 'viewPdf'])->name('view-pdf-observation_sheet');
-    
+
 
     /* Suggestion Route */
     Route::get('/user_name-list',[AdminController::class,'existsUserName'])->name('user_name-list-list');
@@ -797,6 +811,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/area_of_coverage-list', [AreaOfCoverageController::class, 'existsAreaOfCoverage'])->name('area_of_coverage-list');
     Route::get('/film_brand-list', [FilmBrandController::class, 'existsFilmBrand'])->name('film_brand-list');
     Route::get('/film_type-list', [FilmTypeController::class, 'existsFilmType'])->name('film_type-list');
+    Route::get('/test_method-list', [TestMethodController::class, 'existsTestMethod'])->name('test_method-list');
+    Route::post('/material_type-list', [MaterialTypeController::class, 'existsMaterialType'])->name('material_type-list');
     Route::get('/technique_sheet_rt_iqi-list', [TechniqueSheetRtController::class, 'existsIqi'])->name('technique_sheet_rt_iqi-list');
     Route::get('/technique_sheet_rt_film_processing-list', [TechniqueSheetRtController::class, 'existsFilmProcessing'])->name('technique_sheet_rt_film_processing-list');
     Route::get('/technique_sheet_rt_part_no-list', [TechniqueSheetRtController::class, 'existsPart'])->name('technique_sheet_rt_part_no-list');
@@ -840,6 +856,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/test_report_ut_surface_temp-list',           [TestReportUtController::class, 'existsSurfaceTemp'])->name('test_report_ut_surface_temp-list');
     Route::get('/test_report_ut_thickness-list',              [TestReportUtController::class, 'existsThickness'])->name('test_report_ut_thickness-list');
     Route::get('/test_report_ut_product_code-list',           [TestReportUtController::class, 'existsProductCode'])->name('test_report_ut_product_code-list');
+    Route::get('/test_report_ut_reviewed_by-list',            [TestReportUtController::class, 'existsReviewedBy'])->name('test_report_ut_reviewed_by-list');
+    Route::get('/test_report_ut_witness_by-list',             [TestReportUtController::class, 'existsWitnessBy'])->name('test_report_ut_witness_by-list');
 
     Route::get('/test_report_dpt_customer_client-list',        [TestReportDptController::class, 'existsCustomerClient'])->name('test_report_dpt_customer_client-list');
     Route::get('/test_report_dpt_part_no-list',                [TestReportDptController::class, 'existsPartNo'])->name('test_report_dpt_part_no-list');
@@ -902,12 +920,14 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
       Route::get('/verify-area_of_coverage', 'verifyAreaOfCoverage')->name('verify-area_of_coverage');
       Route::get('/verify-film_brand', 'verifyFilmBrand')->name('verify-film_brand');
       Route::get('/verify-film_type', 'verifyFilmType')->name('verify-film_type');
+      Route::get('/verify-test_method', 'verifyTestMethod')->name('verify-test_method');
       Route::get('/verify-finding_level', 'verifyFindingLevel')->name('verify-finding_level');
       Route::get('/verify-finding', 'verifyFinding')->name('verify-finding');
       Route::get('/verify-authority_person', 'verifyAuthorityPerson')->name('verify-authority_person');
       Route::get('/verify-enclosure', 'verifyEnclosure')->name('verify-enclosure');
       Route::get('/verify-aerb_documents', 'verifyAerbDocuments')->name('verify-aerb_documents');
       Route::get('/verify-film_result', 'verifyFilmResult')->name('verify-film_result');
+      Route::get('/verify-material_type', [MaterialTypeController::class, 'verify'])->name('verify-material_type');
       
 
 
@@ -1264,6 +1284,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/get-acceptance_standards', [AcceptanceStandardController::class, 'getAcceptanceStandards'])->name('get-acceptance_standards');
     Route::get('/get-film_brands', [FilmBrandController::class, 'getFilmBrands'])->name('get-film_brands');
     Route::get('/get-film_types', [FilmTypeController::class, 'getFilmTypes'])->name('get-film_types');
+    Route::get('/get-test_methods', [TestMethodController::class, 'getTestMethods'])->name('get-test_methods');
+    Route::get('/get-material_types', [MaterialTypeController::class, 'getMaterialTypes'])->name('get-material_types');
     Route::get('/get-finding_levels', [FindingLevelController::class, 'getFindingLevels'])->name('get-finding_levels');
     Route::get('/get-findings', [FindingController::class, 'getFindings'])->name('get-findings');
     Route::get('/get-authority_persons', [AuthorityPersonController::class, 'getAuthorityPersons'])->name('get-authority_persons');

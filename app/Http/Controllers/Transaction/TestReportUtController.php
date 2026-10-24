@@ -96,8 +96,8 @@ class TestReportUtController extends Controller
             $lowerKeyword = strtolower(trim($searchValue));
             if ($lowerKeyword === 'welding') {
                 $query->where('test_report_ut.job_type_fix', '=', 'Welding');
-            } elseif ($lowerKeyword === 'non-welding' || $lowerKeyword === 'non welding') {
-                $query->where('test_report_ut.job_type_fix', '=', 'Non-Welding');
+            } elseif ($lowerKeyword === 'casting' || $lowerKeyword === 'non welding') {
+                $query->where('test_report_ut.job_type_fix', '=', 'Casting');
             } else {
                 $query->where('test_report_ut.job_type_fix', 'like', "{$lowerKeyword}%");
             }
@@ -149,12 +149,13 @@ class TestReportUtController extends Controller
             'customer_id' => 'required',
             // 'type_of_job_id' => 'required',
             // 'job_desc_id' => 'required',
-            'job_desc' => 'required',
-            'material_id' => 'required',
-            'area_of_coverage_id' => 'required',
+            // 'job_desc' => 'required',
+            // 'material_id' => 'required',
+            // 'area_of_coverage_id' => 'required',
         ], [
-            'job_desc.required' => 'Enter Job Description.',
+            // 'job_desc.required' => 'Enter Job Description.',
         ]);
+        // dd($request->all());
 
         $receiptDate = !empty($request->date_of_receipt) ? Carbon::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null;
         $testDate = !empty($request->date_of_testing) ? Carbon::createFromFormat('d/m/Y', $request->date_of_testing)->format('Y-m-d') : null;
@@ -301,31 +302,42 @@ class TestReportUtController extends Controller
                 // 'type_of_job_id' => $request->type_of_job_id,
                 // 'job_desc_id' => $request->job_desc_id,
                 'type_of_job_id' => $request->type_of_job_id ?? null,
+                'type_of_job' => $request->type_of_job,
+                'project' => $request->project,
+                'test_method_id' => !empty($request->test_method_id) ? $request->test_method_id : null,
+                'job_desc_label' => $request->job_desc_label,
                 'job_desc_id' => null,
-                'job_desc' => $request->job_desc,
-                'part_no' => $request->part_no,
-                'drg_no' => $request->drg_no,
+                'job_desc' => $request->job_desc ?? null,
+                'part_no' => $request->part_no ?? null,
+                'drg_no' => $request->drg_no ?? null,
                 'material_id' => $request->material_id,
-                'heat_no' => $request->heat_no,
-                'product_code' => $request->product_code,
+                'heat_no' => $request->heat_no ?? null,
+                'product_code' => $request->product_code ?? null,
                 'date_of_testing' => !empty($request->date_of_testing) ? Date::createFromFormat('d/m/Y', $request->date_of_testing)->format('Y-m-d') : null,
                 'date_of_testing_value' => $request->date_of_testing_value,
                 'test_carried_out_at' => $request->test_carried_out_at,
-                'amendment_no' => $request->amendment_no,
+                'amendment_no' => $request->amendment_no ?? null,
                 'amendment_date' => !empty($request->amendment_date) ? Date::createFromFormat('d/m/Y', $request->amendment_date)->format('Y-m-d') : null,
-                'amendment_reason' => $request->amendment_reason,
-                'stage_of_test' => $request->stage_of_test,
+                'amendment_reason' => $request->amendment_reason ?? null,
+                'stage_of_test' => $request->stage_of_test ?? null,
                 'area_of_coverage_id' => $request->area_of_coverage_id,
                 'surface_condition' => $request->surface_condition,
                 'surface_temp' => $request->surface_temp,
-                'thickness' => $request->thickness,
+                'thickness' => $request->thickness ?? null,
                 'couplant' => $request->couplant,
-                'test_technique' => $request->test_technique,
+                'test_technique' => $request->test_technique ?? null,
                 'ref_block_used' => $request->ref_block_used,
-                'scanning_area' => $request->scanning_area,
-                'scan_plan_no' => $request->scan_plan_no,
-                'procedure_ref_id' => $request->procedure_ref_id,
+                'scanning_area' => $request->scanning_area ?? null,
+                'scan_plan_no' => $request->scan_plan_no ?? null,
+                'procedure_ref_id' => $request->procedure_ref_id ?? null,
                 'acceptance_standard_id' => $request->acceptance_standard_id,
+                'extent_of_exa' => $request->extent_of_exa,
+                'stage_of_exa' => $request->stage_of_exa,
+                'method' => $request->method,
+                'ref_sensitivity' => $request->ref_sensitivity,
+                'worksheet_no' => $request->worksheet_no,
+                'cable_type' => $request->cable_type,
+                'connector_type' => $request->connector_type,
                 'ut_test_no_label' => $request->filled('ut_test_no_label') ? $request->ut_test_no_label : 'UT Test No.',
                 'heat_no_label' => $request->filled('heat_no_label') ? $request->heat_no_label : 'Heat No.',
                 'defectogram_image' => $defectogramPath,
@@ -335,8 +347,12 @@ class TestReportUtController extends Controller
                 'ulr_no' => $ulr_no,
                 'ulr_sequence' => $ulr_sequence,
                 'ulr_year' => $ulr_year,
-                'tested_by_authority_person_id' => $request->tested_by_authority_person_id,
-                'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id,
+                'performed_by_authority_person_id' => !empty($request->performed_by_authority_person_id) ? $request->performed_by_authority_person_id : null,
+                'examined_by_authority_person_id' => !empty($request->examined_by_authority_person_id) ? $request->examined_by_authority_person_id : null,
+                'reviewed_by' => $request->reviewed_by,
+                'witness_by' => $request->witness_by,
+                'tested_by_authority_person_id' => $request->tested_by_authority_person_id ?? null,
+                'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id ?? null,
                 'authorized_by_authority_person_id' => $request->authorized_by_authority_person_id,
                 'sp_note' => $request->sp_note,
                 'note' => $request->note,
@@ -391,10 +407,14 @@ class TestReportUtController extends Controller
                     if (empty($row) || ($row['mode'] ?? '') === 'Delete') continue;
                     TestReportUtDetails::create([
                         'test_report_ut_id' => $report->test_report_ut_id,
+                        'job_description' => $row['job_description'] ?? null,
+                        'material_id' => !empty($row['material_id']) ? $row['material_id'] : null,
+                        'thickness' => $row['thickness'] ?? null,
                         'ut_test_no' => $row['ut_test_no'],
                         'heat_no' => $row['heat_no'],
                         'quantity' => $row['quantity'],
-                        'discontinuity_evaluation' => $row['discontinuity_evaluation'],
+                        'observation' => $row['observation'] ?? null,
+                        'discontinuity_evaluation' => $row['discontinuity_evaluation'] ?? null,
                         'result_id' => !empty($row['detail_result_id']) ? $row['detail_result_id'] : null,
                     ]);
                 }
@@ -565,13 +585,13 @@ class TestReportUtController extends Controller
             'customer_id' => 'required',
             // 'type_of_job_id' => 'required',
             // 'job_desc_id' => 'required',
-            'job_desc' => 'required',
-            'material_id' => 'required',
-            'area_of_coverage_id' => 'required',
+            // 'job_desc' => 'required',
+            // 'material_id' => 'required',
+            // 'area_of_coverage_id' => 'required',
         ], [
-            'job_desc.required' => 'Enter Job Description.',
+            // 'job_desc.required' => 'Enter Job Description.',
         ]);
-
+        // dd($request->all());
         $report = TestReportUt::where('test_report_ut_id', $request->id)->first();
         if (!$report) {
             return response()->json([
@@ -722,31 +742,42 @@ class TestReportUtController extends Controller
                 // 'type_of_job_id' => $request->type_of_job_id,
                 // 'job_desc_id' => $request->job_desc_id,
                 'type_of_job_id' => $request->type_of_job_id ?? null,
+                'type_of_job' => $request->type_of_job,
+                'project' => $request->project,
+                'test_method_id' => !empty($request->test_method_id) ? $request->test_method_id : null,
+                'job_desc_label' => $request->job_desc_label,
                 'job_desc_id' => null,
-                'job_desc' => $request->job_desc,
-                'part_no' => $request->part_no,
-                'drg_no' => $request->drg_no,
+                'job_desc' => $request->job_desc ?? null,
+                'part_no' => $request->part_no ?? null,
+                'drg_no' => $request->drg_no ?? null,
                 'material_id' => $request->material_id,
-                'heat_no' => $request->heat_no,
-                'product_code' => $request->product_code,
+                'heat_no' => $request->heat_no ?? null,
+                'product_code' => $request->product_code  ?? null,
                 'date_of_testing' => !empty($request->date_of_testing) ? Date::createFromFormat('d/m/Y', $request->date_of_testing)->format('Y-m-d') : null,
                 'date_of_testing_value' => $request->date_of_testing_value,
                 'test_carried_out_at' => $request->test_carried_out_at,
-                'amendment_no' => $request->amendment_no,
+                'amendment_no' => $request->amendment_no  ?? null,
                 'amendment_date' => !empty($request->amendment_date) ? Date::createFromFormat('d/m/Y', $request->amendment_date)->format('Y-m-d') : null,
-                'amendment_reason' => $request->amendment_reason,
-                'stage_of_test' => $request->stage_of_test,
+                'amendment_reason' => $request->amendment_reason ?? null,
+                'stage_of_test' => $request->stage_of_test  ?? null,
                 'area_of_coverage_id' => $request->area_of_coverage_id,
                 'surface_condition' => $request->surface_condition,
                 'surface_temp' => $request->surface_temp,
-                'thickness' => $request->thickness,
+                'thickness' => $request->thickness ?? null,
                 'couplant' => $request->couplant,
-                'test_technique' => $request->test_technique,
+                'test_technique' => $request->test_technique ?? null,
                 'ref_block_used' => $request->ref_block_used,
-                'scanning_area' => $request->scanning_area,
-                'scan_plan_no' => $request->scan_plan_no,
-                'procedure_ref_id' => $request->procedure_ref_id,
+                'scanning_area' => $request->scanning_area ?? null,
+                'scan_plan_no' => $request->scan_plan_no ?? null,
+                'procedure_ref_id' => $request->procedure_ref_id ?? null,
                 'acceptance_standard_id' => $request->acceptance_standard_id,
+                'extent_of_exa' => $request->extent_of_exa,
+                'stage_of_exa' => $request->stage_of_exa,
+                'method' => $request->method,
+                'ref_sensitivity' => $request->ref_sensitivity,
+                'worksheet_no' => $request->worksheet_no,
+                'cable_type' => $request->cable_type,
+                'connector_type' => $request->connector_type,
                 'ut_test_no_label' => $request->filled('ut_test_no_label') ? $request->ut_test_no_label : 'UT Test No.',
                 'heat_no_label' => $request->filled('heat_no_label') ? $request->heat_no_label : 'Heat No.',
                 'defectogram_image' => $defectogramPath,
@@ -756,11 +787,15 @@ class TestReportUtController extends Controller
                 'ulr_no' => $ulr_no,
                 'ulr_sequence' => $ulr_sequence,
                 'ulr_year' => $ulr_year,
-                'tested_by_authority_person_id' => $request->tested_by_authority_person_id,
-                'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id,
+                'performed_by_authority_person_id' => !empty($request->performed_by_authority_person_id) ? $request->performed_by_authority_person_id : null,
+                'examined_by_authority_person_id' => !empty($request->examined_by_authority_person_id) ? $request->examined_by_authority_person_id : null,
+                'reviewed_by' => $request->reviewed_by,
+                'witness_by' => $request->witness_by,
+                'tested_by_authority_person_id' => $request->tested_by_authority_person_id ?? null,
+                'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id ?? null,
                 'authorized_by_authority_person_id' => $request->authorized_by_authority_person_id,
                 'sp_note' => $request->sp_note,
-                'note' => $request->note,
+                'note' => $request->note ?? null,
                 'last_by' => Auth::id(),
                 'last_on' => Carbon::now('Asia/Kolkata')->toDateTimeString(),
             ]);
@@ -851,19 +886,27 @@ class TestReportUtController extends Controller
                     if ($mode === 'Insert') {
                         TestReportUtDetails::create([
                             'test_report_ut_id' => $report->test_report_ut_id,
+                            'job_description' => $row['job_description'] ?? null,
+                            'material_id' => !empty($row['material_id']) ? $row['material_id'] : null,
+                            'thickness' => $row['thickness'] ?? null,
                             'ut_test_no' => $row['ut_test_no'],
                             'heat_no' => $row['heat_no'],
                             'quantity' => $row['quantity'],
-                            'discontinuity_evaluation' => $row['discontinuity_evaluation'],
+                            'observation' => $row['observation'] ?? null,
+                            'discontinuity_evaluation' => $row['discontinuity_evaluation'] ?? null,
                             'result_id' => !empty($row['detail_result_id']) ? $row['detail_result_id'] : null,
                         ]);
                     } elseif ($mode === 'Update') {
                         if (!empty($row['test_report_ut_details_id'])) {
                             TestReportUtDetails::where('test_report_ut_details_id', $row['test_report_ut_details_id'])->update([
+                                'job_description' => $row['job_description'] ?? null,
+                                'material_id' => !empty($row['material_id']) ? $row['material_id'] : null,
+                                'thickness' => $row['thickness'] ?? null,
                                 'ut_test_no' => $row['ut_test_no'],
                                 'heat_no' => $row['heat_no'],
                                 'quantity' => $row['quantity'],
-                                'discontinuity_evaluation' => $row['discontinuity_evaluation'],
+                                'observation' => $row['observation'] ?? null,
+                                'discontinuity_evaluation' => $row['discontinuity_evaluation'] ?? null,
                                 'result_id' => !empty($row['detail_result_id']) ? $row['detail_result_id'] : null,
                             ]);
                         }
@@ -1376,6 +1419,16 @@ class TestReportUtController extends Controller
         return $this->existsSuggestion('test_report_ut', 'product_code', $request->term, 'productCodeList', 'product_code');
     }
 
+    public function existsReviewedBy(Request $request)
+    {
+        return $this->existsSuggestion('test_report_ut', 'reviewed_by', $request->term, 'reviewedByList', 'reviewed_by');
+    }
+
+    public function existsWitnessBy(Request $request)
+    {
+        return $this->existsSuggestion('test_report_ut', 'witness_by', $request->term, 'witnessByList', 'witness_by');
+    }
+
     public function getLastReportEquipmentAndProbes(Request $request)
     {
         $location = getCurrentLocation()->location_id;
@@ -1567,8 +1620,11 @@ class TestReportUtController extends Controller
         $lnr_data = TestReportUt::select([
             'test_report_ut_id',
             'note',
+            'job_desc_label',
             'ut_test_no_label',
-            'heat_no_label'
+            'heat_no_label',
+            'nabl_type_fix',
+            'job_type_fix'
         ])
         ->where('current_location_id', $location_data->location_id)
         ->orderBy('test_report_ut_id', 'desc')
@@ -1578,21 +1634,30 @@ class TestReportUtController extends Controller
 except in full, without written approval of Ultratech ENGINEERS PRIVATE LIMITED.
 Disclaimer : *Marked informations as given by customer that can affects the validity of the test results.';
 
+        $job_desc_label = 'Job Desc.';
         $ut_test_no_label = 'UT Test No.';
         $heat_no_label = 'Heat No.';
+        $nabl_type_fix = 'Non NABL';
+        $job_type_fix = 'Casting';
 
         if ($lnr_data) {
             $note = $lnr_data->note ?? $note;
+            $job_desc_label = !empty($lnr_data->job_desc_label) ? $lnr_data->job_desc_label : 'Job Desc.';
             $ut_test_no_label = !empty($lnr_data->ut_test_no_label) ? $lnr_data->ut_test_no_label : 'UT Test No.';
             $heat_no_label = !empty($lnr_data->heat_no_label) ? $lnr_data->heat_no_label : 'Heat No.';
+            $nabl_type_fix = !empty($lnr_data->nabl_type_fix) ? $lnr_data->nabl_type_fix : 'Non NABL';
+            $job_type_fix = !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : 'Casting';
         }
 
         return response()->json([
             'response_code' => 1,
             'lnr_data'      => [
                 'note'             => $note,
+                'job_desc_label'   => $job_desc_label,
                 'ut_test_no_label' => $ut_test_no_label,
-                'heat_no_label'    => $heat_no_label
+                'heat_no_label'    => $heat_no_label,
+                'nabl_type_fix'    => $nabl_type_fix,
+                'job_type_fix'     => $job_type_fix
             ]
         ]);
     }

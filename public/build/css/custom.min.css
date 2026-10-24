@@ -1191,3 +1191,46 @@ html[data-layout="horizontal"] .navbar-nav .menu-dropdown .nav-link {
     flex: 0 0 calc(100% - (100% / 9));
     max-width: calc(100% - (100% / 9));
 }
+
+
+/* ૧. Select2 ફ્લેક્સ કન્ટેનર - બાકી રહેલી તમામ જગ્યા લેશે */
+.d-flex:has(.btn, button, .plus-icon)>.select2-container,
+.d-flex>.select2-container:not(:last-child),
+.otherselectwidth>.select2-container,
+.otherselectwidth .select2.select2-container {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 1% !important;
+    max-width: none !important;
+}
+
+.d-flex>.select2-container .select2-selection--single,
+.otherselectwidth .select2-container .select2-selection--single,
+.otherselectwidth .select2.select2-container .select2-selection {
+    width: 100% !important;
+}
+
+/* ૨. ટેક્સ્ટ Ellipsis - લાંબા નામ કટ થઈને "..." થશે (સંપૂર્ણ સુરક્ષિત) */
+.select2-container .select2-selection--single .select2-selection__rendered,
+.otherselectwidth .select2-container .select2-selection--single .select2-selection__rendered {
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    line-height: 23px !important;
+    padding-left: 5px !important;
+    height: 100% !important;
+}
+
+/* ૩. બટન પોતાની જગ્યાએ સ્થિર રહેશે (સંપૂર્ણ સુરક્ષિત) */
+.d-flex>.select2-container~.btn,
+.d-flex>.select2-container~button,
+.d-flex>.btn.toggleModalBtn,
+.d-flex>#pending_btn,
+.d-flex>#load_pending_reports,
+.d-flex>.pending_detail,
+.otherselectwidth>.plus-icon,
+.plus-icon {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+}
