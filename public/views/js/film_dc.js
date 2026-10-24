@@ -891,11 +891,11 @@ function loadPendingCustomers(selectedId = null, dcId = null) {
     jQuery.ajax({
         url: 'get-pending-customers-for-film_dc',
         type: 'GET',
-        data: { 
-            job_type_fix: jobType, 
-            film_size_unit_fix: filmSizeUnit, 
+        data: {
+            job_type_fix: jobType,
+            film_size_unit_fix: filmSizeUnit,
             from_type_id: fromType,
-            film_dc_id: dcId 
+            film_dc_id: dcId
         },
         headers: getAjaxHeaders(),
         success: function (res) {
@@ -916,13 +916,13 @@ function loadPendingCustomers(selectedId = null, dcId = null) {
             }
 
             var formid = jQuery('#id').val();
-            if(formid > 0 || formid != "" || _isEditMode){
+            if (formid > 0 || formid != "" || _isEditMode) {
                 jQuery('#pending_btn').prop('disabled', true);
                 jQuery('#customer_id').prop('disabled', true);
                 if (typeof setSelect2Readonly === 'function') {
                     setSelect2Readonly('#customer_id', true);
                 }
-            }else{
+            } else {
                 let custVal = jQuery('#customer_id').val();
                 let currentFromType = jQuery('input[name="from_type_id"]:checked').val() || 'Test Report RT';
                 jQuery('#pending_btn').prop('disabled', (!custVal || currentFromType === 'Manual'));
@@ -1002,6 +1002,7 @@ function renderPendingTable() {
         "sScrollX": "100%",
         "sScrollXInner": "110%",
         "bScrollCollapse": true,
+        "order": [[1, "asc"], [2, "asc"]],
         columnDefs: [
             { orderable: false, targets: 0 }
         ]

@@ -63,6 +63,7 @@ use App\Models\IqiSensitivity;
 use App\Models\AreaOfCoverage;
 use App\Models\FilmBrand;
 use App\Models\FilmType;
+use App\Models\TestMethod;
 use App\Models\FindingLevel;
 use App\Models\Finding;
 use App\Models\AuthorityPerson;
@@ -1900,6 +1901,49 @@ class DuplicationVerificationController extends Controller
         }
     }
 
+    // Test Method verification controller
+    public function verifyTestMethod(Request $request)
+    {
+        if(!empty($request->test_method))
+        {
+            $name = $request->test_method;
+            if(!empty($name))
+            {
+                if(isset($request->id))
+                {
+                    $users_count = TestMethod::where('test_method', $request->test_method)->where('test_method_id', '!=', $request->id)->first();
+                }
+                else
+                {
+                    $users_count = TestMethod::where('test_method', $request->test_method)->first();
+                }
+            }
+
+            if($users_count)
+            {
+                return response()->json([
+                    'state' => $users_count,
+                    'response_code' => '1',
+                    'response_message' => 'Duplicate Test Method Found.',
+                ]);
+            }
+            else
+            {
+                return response()->json([
+                    'response_code' => '2',
+                    'response_message' => 'Success',
+                ]);
+            }
+        }
+        else
+        {
+            return response()->json([
+                'response_code' => '0',
+                'response_message' => 'Record Does Not Exists',
+            ]);
+        }
+    }
+
     // Finding Level verification controller
     public function verifyFindingLevel(Request $request)
     {
@@ -2392,21 +2436,31 @@ class DuplicationVerificationController extends Controller
        $message = "Inward No.";
        $id = $request->id;
        $table_id = 'material_inward_id';
-       $pre_fix = 'INW';  
+       $pre_fix = '';  
        return  $this->checkTranscationDuplication($seq, $modal, $sequence, $message , $id, $table_id, $pre_fix) ;
     }
 
-    // Latest Offer Number Duplication Check
+        // Latest Offer Number Duplication Check (Customer-wise)
     public function checkOfferSequnceDuplication(Request $request)
     {
-       $seq = "offer_sequence";
-       $modal  =  Offer::class;
        $sequence = $request->offer_sequence;
-       $message = "Offer No.";
+       $customerId = $request->customer_id;
        $id = $request->id;
-       $table_id = 'offer_id';
-       $pre_fix = 'OF';  
-       return  $this->checkMarketingTranscationDuplication($seq, $modal, $sequence, $message , $id, $table_id, $pre_fix) ;
+
+       $number_format = duplicationCustomerSequence(Offer::class, 'offer_sequence', $sequence, $id, 'offer_id', $customerId);
+
+       if ($number_format['format'] == 0) {
+           return response()->json([
+               'response_code' => 0,
+               'response_message' => 'Duplicate Offer No. Found.'
+           ]);
+       } else {
+           return response()->json([
+               'response_code' => 1,
+               'latest_no' => $number_format['format'],
+               'number' => intval($number_format['isFound']),
+           ]);
+       }
     }
      // Latest Material Inspection Number Duplication Check
     public function checkMaterialInspectionSequnceDuplication(Request $request)

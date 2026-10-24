@@ -14,10 +14,19 @@ class TestReportUtDetails extends Model
 
     protected $fillable = [
         'test_report_ut_id',
+        'job_description',
+        'material_id',
+        'thickness',
         'ut_test_no',
         'heat_no',
         'quantity',
+        'observation',
         'discontinuity_evaluation',
         'result_id',
     ];
+
+    public function setMaterialIdAttribute($value)
+    {
+        $this->attributes['material_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
 }

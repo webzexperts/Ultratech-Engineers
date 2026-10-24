@@ -52,11 +52,9 @@ function toggleAuthorityFields() {
 // Build the comma-separated operator_type from checked boxes (live, mirrors server logic)
 function buildOperatorType() {
     var labels = [];
-    if (jQuery('#tested_by').is(':checked'))     labels.push('Tested By');
-    if (jQuery('#reviewed_by').is(':checked'))   labels.push('Reviewed By');
+    if (jQuery('#performed_by').is(':checked'))     labels.push('Tested By');
+    if (jQuery('#examined_by').is(':checked'))   labels.push('Reviewed By');
     if (jQuery('#authorized_by').is(':checked')) labels.push('Authorized By');
-    if (jQuery('#checked_by').is(':checked'))    labels.push('Checked By');
-    if (jQuery('#approved_by').is(':checked'))   labels.push('Approved By');
     jQuery('#operator_type').val(labels.join(', '));
 }
 
@@ -90,11 +88,9 @@ function fetchAndFillAuthorityPerson(id) {
                 jQuery('#AuthorityPersonModal').find('#designation').val(d.designation);
                 jQuery('#AuthorityPersonModal').find('#status').val(d.status).trigger('change');
 
-                jQuery('#AuthorityPersonModal').find('#tested_by').prop('checked', d.tested_by == 'Yes');
-                jQuery('#AuthorityPersonModal').find('#reviewed_by').prop('checked', d.reviewed_by == 'Yes');
+                jQuery('#AuthorityPersonModal').find('#performed_by').prop('checked', d.performed_by == 'Yes');
+                jQuery('#AuthorityPersonModal').find('#examined_by').prop('checked', d.examined_by == 'Yes');
                 jQuery('#AuthorityPersonModal').find('#authorized_by').prop('checked', d.authorized_by == 'Yes');
-                jQuery('#AuthorityPersonModal').find('#checked_by').prop('checked', d.checked_by == 'Yes');
-                jQuery('#AuthorityPersonModal').find('#approved_by').prop('checked', d.approved_by == 'Yes');
                 buildOperatorType();
 
                 // Reset file fields first
