@@ -37,11 +37,11 @@ class TestReportUtController extends Controller
         $location_data = getCurrentLocation();
 
         $reports = TestReportUt::select([
-            'test_report_ut.test_report_ut_id as id','test_report_ut.test_report_no','test_report_ut.test_report_sequence','test_report_ut.test_report_date','test_report_ut.entry_type_fix','test_report_ut.nabl_type_fix','test_report_ut.ulr_no','test_report_ut.test_carried_out_at','test_report_ut.job_type_fix','test_report_ut.from_type_id_fix','customers.customer','material_inward.dc_no','material_inward.dc_date','material_inward.po_no','material_inward.po_date',
+            'test_report_ut.test_report_ut_id as id','test_report_ut.test_report_no','test_report_ut.test_report_sequence','test_report_ut.test_report_date','test_report_ut.entry_type_fix','test_report_ut.nabl_type_fix','test_report_ut.ulr_no','test_report_ut.test_carried_out_at','test_report_ut.job_type_fix','test_report_ut.from_type_id_fix','customers.customer','test_report_ut.project','material_inward.dc_no','material_inward.dc_date','material_inward.po_no','material_inward.po_date',
             // 'type_of_job.type_of_job',
             // 'job_descriptions.job_description',
             'test_report_ut.job_desc as job_description',
-            'test_report_ut.part_no','test_report_ut.drg_no','materials.material','test_report_ut.heat_no','test_report_ut.product_code','test_report_ut.total_qty','test_report_ut.created_on','test_report_ut.created_by','test_report_ut.last_by','test_report_ut.last_on'
+            'test_report_ut.part_no','test_report_ut.drg_no','materials.material','test_report_ut.heat_no','test_report_ut.product_code','test_report_ut.total_qty','test_report_ut.sp_note','test_report_ut.created_on','test_report_ut.created_by','test_report_ut.last_by','test_report_ut.last_on'
         ])
         ->leftJoin('customers', 'customers.id', '=', 'test_report_ut.customer_id')
         // ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_ut.type_of_job_id')
@@ -54,7 +54,8 @@ class TestReportUtController extends Controller
 
         $dataTable = DataTables::of($reports)
         ->filterColumn('test_report_ut.test_report_no', function($query, $keyword) {
-            applySequenceSearch($query, $keyword, 'test_report_ut.test_report_no');
+            // applySequenceSearch($query, $keyword, 'test_report_ut.test_report_no');
+            applynumber($query, $keyword, 'test_report_ut.test_report_no');
         })
         ->editColumn('test_report_date', function($report) {
             return $report->test_report_date != null
@@ -80,6 +81,12 @@ class TestReportUtController extends Controller
         ->filterColumn('material_inward.po_date', function ($q, $k) {
             applyDate($q, $k, 'material_inward.po_date');
         })
+        ->filterColumn('test_report_ut.project', function ($query, $keyword) {
+            $query->where('test_report_ut.project', 'like', "%" . trim($keyword) . "%");
+        })
+        ->filterColumn('test_report_ut.sp_note', function ($query, $keyword) {
+            $query->where('test_report_ut.sp_note', 'like', "%" . trim($keyword) . "%");
+        })
         ->filterColumn('part_no', function($query, $keyword) {
             $query->where(function($q) use ($keyword) {
                 $q->where('test_report_ut.part_no', 'like', "%{$keyword}%");
@@ -90,14 +97,33 @@ class TestReportUtController extends Controller
                 $q->where('test_report_ut.drg_no', 'like', "%{$keyword}%");
             });
         })
+        ->filterColumn('test_report_ut.nabl_type_fix', function ($query, $keyword) {
+            $globalSearch = request()->input('search.value');
+            $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
+            $lowerKeyword = strtolower(trim($searchValue));
+            if ($lowerKeyword === 'nabl') {
+                $query->where('test_report_ut.nabl_type_fix', '=', 'NABL');
+            } elseif ($lowerKeyword === 'non nabl' || $lowerKeyword === 'non-nabl' || $lowerKeyword === 'nonnabl') {
+                $query->where('test_report_ut.nabl_type_fix', '=', 'Non NABL');
+            } else {
+                $query->where('test_report_ut.nabl_type_fix', 'like', "{$lowerKeyword}%");
+            }
+        })
         ->filterColumn('test_report_ut.job_type_fix', function ($query, $keyword) {
             $globalSearch = request()->input('search.value');
             $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
             $lowerKeyword = strtolower(trim($searchValue));
-            if ($lowerKeyword === 'welding') {
-                $query->where('test_report_ut.job_type_fix', '=', 'Welding');
-            } elseif ($lowerKeyword === 'casting' || $lowerKeyword === 'non welding') {
+            // if ($lowerKeyword === 'welding') {
+            //     $query->where('test_report_ut.job_type_fix', '=', 'Welding');
+            // } elseif ($lowerKeyword === 'casting' || $lowerKeyword === 'non welding') {
+            //     $query->where('test_report_ut.job_type_fix', '=', 'Casting');
+            // } else {
+            //     $query->where('test_report_ut.job_type_fix', 'like', "{$lowerKeyword}%");
+            // }
+            if ($lowerKeyword === 'casting') {
                 $query->where('test_report_ut.job_type_fix', '=', 'Casting');
+            } elseif ($lowerKeyword === 'fabrication') {
+                $query->where('test_report_ut.job_type_fix', '=', 'Fabrication');
             } else {
                 $query->where('test_report_ut.job_type_fix', 'like', "{$lowerKeyword}%");
             }
@@ -296,7 +322,7 @@ class TestReportUtController extends Controller
                 'material_inward_details_id' => $request->material_inward_details_id ?: null,
                 'observation_sheet_details_id' => $request->observation_sheet_details_id ?? null,
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
-                'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
+                'job_type_fix' => $request->job_type_fix ?? 'Casting',
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 // 'type_of_job_id' => $request->type_of_job_id,
@@ -315,6 +341,7 @@ class TestReportUtController extends Controller
                 'product_code' => $request->product_code ?? null,
                 'date_of_testing' => !empty($request->date_of_testing) ? Date::createFromFormat('d/m/Y', $request->date_of_testing)->format('Y-m-d') : null,
                 'date_of_testing_value' => $request->date_of_testing_value,
+                'date_of_receipt' => !empty($request->date_of_receipt) ? Date::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null,
                 'test_carried_out_at' => $request->test_carried_out_at,
                 'amendment_no' => $request->amendment_no ?? null,
                 'amendment_date' => !empty($request->amendment_date) ? Date::createFromFormat('d/m/Y', $request->amendment_date)->format('Y-m-d') : null,
@@ -488,6 +515,7 @@ class TestReportUtController extends Controller
             $report_data->date_of_testing = ($report_data->date_of_testing != "" && $report_data->date_of_testing != "0000-00-00")
                 ? Date::createFromFormat('Y-m-d', $report_data->date_of_testing)->format('d/m/Y') 
                 : "";
+
             $report_data->amendment_date = ($report_data->amendment_date != "" && $report_data->amendment_date != "0000-00-00")
                 ? Date::createFromFormat('Y-m-d', $report_data->amendment_date)->format('d/m/Y') 
                 : "";
@@ -726,7 +754,7 @@ class TestReportUtController extends Controller
                 $ulr_no = $request->ulr_no;
                 $ulr_sequence = $request->ulr_sequence;
             }
-
+            // dd($request->all());
             $report->update([
                 'test_report_sequence' => $request->test_report_sequence,
                 'test_report_no' => $request->test_report_no,
@@ -736,7 +764,7 @@ class TestReportUtController extends Controller
                 'material_inward_details_id' => $report->material_inward_details_id,
                 'observation_sheet_details_id' => $request->observation_sheet_details_id ?? null,
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
-                'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
+                'job_type_fix' => $request->job_type_fix ?? 'Casting',
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 // 'type_of_job_id' => $request->type_of_job_id,
@@ -755,6 +783,7 @@ class TestReportUtController extends Controller
                 'product_code' => $request->product_code  ?? null,
                 'date_of_testing' => !empty($request->date_of_testing) ? Date::createFromFormat('d/m/Y', $request->date_of_testing)->format('Y-m-d') : null,
                 'date_of_testing_value' => $request->date_of_testing_value,
+                'date_of_receipt' => !empty($request->date_of_receipt) ? Date::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null,
                 'test_carried_out_at' => $request->test_carried_out_at,
                 'amendment_no' => $request->amendment_no  ?? null,
                 'amendment_date' => !empty($request->amendment_date) ? Date::createFromFormat('d/m/Y', $request->amendment_date)->format('Y-m-d') : null,

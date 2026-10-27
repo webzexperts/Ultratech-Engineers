@@ -330,6 +330,16 @@ class OfferAuthorizedController extends Controller
                 // 4. Create Material Inward Detail Items
                 $offerDetails = OfferDetails::where('offer_id', $offer->offer_id)->get();
                 foreach ($offerDetails as $detail) {
+
+                    if($offer->nabl_type_fix == 'NABL' && $detail->process_type_fix  != 'Repair'){
+                        $is_observation_sheet = 'Yes';
+                    }else if($detail->process_type_fix == 'Repair'){
+                        $is_observation_sheet = 'N/A';
+                    }else if($detail->type_of_testing_id_fix != 'RT' && $request->nabl_type_fix != 'NABL'){
+                        $is_observation_sheet = 'N/A';
+                    }else{
+                        $is_observation_sheet = 'No';
+                    }
                     MaterialInwardDetails::create([
                         'material_inward_id'     => $materialInward->material_inward_id,
                         'process_type_fix'       => $detail->process_type_fix ?? 'Fresh',
@@ -346,6 +356,7 @@ class OfferAuthorizedController extends Controller
                         'quantity'               => $detail->quantity ?? 0,
                         'remark'                 => $detail->remark ?? null,
                         'offer_details_id'       => $detail->offer_details_id,
+                        'is_observation_sheet'   => $is_observation_sheet,
                     ]);
                 }
             }

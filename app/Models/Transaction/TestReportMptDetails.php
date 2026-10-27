@@ -12,6 +12,7 @@ class TestReportMptDetails extends Model
 
     public $timestamps = false;
 
+    /*
     protected $fillable = [
         'test_report_mpt_id',
         'mpt_test_no',
@@ -20,4 +21,23 @@ class TestReportMptDetails extends Model
         'discontinuity_evaluation',
         'result_id'
     ];
+    */
+
+    protected $fillable = [
+        'test_report_mpt_id',
+        'job_description',
+        'material_id',
+        'thickness',
+        'mpt_test_no',
+        'heat_no',
+        'quantity',
+        'observation',
+        'discontinuity_evaluation',
+        'result_id',
+    ];
+
+    public function setMaterialIdAttribute($value)
+    {
+        $this->attributes['material_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
 }

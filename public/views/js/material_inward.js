@@ -55,6 +55,7 @@ function fetchAndFillMaterialInward(id) {
                 jQuery('#MaterialInwardModal').find('#challan_date').val(d.challan_date ?? d.dc_date ?? "");
                 jQuery('#MaterialInwardModal').find('#offer_no').val(d.offer_no ?? d.po_no ?? "");
                 jQuery('#MaterialInwardModal').find('#offer_date').val(d.offer_date ?? d.po_date ?? "");
+               
                 validateChallanNoDate();
                 validateOfferNoDate();
                 jQuery('#MaterialInwardModal').find('#material_type_id').val(d.material_type_id ?? "").trigger('change.select2');
@@ -86,8 +87,12 @@ function fetchAndFillMaterialInward(id) {
                 // 1) From Offer: Material Inward Detail Add button disabled
                 if (isFromOffer) {
                     jQuery('#MaterialInwardModal').find('[data-bs-target="#MaterialInwardDetailsModal"]').prop('disabled', true).addClass('disabled');
+                    jQuery('#MaterialInwardModal').find('#offer_no').attr('readonly',true);
+                    jQuery('#MaterialInwardModal').find('#offer_date').attr('readonly',true);
                 } else {
                     jQuery('#MaterialInwardModal').find('[data-bs-target="#MaterialInwardDetailsModal"]').prop('disabled', false).removeClass('disabled');
+                    jQuery('#MaterialInwardModal').find('#offer_no').attr('readonly',false);
+                    jQuery('#MaterialInwardModal').find('#offer_date').attr('readonly',false);
                 }
 
                 // 2) Customer Readonly, NABL & Non NABL readonly, Casting & Fabrication readonly, Test at readonly (on edit)
@@ -95,20 +100,7 @@ function fetchAndFillMaterialInward(id) {
                 jQuery('#MaterialInwardModal').find('#customer_id').addClass('skip-tab');
                 lockParentRadios(true);
 
-                // 5) Offer No. & Date readonly
-                if (isFromOffer) {
-                    jQuery('#MaterialInwardModal').find('#offer_no').prop('readonly', true).addClass('skip-tab');
-                    jQuery('#MaterialInwardModal').find('#offer_date').prop('readonly', true).addClass('skip-tab').css('pointer-events', 'none');
-                    if (jQuery('#MaterialInwardModal').find('#offer_date').hasClass('hasDatepicker')) {
-                        jQuery('#MaterialInwardModal').find('#offer_date').datepicker('option', 'disabled', true);
-                    }
-                } else {
-                    jQuery('#MaterialInwardModal').find('#offer_no').prop('readonly', false).removeClass('skip-tab');
-                    jQuery('#MaterialInwardModal').find('#offer_date').prop('readonly', false).removeClass('skip-tab').css('pointer-events', 'auto');
-                    if (jQuery('#MaterialInwardModal').find('#offer_date').hasClass('hasDatepicker')) {
-                        jQuery('#MaterialInwardModal').find('#offer_date').datepicker('option', 'disabled', false);
-                    }
-                }
+
 
                 // Reset datepicker maxDate to default (endDate) first
                 jQuery('#MaterialInwardModal').find('#material_inward_date').datepicker('option', 'maxDate', endDate);
@@ -243,7 +235,7 @@ function resetParentForm(fetchLatest = false) {
 
     // Reset select2 dropdowns
     jQuery('#MaterialInwardModal').find('#customer_id').val('').trigger('change');
-    ['material_type_id', 'test_method', 'procedure_ref_id', 'evaluation_as_per_id', 'acceptance_standard_id', 'radiation_energy_fix','test_method_id'].forEach(function (f) {
+    ['material_type_id', 'test_method', 'procedure_ref_id', 'evaluation_as_per_id', 'acceptance_standard_id', 'radiation_energy_fix', 'test_method_id'].forEach(function (f) {
         jQuery('#MaterialInwardModal').find('#' + f).val('').trigger('change.select2');
     });
     jQuery('#MaterialInwardModal').find('#procedure_submitted_fix').val('Yes').trigger('change.select2');
@@ -1035,11 +1027,11 @@ function updateParentRadiosLockState() {
         lockParentRadios(true);
         if (isFromOffer) {
             jQuery('#MaterialInwardModal').find('[data-bs-target="#MaterialInwardDetailsModal"]').prop('disabled', true).addClass('disabled');
-            jQuery('#MaterialInwardModal').find('#offer_no').prop('readonly', true).addClass('skip-tab');
-            jQuery('#MaterialInwardModal').find('#offer_date').prop('readonly', true).addClass('skip-tab').css('pointer-events', 'none');
-            if (jQuery('#MaterialInwardModal').find('#offer_date').hasClass('hasDatepicker')) {
-                jQuery('#MaterialInwardModal').find('#offer_date').datepicker('option', 'disabled', true);
-            }
+            // jQuery('#MaterialInwardModal').find('#offer_no').prop('readonly', true).addClass('skip-tab');
+            // jQuery('#MaterialInwardModal').find('#offer_date').prop('readonly', true).addClass('skip-tab').css('pointer-events', 'none');
+            // if (jQuery('#MaterialInwardModal').find('#offer_date').hasClass('hasDatepicker')) {
+            //     jQuery('#MaterialInwardModal').find('#offer_date').datepicker('option', 'disabled', true);
+            // }
         }
         return;
     }

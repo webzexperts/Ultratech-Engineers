@@ -37,17 +37,20 @@
                             <th>Test At</th>
                             <th>Type</th>
                             <th>Customer</th>
-                            <th>DC No.</th>
-                            <th>DC Date</th>
+                            <th>Test Method</th>
+                            <th>Acceptance Standard</th>
+                            <!-- <th>DC No.</th>
+                            <th>DC Date</th> -->
                             <th>PO No.</th>
-                            <th>PO Date</th>
+                            <!-- <th>PO Date</th> -->
                             <!-- <th>Type of Job</th> -->
-                            <th>Job Desc.</th>
+                            <!-- <th>Job Desc.</th>
                             <th>Part No. / Die No.</th>
                             <th>Drg. No.</th>
                             <th>Material</th>
-                            <th>Product Code</th>
-                            <th>Qty.</th>
+                            <th>Product Code</th> -->
+                            <th>Total Qty.</th>
+                            <th>Special Note</th>
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -73,7 +76,8 @@
             "processing": false,
             "serverSide": true,
             "scrollX": true,
-            "order": [[2, 'desc'], [22, 'desc']],
+            // "order": [[2, 'desc'], [22, 'desc']],
+            "order": [[2, 'desc'], [17, 'desc']],
             dom: 'Blfrtip',
             buttons: [{
                 extend: 'excel',
@@ -111,17 +115,20 @@
                 { data: 'test_carried_out_at', name: 'test_report_dpt.test_carried_out_at' },
                 { data: 'job_type_fix', name: 'test_report_dpt.job_type_fix' },
                 { data: 'customer', name: 'customers.customer' },
-                { data: 'dc_no', name: 'material_inward.dc_no' },
-                { data: 'dc_date', name: 'material_inward.dc_date' },
-                { data: 'po_no', name: 'material_inward.po_no' },
-                { data: 'po_date', name: 'material_inward.po_date' },
+                { data: 'test_method', name: 'test_method.test_method' },
+                { data: 'acceptance_standard', name: 'acceptance_standards.acceptance_standard' },
+                // { data: 'dc_no', name: 'material_inward.dc_no' },
+                // { data: 'dc_date', name: 'material_inward.dc_date' },
+                { data: 'po_no', name: 'test_report_dpt.po_no' },
+                // { data: 'po_date', name: 'material_inward.po_date' },
                 // { data: 'type_of_job', name: 'type_of_job.type_of_job' },
-                { data: 'job_description', name: 'test_report_dpt.job_desc' },
-                { data: 'part_no', name: 'test_report_dpt.part_no' },
-                { data: 'drg_no', name: 'test_report_dpt.drg_no' },
-                { data: 'material', name: 'materials.material' },
-                { data: 'product_code', name: 'test_report_dpt.product_code' },
+                // { data: 'job_description', name: 'test_report_dpt.job_desc' },
+                // { data: 'part_no', name: 'test_report_dpt.part_no' },
+                // { data: 'drg_no', name: 'test_report_dpt.drg_no' },
+                // { data: 'material', name: 'materials.material' },
+                // { data: 'product_code', name: 'test_report_dpt.product_code' },
                 { data: 'total_qty', name: 'test_report_dpt.total_qty' },
+                { data: 'sp_note', name: 'test_report_dpt.sp_note' },
                 { data: 'last_by', name: 'last_by' },
                 { data: 'last_on', name: 'test_report_dpt.last_on' },
                 { data: 'created_by', name: 'created_by' },

@@ -50,6 +50,7 @@ class TestReportUt extends Model
         'product_code',
         'date_of_testing',
         'date_of_testing_value',
+        'date_of_receipt',
         'test_carried_out_at',
         'amendment_no',
         'amendment_date',

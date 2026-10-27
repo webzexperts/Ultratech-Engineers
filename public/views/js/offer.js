@@ -1176,7 +1176,7 @@ jQuery('#commonOfferForm').on('submit', function (e) {
                             form.classList.remove('was-validated');
                         }
                     }
-                    if (data.url != "") { toastSuccessPreview(data.response_message, data.url, redirectFn); }
+                    if (data.data.file != "") { toastSuccessPreview(data.response_message, data.data.file, redirectFn); }
                     else { toastSuccess(data.response_message, redirectFn); }
                 } else {
                     function nextFn() {
@@ -1185,7 +1185,7 @@ jQuery('#commonOfferForm').on('submit', function (e) {
                             focusInitialOfferField();
                         }, 100);
                     }
-                    if (data.url != "") { toastSuccessPreview(data.response_message, data.url, nextFn); }
+                    if (data.data.file != "") { toastSuccessPreview(data.response_message, data.data.file, nextFn); }
                     else { toastSuccess(data.response_message, nextFn); }
                 }
                 jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
