@@ -44,11 +44,11 @@
                                     <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
                                         <div class="d-flex gap-3 align-items-center">
                                             <div class="form-check">
-                                                <input class="form-check-input skip-tab" type="radio" name="nabl_type_fix" id="nabl_non_nabl" value="Non NABL" checked tabindex="-1">
+                                                <input class="form-check-input" type="radio" name="nabl_type_fix" id="nabl_non_nabl" value="Non NABL" checked required>
                                                 <label class="form-check-label" for="nabl_non_nabl">Non NABL</label>
                                             </div>
                                             <div class="form-check me-3">
-                                                <input class="form-check-input skip-tab" type="radio" name="nabl_type_fix" id="nabl_nabl" value="NABL" tabindex="-1">
+                                                <input class="form-check-input" type="radio" name="nabl_type_fix" id="nabl_nabl" value="NABL" required>
                                                 <label class="form-check-label" for="nabl_nabl">NABL</label>
                                             </div>
                                         </div>
@@ -227,6 +227,22 @@
                                     <div class="invalid-tooltip">Select Test Method.</div>
                                 </div>
                             </div>
+                            <!-- Acceptance Standard -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="acceptance_standard_id" class="form-label">Acceptance Standard <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <select class="js-example-basic-single" name="acceptance_standard_id" id="acceptance_standard_id" required style="width: 100%;">
+                                        <option value="">Select Acceptance Standard</option>
+                                        @forelse(getAcceptanceStandards() as $as)
+                                            <option value="{{ $as->id }}">{{ $as->acceptance_standard }}</option>
+                                        @empty
+                                        @endforelse
+                                    </select>
+                                    <div class="invalid-tooltip">Select Acceptance Standard.</div>
+                                </div>
+                            </div>
 
                             
 
@@ -317,15 +333,7 @@
                                     </div>
                                 </div>
                             </div> -->
-                            <!-- Date of Receipt -->
-                            <!-- <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="date_of_receipt" class="form-label">Date of Receipt</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control skip-tab" id="date_of_receipt" name="date_of_receipt" readonly>
-                                </div>
-                            </div> -->
+                            
                             
                            
                             <!-- Amendment No. & Date -->
@@ -381,25 +389,6 @@
                                 </div>
                             </div> -->
 
-                            <!-- Acceptance Standard -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="acceptance_standard_id" class="form-label">Acceptance Standard <sup class="astric">*</sup></label>
-                                </div>
-                                <div class="col-8 position-relative">
-                                    <select class="js-example-basic-single" name="acceptance_standard_id" id="acceptance_standard_id" required style="width: 100%;">
-                                        <option value="">Select Acceptance Standard</option>
-                                        @forelse(getAcceptanceStandards() as $as)
-                                            <option value="{{ $as->id }}">{{ $as->acceptance_standard }}</option>
-                                        @empty
-                                        @endforelse
-                                    </select>
-                                    <div class="invalid-tooltip">Select Acceptance Standard.</div>
-                                </div>
-                            </div>
-
-                            
-
                             <!-- Surface Condition -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
@@ -419,10 +408,20 @@
                                 </div>
                                 <div class="col-8 position-relative">
                                     <div class="d-flex gap-2">
-                                        <input type="text" class="form-control date-picker" id="date_of_testing" name="date_of_testing" style="max-width:100px;" required>
-                                        <input type="text" class="form-control" id="date_of_testing_value" name="date_of_testing_value">
+                                        <input type="text" class="form-control date-picker" id="date_of_testing" name="date_of_testing" required>
+                                        <!-- <input type="text" class="form-control" id="date_of_testing_value" name="date_of_testing_value"> -->
                                         <div class="invalid-tooltip">Enter Date of Testing.</div>
                                     </div>
+                                </div>
+                            </div>
+                            <!-- Date of Receipt -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="date_of_receipt" class="form-label">Date of Receipt <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control date-picker" id="date_of_receipt" name="date_of_receipt" required>
+                                    <div class="invalid-tooltip">Enter Date of Receipt.</div>
                                 </div>
                             </div>
                             
@@ -497,6 +496,15 @@
                                     <input type="hidden" name="ref_block_used_suggestion" id="ref_block_used_suggestion">
                                 </div>
                             </div>
+                             <!-- Ref. Sensitivity -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="ref_sensitivity" class="form-label">Ref. Sensitivity</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="ref_sensitivity" name="ref_sensitivity" autocomplete="off">
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Column 3 -->
@@ -565,20 +573,6 @@
                                 </div>
                             </div> -->
 
-                            
-
-                            
-
-                            <!-- Ref. Sensitivity -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="ref_sensitivity" class="form-label">Ref. Sensitivity</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="ref_sensitivity" name="ref_sensitivity" autocomplete="off">
-                                </div>
-                            </div>
-
                             <!-- Worksheet No. -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
@@ -628,7 +622,7 @@
                                     <label for="job_desc_label" class="form-label">Job Desc. Label <sup class="astric">*</sup></label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="job_desc_label" name="job_desc_label">
+                                    <input type="text" class="form-control" id="job_desc_label" name="job_desc_label" required>
                                     <div class="invalid-tooltip">Enter Job Desc. Label.</div>
                                 </div>
                             </div>
@@ -640,6 +634,7 @@
                                 </div>
                                 <div class="col-8">
                                     <input type="text" class="form-control" id="heat_no_label" name="heat_no_label" required>
+                                    <div class="invalid-tooltip">Enter Heat No. Label</div>
                                 </div>
                             </div>
 
@@ -650,6 +645,7 @@
                                 </div>
                                 <div class="col-8">
                                     <input type="text" class="form-control" id="ut_test_no_label" name="ut_test_no_label" required>
+                                    <div class="invalid-tooltip">Enter UT Test No. Label</div>
                                 </div>
                             </div>
                             
@@ -992,6 +988,8 @@
 <script>
     var loginUserId = {{ auth()->id() }};
     var checkFileRoute = "{{ route('check-file_exists') }}";
+    window.locationNablDefault = "{{ getCurrentLocation()->location_nabl_applicable == 'Yes' ? 'NABL' : 'Non NABL' }}";
+    window.locationNablTests = "{{ getCurrentLocation()->location_nabl_test ?? '' }}";
 </script>
 <script src="{{ URL::asset('views/js/test_report_ut.js?ver='.getJsVersion()) }}"></script>
 @endpush

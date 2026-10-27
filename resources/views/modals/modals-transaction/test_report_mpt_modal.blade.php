@@ -20,7 +20,7 @@
                         <div class="col-md-4">
 
                             <!-- Entry Type -->
-                            <div class="row g-2 mb-1">
+                            <div class="row g-2 mb-1" style="display:none;">
                                 <div class="col-4">
                                     <!-- <label class="form-label">Entry Type</label> -->
                                 </div>
@@ -37,6 +37,44 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- NABL / Non NABL & Pending Inward Button in one line -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4"></div>
+                                <div class="col-8">
+                                    <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
+                                        <div class="d-flex gap-3 align-items-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="nabl_type_fix" id="nabl_non_nabl" value="Non NABL" checked required>
+                                                <label class="form-check-label" for="nabl_non_nabl">Non NABL</label>
+                                            </div>
+                                            <div class="form-check me-3">
+                                                <input class="form-check-input" type="radio" name="nabl_type_fix" id="nabl_nabl" value="NABL" required>
+                                                <label class="form-check-label" for="nabl_nabl">NABL</label>
+                                            </div>
+                                        </div>
+                                        <button disabled type="button" class="btn btn-success btn-sm toggleModalBtn" data-bs-target="#PendingInwardForMptModal" id="pending_btn" style="display:none;">Pending Inward</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Job Type Radio (Casting / Fabrication) -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4"></div>
+                                <div class="col-8">
+                                    <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_casting" value="Casting" checked required>
+                                            <label class="form-check-label" for="job_type_casting">Casting</label>
+                                        </div>
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_fabrication" value="Fabrication" required>
+                                            <label class="form-check-label" for="job_type_fabrication">Fabrication</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Report No -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
@@ -75,43 +113,6 @@
                                 </div>
                             </div>
 
-                            <!-- NABL / Non NABL & Pending Inward Button in one line -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4"></div>
-                                <div class="col-8">
-                                    <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
-                                        <div class="d-flex gap-3 align-items-center">
-                                            <div class="form-check">
-                                                <input class="form-check-input skip-tab" type="radio" name="nabl_type_fix" id="nabl_non_nabl" value="Non NABL" checked tabindex="-1">
-                                                <label class="form-check-label" for="nabl_non_nabl">Non NABL</label>
-                                            </div>
-                                            <div class="form-check me-3">
-                                                <input class="form-check-input skip-tab" type="radio" name="nabl_type_fix" id="nabl_nabl" value="NABL" tabindex="-1">
-                                                <label class="form-check-label" for="nabl_nabl">NABL</label>
-                                            </div>
-                                        </div>
-                                        <button disabled type="button" class="btn btn-success btn-sm toggleModalBtn" data-bs-target="#PendingInwardForMptModal" id="pending_btn" disabled>Pending Inward</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Job Type Radio -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4"></div>
-                                <div class="col-8">
-                                    <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
-                                        <div class="form-check">
-                                            <input class="form-check-input skip-tab" type="radio" name="job_type_fix" id="job_casting" value="Non-Welding" checked tabindex="-1">
-                                            <label class="form-check-label" for="job_casting">Non-Welding</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input skip-tab" type="radio" name="job_type_fix" id="job_welding" value="Welding" tabindex="-1">
-                                            <label class="form-check-label" for="job_welding">Welding</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- Customer's Client -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
@@ -124,98 +125,108 @@
                                 </div>
                             </div>
 
-                            <!-- Type of Job (Commented Out) -->
-                            <!--
+                            <!-- Date of Receipt -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="type_of_job_id" class="form-label">Type of Job <sup class="astric">*</sup></label>
+                                    <label for="date_of_receipt" class="form-label">Date of Receipt <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <input type="text" class="form-control date-picker" id="date_of_receipt" name="date_of_receipt" required autocomplete="off">
+                                    <div class="invalid-tooltip">Enter Date of Receipt.</div>
+                                </div>
+                            </div>
+
+                            <!-- Date of Testing -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="date_of_testing" class="form-label">Date of Testing <sup class="astric">*</sup></label>
                                 </div>
                                 <div class="col-8 position-relative">
                                     <div class="d-flex gap-2">
-                                        <select class="js-example-basic-single" name="type_of_job_id" id="type_of_job_id" required style="width: 100%;">
-                                            <option value="">Select Type of Job</option>
-                                            @forelse(getTypeOfJob() as $tj)
-                                                <option value="{{ $tj->id }}">{{ $tj->type_of_job }}</option>
-                                            @empty
-                                            @endforelse
-                                        </select>
-                                        <div class="invalid-tooltip">Select Type of Job.</div>
+                                        <input type="text" class="form-control date-picker" id="date_of_testing" name="date_of_testing" required>
+                                        <!-- <input type="text" class="form-control" id="date_of_testing_value" name="date_of_testing_value"> -->
+                                        <input type="hidden" id="date_of_testing_value" name="date_of_testing_value">
+                                        <div class="invalid-tooltip">Enter Date of Testing.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Job Type -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="type_of_job" class="form-label">Job Type</label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <div class="d-flex gap-2">
+                                        <input type="text" class="form-control" name="type_of_job" id="type_of_job">
+                                        <div class="invalid-tooltip">Enter Job Type.</div>
                                         <button type="button" class="btn btn-success btn-sm ms-1" id="copy_report_btn">Copy</button>
                                     </div>
                                 </div>
                             </div>
-                            -->
                             <input type="hidden" name="type_of_job_id" id="type_of_job_id" value="">
 
-                            <!-- Job Description -->
-                            <!--
+                            <!-- Project -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="job_desc_id" class="form-label">Job Description <sup class="astric">*</sup></label>
-                                </div>
-                                <div class="col-8 position-relative">
-                                    <select class="js-example-basic-single" name="job_desc_id" id="job_desc_id" required style="width: 100%;">
-                                        <option value="">Select Job Description</option>
-                                        @forelse(getJobDescription() as $jd)
-                                            <option value="{{ $jd->id }}">{{ $jd->job_description }}</option>
-                                        @empty
-                                        @endforelse
-                                    </select>
-                                    <div class="invalid-tooltip">Select Job Description.</div>
-                                </div>
-                            </div>
-                            -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="job_desc" class="form-label">Job Description <sup class="astric">*</sup></label>
+                                    <label for="project" class="form-label">Project</label>
                                 </div>
                                 <div class="col-8 position-relative">
                                     <div class="d-flex gap-2">
-                                        <input type="text" class="form-control" name="job_desc" id="job_desc" required>
-                                        <div class="invalid-tooltip">Enter Job Description.</div>
-                                        <button type="button" class="btn btn-success btn-sm ms-1" id="copy_report_btn">Copy</button>
+                                        <input type="text" class="form-control" name="project" id="project">
+                                        <div class="invalid-tooltip">Enter Project.</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Part No.  / Die No. -->
+                            <!-- PO No. -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="po_no" class="form-label">PO No.</label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <div class="d-flex gap-2">
+                                        <input type="text" class="form-control" name="po_no" id="po_no">
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <!-- Old Header Fields Commented Out -->
+                            <!--
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="job_desc" class="form-label">Job Description</label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <input type="text" class="form-control" name="job_desc" id="job_desc">
+                                </div>
+                            </div>
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
                                     <label for="part_no" class="form-label">Part No. / Die No.</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="part_no" name="part_no" oninput="suggestPartNo(event, this)" autocomplete="off">
-                                    <div id="part_no_list"></div>
-                                    <input type="hidden" name="part_no_suggestion" id="part_no_suggestion">
+                                    <input type="text" class="form-control" id="part_no" name="part_no">
                                 </div>
                             </div>
-
-                            <!-- Drg. No. -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
                                     <label for="drg_no" class="form-label">Drg. No.</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="drg_no" name="drg_no" oninput="suggestDrgNo(event, this)" autocomplete="off">
-                                    <div id="drg_no_list"></div>
-                                    <input type="hidden" name="drg_no_suggestion" id="drg_no_suggestion">
+                                    <input type="text" class="form-control" id="drg_no" name="drg_no">
                                 </div>
                             </div>
-
-                            <!-- Material -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="material_id" class="form-label">Material <sup class="astric">*</sup></label>
+                                    <label for="material_id" class="form-label">Material</label>
                                 </div>
                                 <div class="col-8 position-relative">
-                                    <select class="js-example-basic-single" name="material_id" id="material_id" required style="width: 100%;">
+                                    <select class="js-example-basic-single" name="material_id" id="material_id" style="width: 100%;">
                                         <option value="">Select Material</option>
-                                        @forelse(getMaterial() as $m)
-                                            <option value="{{ $m->id }}">{{ $m->material }}</option>
-                                        @empty
-                                        @endforelse
                                     </select>
-                                    <div class="invalid-tooltip">Select Material.</div>
                                 </div>
                             </div>
                             <div class="row g-2 mb-1">
@@ -226,18 +237,14 @@
                                     <input type="text" class="form-control" id="heat_no" name="heat_no">
                                 </div>
                             </div>
-                            <!-- Product Code -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4 justify-content-start">
                                     <label for="product_code" class="form-label">Product Code</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="product_code" name="product_code" oninput="suggestProductCode(event, this)" autocomplete="off">
-                                    <div id="product_code_list"></div>
-                                    <input type="hidden" name="product_code_suggestion" id="product_code_suggestion">
+                                    <input type="text" class="form-control" id="product_code" name="product_code">
                                 </div>
                             </div>
-                            <!-- DC No. & Date -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
                                     <label for="dc_no" class="form-label">DC No. & Date</label>
@@ -249,282 +256,34 @@
                                     </div>
                                 </div>
                             </div>
+                            -->
+
                         </div>
 
-                        <!-- Column 3 -->
+                        <!-- Column 2 -->
                         <div class="col-md-4">
 
-                            
-                            <!-- PO No. & Date -->
+                            <!-- Test Method -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="po_no" class="form-label">PO No. & Date</label>
-                                </div>
-                                <div class="col-8">
-                                    <div class="d-flex gap-2">
-                                        <input type="text" class="form-control skip-tab" id="po_no" name="po_no" readonly>
-                                        <input type="text" class="form-control skip-tab" id="po_date" name="po_date" readonly tabindex="-1">
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Date of Receipt -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="date_of_receipt" class="form-label">Date of Receipt</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control skip-tab" id="date_of_receipt" name="date_of_receipt" readonly>
-                                </div>
-                            </div>
-                            <!-- Date of Testing -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="date_of_testing" class="form-label">Date of Testing <sup class="astric">*</sup></label>
+                                    <label for="test_method_id" class="form-label">Test Method <sup class="astric">*</sup></label>
                                 </div>
                                 <div class="col-8 position-relative">
-                                    <div class="d-flex gap-2">
-                                        <input type="text" class="form-control date-picker" id="date_of_testing" name="date_of_testing" style="max-width:100px;" required>
-                                        <input type="text" class="form-control" id="date_of_testing_value" name="date_of_testing_value">
-                                        <div class="invalid-tooltip">Enter Date of Testing.</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Test Carried Out At -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="test_carried_out_at" class="form-label">Test Carried Out At <sup class="astric">*</sup></label>
-                                </div>
-                                <div class="col-8 position-relative">
-                                    <input type="text" class="form-control" id="test_carried_out_at" name="test_carried_out_at" oninput="suggestTestCarriedOutAt(event, this)" autocomplete="off" required>
-                                    <div id="test_carried_out_at_list"></div>
-                                    <input type="hidden" name="test_carried_out_at_suggestion" id="test_carried_out_at_suggestion">
-                                    <div class="invalid-tooltip">Enter Test Carried Out At.</div>
-                                </div>
-                            </div>
-                            <!-- Amendment No. & Date -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="amendment_no" class="form-label">Amendment No.</label>
-                                </div>
-                                <div class="col-8">
-                                    <div class="d-flex gap-2">
-                                        <div class="position-relative flex-grow-1">
-                                            <input type="text" class="form-control" id="amendment_no" name="amendment_no">
-                                            <div class="invalid-tooltip">Enter Amendment No.</div>
-                                        </div>
-                                        <div class="position-relative flex-grow-1">
-                                            <input type="text" class="form-control date-picker" id="amendment_date" name="amendment_date">
-                                            <div class="invalid-tooltip">Enter Amendment Date.</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Amendment Reason -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="amendment_reason" class="form-label">Amendment Reason</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="amendment_reason" name="amendment_reason">
-                                </div>
-                            </div>
-                            <!-- Stage of Test -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="stage_of_test" class="form-label">Stage of Test</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="stage_of_test" name="stage_of_test" oninput="suggestStageOfTest(event, this)" autocomplete="off">
-                                    <div id="stage_of_test_list"></div>
-                                    <input type="hidden" name="stage_of_test_suggestion" id="stage_of_test_suggestion">
-                                </div>
-                            </div>
-                            <!-- Area of Coverage -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="area_of_coverage_id" class="form-label">Area of Coverage <sup class="astric">*</sup></label>
-                                </div>
-                                <div class="col-8 position-relative">
-                                    <select class="js-example-basic-single" name="area_of_coverage_id" id="area_of_coverage_id" required style="width: 100%;">
-                                        <option value="">Select Area of Coverage</option>
-                                        @forelse(getAreaOfCoverage() as $ac)
-                                            <option value="{{ $ac->area_of_coverage_id }}">{{ $ac->area_of_coverage }}</option>
+                                    <select class="js-example-basic-single" name="test_method_id" id="test_method_id" required style="width: 100%;">
+                                        <option value="">Select Test Method</option>
+                                        @forelse(getTestMethod() as $m)
+                                            <option value="{{ $m->test_method_id }}">{{ $m->test_method }}</option>
                                         @empty
                                         @endforelse
                                     </select>
-                                    <div class="invalid-tooltip">Select Area of Coverage.</div>
-                                </div>
-                            </div>
-                            <!-- Surface Condition -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="surface_condition" class="form-label">Surface Condition</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="surface_condition" name="surface_condition" oninput="suggestSurfaceCondition(event, this)" autocomplete="off">
-                                    <div id="surface_condition_list"></div>
-                                    <input type="hidden" name="surface_condition_suggestion" id="surface_condition_suggestion">
-                                </div>
-                            </div>
-                            <!-- Surface Temp -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="surface_temp" class="form-label">Surface Temp.</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="surface_temp" name="surface_temp" oninput="suggestSurfaceTemp(event, this)" autocomplete="off">
-                                    <div id="surface_temp_list"></div>
-                                    <input type="hidden" name="surface_temp_suggestion" id="surface_temp_suggestion">
-                                </div>
-                            </div>
-                            <!-- Thickness -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="thickness" class="form-label">Thickness</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="thickness" name="thickness" oninput="suggestThickness(event, this)" autocomplete="off">
-                                    <div id="thickness_list"></div>
-                                    <input type="hidden" name="thickness_suggestion" id="thickness_suggestion">
-                                </div>
-                            </div>
-                            <!-- Test Technique -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="test_technique" class="form-label">Test Technique</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="test_technique" name="test_technique" oninput="suggestTestTechnique(event, this)" autocomplete="off">
-                                    <div id="test_technique_list"></div>
-                                    <input type="hidden" name="test_technique_suggestion" id="test_technique_suggestion">
-                                </div>
-                            </div>
-                             <!-- Type of Magnetization -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="type_of_magnetization" class="form-label">Type of Magnetization</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="type_of_magnetization" name="type_of_magnetization" oninput="suggestTypeOfMagnetization(event, this)" autocomplete="off">
-                                    <div id="type_of_magnetization_list"></div>
-                                    <input type="hidden" name="type_of_magnetization_suggestion" id="type_of_magnetization_suggestion">
-                                </div>
-                            </div>
-                            <!-- Type of Current -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="type_of_current" class="form-label">Type of Current</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="type_of_current" name="type_of_current" oninput="suggestTypeOfCurrent(event, this)" autocomplete="off">
-                                    <div id="type_of_current_list"></div>
-                                    <input type="hidden" name="type_of_current_suggestion" id="type_of_current_suggestion">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Column 3 -->
-                        <div class="col-md-4">
-                            
-                           
-                            <!-- Prod/Pole Spacing -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="prod_pole_spacing" class="form-label">Prod. / Pole Spacing</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="prod_pole_spacing" name="prod_pole_spacing" oninput="suggestProdPoleSpacing(event, this)" autocomplete="off">
-                                    <div id="prod_pole_spacing_list"></div>
-                                    <input type="hidden" name="prod_pole_spacing_suggestion" id="prod_pole_spacing_suggestion">
-                                </div>
-                            </div>
-                            <!-- Performance Verification -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="performance_verification" class="form-label">Performance Verification</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="performance_verification" name="performance_verification" oninput="suggestPerformanceVerification(event, this)" autocomplete="off">
-                                    <div id="performance_verification_list"></div>
-                                    <input type="hidden" name="performance_verification_suggestion" id="performance_verification_suggestion">
-                                </div>
-                            </div>
-                            <!-- Lighting -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="lighting" class="form-label">Lighting</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="lighting" name="lighting" oninput="suggestLighting(event, this)" autocomplete="off">
-                                    <div id="lighting_list"></div>
-                                    <input type="hidden" name="lighting_suggestion" id="lighting_suggestion">
-                                </div>
-                            </div>
-                            <!-- Light Intensity -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="light_intensity" class="form-label">Light Intensity</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="light_intensity" name="light_intensity" oninput="suggestLightIntensity(event, this)" autocomplete="off">
-                                    <div id="light_intensity_list"></div>
-                                    <input type="hidden" name="light_intensity_suggestion" id="light_intensity_suggestion">
-                                </div>
-                            </div>
-                            <!-- Background Light -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="background_light" class="form-label">Background Light</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="background_light" name="background_light" oninput="suggestBackgroundLight(event, this)" autocomplete="off">
-                                    <div id="background_light_list"></div>
-                                    <input type="hidden" name="background_light_suggestion" id="background_light_suggestion">
-                                </div>
-                            </div>
-                            <!-- UV-A Light Intensity -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="uva_light_intensity" class="form-label">UV-A Light Intensity</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="uva_light_intensity" name="uva_light_intensity" oninput="suggestUvaLightIntensity(event, this)" autocomplete="off">
-                                    <div id="uva_light_intensity_list"></div>
-                                    <input type="hidden" name="uva_light_intensity_suggestion" id="uva_light_intensity_suggestion">
-                                </div>
-                            </div>
-                            <!-- Yoke Wt. Lift Check -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="yoke_wt_lift_check" class="form-label">Yoke Wt. Lift Check</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="yoke_wt_lift_check" name="yoke_wt_lift_check" oninput="suggestYokeWtLiftCheck(event, this)" autocomplete="off">
-                                    <div id="yoke_wt_lift_check_list"></div>
-                                    <input type="hidden" name="yoke_wt_lift_check_suggestion" id="yoke_wt_lift_check_suggestion">
+                                    <div class="invalid-tooltip">Select Test Method.</div>
                                 </div>
                             </div>
 
-                            <!-- Procedure Reference -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="procedure_ref_id" class="form-label">Procedure Reference <sup class="astric">*</sup></label>
-                                </div>
-                                <div class="col-8 position-relative">
-                                    <select class="js-example-basic-single" name="procedure_ref_id" id="procedure_ref_id" required style="width: 100%;">
-                                        <option value="">Select Procedure Reference</option>
-                                        @forelse(getProcedureReferance() as $pr)
-                                            <option value="{{ $pr->procedure_reference_id }}">{{ $pr->procedure_reference }}</option>
-                                        @empty
-                                        @endforelse
-                                    </select>
-                                    <div class="invalid-tooltip">Select Procedure Reference.</div>
-                                </div>
-                            </div>
                             <!-- Acceptance Standard -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="acceptance_standard_id" class="form-label">Acceptance Standard <sup class="astric">*</sup></label>
+                                    <label for="acceptance_standard_id" class="form-label">Acceptance Std. <sup class="astric">*</sup></label>
                                 </div>
                                 <div class="col-8 position-relative">
                                     <select class="js-example-basic-single" name="acceptance_standard_id" id="acceptance_standard_id" required style="width: 100%;">
@@ -537,24 +296,299 @@
                                     <div class="invalid-tooltip">Select Acceptance Standard.</div>
                                 </div>
                             </div>
-                            <!-- MPT Test No. Label -->
+
+                            <!-- Surface Condition -->
                             <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="mpt_test_no_label" class="form-label">MPT Test No. Label</label>
+                                <div class="col-4 justify-content-start">
+                                    <label for="surface_condition" class="form-label">Surface Condition</label>
                                 </div>
-                                <div class="col-8 position-relative">
-                                    <input type="text" class="form-control" id="mpt_test_no_label" name="mpt_test_no_label" placeholder="MPT Test No.">
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="surface_condition" name="surface_condition" oninput="suggestSurfaceCondition(event, this)" autocomplete="off">
+                                    <div id="surface_condition_list"></div>
+                                    <input type="hidden" name="surface_condition_suggestion" id="surface_condition_suggestion">
                                 </div>
                             </div>
+
+                            <!-- Extent Of Exa. -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="extent_of_exa" class="form-label">Extent of Exa.</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="extent_of_exa" name="extent_of_exa" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <!-- Stage Of Exa. -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="stage_of_exa" class="form-label">Stage Of Exa.</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="stage_of_exa" name="stage_of_exa" oninput="suggestStageOfExa(event, this)" autocomplete="off">
+                                    <div id="stage_of_exa_list"></div>
+                                    <input type="hidden" name="stage_of_exa_suggestion" id="stage_of_exa_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Surface Temp -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="surface_temp" class="form-label">Surface Temp.</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="surface_temp" name="surface_temp" oninput="suggestSurfaceTemp(event, this)" autocomplete="off">
+                                    <div id="surface_temp_list"></div>
+                                    <input type="hidden" name="surface_temp_suggestion" id="surface_temp_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Method -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="method" class="form-label">Method</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="method" name="method" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <!-- Type of Magnetization -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="type_of_magnetization" class="form-label">Magnetization</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="type_of_magnetization" name="type_of_magnetization" oninput="suggestTypeOfMagnetization(event, this)" autocomplete="off">
+                                    <div id="type_of_magnetization_list"></div>
+                                    <input type="hidden" name="type_of_magnetization_suggestion" id="type_of_magnetization_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Type of Current -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="type_of_current" class="form-label">Mag. Current</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="type_of_current" name="type_of_current" oninput="suggestTypeOfCurrent(event, this)" autocomplete="off">
+                                    <div id="type_of_current_list"></div>
+                                    <input type="hidden" name="type_of_current_suggestion" id="type_of_current_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Field Indicator -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="field_indicator" class="form-label">Field Indicator</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="field_indicator" name="field_indicator" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <!-- Mea. Lifting Force -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="yoke_wt_lift_check" class="form-label">Mea. Lifting Force</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="yoke_wt_lift_check" name="yoke_wt_lift_check" oninput="suggestYokeWtLiftCheck(event, this)" autocomplete="off">
+                                    <div id="yoke_wt_lift_check_list"></div>
+                                    <input type="hidden" name="yoke_wt_lift_check_suggestion" id="yoke_wt_lift_check_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Old Unused Fields Commented Out -->
+                            <!--
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="po_date" class="form-label">PO Date</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control skip-tab" id="po_date" name="po_date" readonly tabindex="-1">
+                                </div>
+                            </div>
+                            {{-- Date of Receipt is active in Column 1 above Testing Date --}}
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="amendment_no" class="form-label">Amendment No.</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="amendment_no" name="amendment_no">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="amendment_date" class="form-label">Amendment Date</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control date-picker" id="amendment_date" name="amendment_date">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="amendment_reason" class="form-label">Amendment Reason</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="amendment_reason" name="amendment_reason">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="stage_of_test" class="form-label">Stage of Test</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="stage_of_test" name="stage_of_test">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="area_of_coverage_id" class="form-label">Area of Coverage</label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <select class="js-example-basic-single" name="area_of_coverage_id" id="area_of_coverage_id" style="width: 100%;">
+                                        <option value="">Select Area of Coverage</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="thickness" class="form-label">Thickness</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="thickness" name="thickness">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="test_technique" class="form-label">Test Technique</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="test_technique" name="test_technique">
+                                </div>
+                            </div>
+                            -->
+
+                        </div>
+
+                        <!-- Column 3 -->
+                        <div class="col-md-4">
+
+                            <!-- Background Contrast -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="background_contrast" class="form-label">Background Contrast</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="background_contrast" name="background_contrast" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <!-- Prod/Pole Spacing -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="prod_pole_spacing" class="form-label">Pole / Prod Spacing</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="prod_pole_spacing" name="prod_pole_spacing" oninput="suggestProdPoleSpacing(event, this)" autocomplete="off">
+                                    <div id="prod_pole_spacing_list"></div>
+                                    <input type="hidden" name="prod_pole_spacing_suggestion" id="prod_pole_spacing_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Black Light Intensity -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="uva_light_intensity" class="form-label">Black Light Intensity</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="uva_light_intensity" name="uva_light_intensity" oninput="suggestUvaLightIntensity(event, this)" autocomplete="off">
+                                    <div id="uva_light_intensity_list"></div>
+                                    <input type="hidden" name="uva_light_intensity_suggestion" id="uva_light_intensity_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- White Light Intensity -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="light_intensity" class="form-label">White Light Intensity</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="light_intensity" name="light_intensity" oninput="suggestLightIntensity(event, this)" autocomplete="off">
+                                    <div id="light_intensity_list"></div>
+                                    <input type="hidden" name="light_intensity_suggestion" id="light_intensity_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Inspection Light -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="lighting" class="form-label">Inspection Light</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="lighting" name="lighting" oninput="suggestLighting(event, this)" autocomplete="off">
+                                    <div id="lighting_list"></div>
+                                    <input type="hidden" name="lighting_suggestion" id="lighting_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Worksheet No. -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="worksheet_no" class="form-label">Worksheet No.</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="worksheet_no" name="worksheet_no" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <!-- Job Description Label -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="job_desc_label" class="form-label">Job Desc. Label <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <input type="text" class="form-control" id="job_desc_label" name="job_desc_label" required>
+                                    <div class="invalid-tooltip">Enter Job Desc. Label.</div>
+                                </div>
+                            </div>
+
+                            <!-- MPT No. Label -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="mpt_test_no_label" class="form-label">MPT No. Label <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <input type="text" class="form-control" id="mpt_test_no_label" name="mpt_test_no_label" required>
+                                    <div class="invalid-tooltip">Enter MPT No. Label.</div>
+                                </div>
+                            </div>
+
                             <!-- Heat No. Label -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="heat_no_label" class="form-label">Heat No. Label</label>
+                                    <label for="heat_no_label" class="form-label">Heat No. Label <sup class="astric">*</sup></label>
                                 </div>
                                 <div class="col-8 position-relative">
-                                    <input type="text" class="form-control" id="heat_no_label" name="heat_no_label" placeholder="Heat No.">
+                                    <input type="text" class="form-control" id="heat_no_label" name="heat_no_label" required>
+                                    <div class="invalid-tooltip">Enter Heat No. Label.</div>
                                 </div>
                             </div>
+
+                            <!-- Test Carried Out At -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="test_carried_out_at" class="form-label">Test Carried Out At <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <input type="text" class="form-control" id="test_carried_out_at" name="test_carried_out_at" oninput="suggestTestCarriedOutAt(event, this)" autocomplete="off" required>
+                                    <div id="test_carried_out_at_list"></div>
+                                    <input type="hidden" name="test_carried_out_at_suggestion" id="test_carried_out_at_suggestion">
+                                    <div class="invalid-tooltip">Enter Test Carried Out At.</div>
+                                </div>
+                            </div>
+
                             <!-- Defectogram Sketch -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
@@ -571,6 +605,37 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Old Unused Fields Commented Out -->
+                            <!--
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="performance_verification" class="form-label">Performance Verification</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="performance_verification" name="performance_verification">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="background_light" class="form-label">Background Light</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="background_light" name="background_light">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="procedure_ref_id" class="form-label">Procedure Reference</label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <select class="js-example-basic-single" name="procedure_ref_id" id="procedure_ref_id" style="width: 100%;">
+                                        <option value="">Select Procedure Reference</option>
+                                    </select>
+                                </div>
+                            </div>
+                            -->
+
                         </div>
                     </div>
 
@@ -648,10 +713,13 @@
                                                 <tr>
                                                     <th class="action_col">Actions</th>
                                                     <th>Sr. No.</th>
+                                                    <th id="th_job_description">Job Desc.</th>
+                                                    <th>Material</th>
+                                                    <th>Thickness</th>
                                                     <th id="th_mpt_test_no">MPI Test No.</th>
                                                     <th id="th_heat_no">Heat No.</th>
-                                                    <th>Quantity</th>
-                                                    <th>Discontinuity Evaluation</th>
+                                                    <th>Qty.</th>
+                                                    <th>Observation</th>
                                                     <th>Result</th>
                                                 </tr>
                                             </thead>
@@ -696,7 +764,42 @@
                                 </div>
                             </div>
 
-                            <!-- Tested By -->
+                            <!-- Performed By -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-3">
+                                    <label for="performed_by_authority_person_id" class="form-label">Performed By <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-9 position-relative">
+                                    <select class="js-example-basic-single" name="performed_by_authority_person_id" id="performed_by_authority_person_id" style="width: 100%;" required>
+                                        <option value="">Select Performed By</option>
+                                        @forelse(getAuthorityPersonsPerformedBy() as $ap)
+                                            <option value="{{ $ap->authority_person_id }}">{{ $ap->operator }}</option>
+                                        @empty
+                                        @endforelse
+                                    </select>
+                                    <div class="invalid-tooltip">Select Performed By.</div>
+                                </div>
+                            </div>
+
+                            <!-- Examined By -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-3">
+                                    <label for="examined_by_authority_person_id" class="form-label">Examined By <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-9 position-relative">
+                                    <select class="js-example-basic-single" name="examined_by_authority_person_id" id="examined_by_authority_person_id" style="width: 100%;" required>
+                                        <option value="">Select Examined By</option>
+                                        @forelse(getAuthorityPersonsExaminedBy() as $ap)
+                                            <option value="{{ $ap->authority_person_id }}">{{ $ap->operator }}</option>
+                                        @empty
+                                        @endforelse
+                                    </select>
+                                    <div class="invalid-tooltip">Select Examined By.</div>
+                                </div>
+                            </div>
+
+                            <!-- Old Operators Commented Out -->
+                            <!--
                             <div class="row g-2 mb-1">
                                 <div class="col-3">
                                     <label for="tested_by_authority_person_id" class="form-label">Tested By</label>
@@ -704,16 +807,9 @@
                                 <div class="col-9 position-relative">
                                     <select class="js-example-basic-single" name="tested_by_authority_person_id" id="tested_by_authority_person_id" style="width: 100%;">
                                         <option value="">Select Tested By</option>
-                                        @forelse(getAuthorityPersonsTestBy() as $ap)
-                                            <option value="{{ $ap->authority_person_id }}">{{ $ap->operator }}</option>
-                                        @empty
-                                        @endforelse
                                     </select>
-                                    <div class="invalid-tooltip">Select Tested By.</div>
                                 </div>
                             </div>
-
-                            <!-- Reviewed By -->
                             <div class="row g-2 mb-1">
                                 <div class="col-3">
                                     <label for="reviewed_by_authority_person_id" class="form-label">Reviewed By</label>
@@ -721,36 +817,56 @@
                                 <div class="col-9">
                                     <select class="js-example-basic-single" name="reviewed_by_authority_person_id" id="reviewed_by_authority_person_id" style="width: 100%;">
                                         <option value="">Select Reviewed By</option>
-                                        @forelse(getAuthorityPersonsReviewedBy() as $ap)
-                                            <option value="{{ $ap->authority_person_id }}">{{ $ap->operator }}</option>
-                                        @empty
-                                        @endforelse
                                     </select>
                                 </div>
                             </div>
-
-                            
+                            -->
 
                         </div>
 
                         <!-- Column 2 -->
                         <div class="col-md-4">
                             
+                            <div class="row g-2 mb-1">
+                                <div class="col-3">
+                                    <label for="total_qty" class="form-label">Total Qty. </label>
+                                </div>
+                                <div class="col-9">
+                                    <input type="number" class="form-control skip-tab" id="total_qty" name="total_qty" readonly tabindex="-1">
+                                </div>
+                            </div>
+
                             <!-- Authorized By -->
                             <div class="row g-2 mb-1">
                                 <div class="col-3">
-                                    <label for="authorized_by_authority_person_id" class="form-label">Authorized By</label>
+                                    <label for="authorized_by_authority_person_id" class="form-label">Authorized By <sup class="astric">*</sup></label>
                                 </div>
-                                <div class="col-9">
-                                    <select class="js-example-basic-single" name="authorized_by_authority_person_id" id="authorized_by_authority_person_id" style="width: 100%;">
+                                <div class="col-9 position-relative">
+                                    <select class="js-example-basic-single" name="authorized_by_authority_person_id" id="authorized_by_authority_person_id" style="width: 100%;" required>
                                         <option value="">Select Authorized By</option>
                                         @forelse(getAuthorityPersonsAuthorizedBy() as $ap)
                                             <option value="{{ $ap->authority_person_id }}">{{ $ap->operator }}</option>
                                         @empty
                                         @endforelse
                                     </select>
+                                    <div class="invalid-tooltip">Select Authorized By.</div>
                                 </div>
                             </div>
+
+                            <!-- Reviewed By -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-3 justify-content-start">
+                                    <label for="reviewed_by" class="form-label">Reviewed By</label>
+                                </div>
+                                <div class="col-9">
+                                    <input type="text" class="form-control" id="reviewed_by" name="reviewed_by" oninput="suggestReviewedBy(event, this)" autocomplete="off">
+                                    <div id="reviewed_by_list"></div>
+                                    <input type="hidden" name="reviewed_by_suggestion" id="reviewed_by_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Old Pend Qty Commented Out -->
+                            <!--
                             <div class="row g-2 mb-1">
                                 <div class="col-3">
                                     <label for="pend_qty" class="form-label">Pending Qty.</label>
@@ -759,24 +875,32 @@
                                     <input type="text" class="form-control skip-tab" id="pend_qty" name="pend_qty" readonly tabindex="-1">
                                 </div>
                             </div>
+                            -->
+                        </div>
+
+                        <!-- Column 3 -->
+                        <div class="col-md-4">
+                            <!-- Witness By -->
                             <div class="row g-2 mb-1">
-                                <div class="col-3">
-                                    <label for="total_qty" class="form-label">Total Qty. <sup class="astric">*</sup></label>
+                                <div class="col-3 justify-content-start">
+                                    <label for="witness_by" class="form-label">Witness By</label>
                                 </div>
                                 <div class="col-9">
-                                    <input type="number" class="form-control skip-tab" id="total_qty" name="total_qty" readonly tabindex="-1">
+                                    <input type="text" class="form-control" id="witness_by" name="witness_by" oninput="suggestWitnessBy(event, this)" autocomplete="off">
+                                    <div id="witness_by_list"></div>
+                                    <input type="hidden" name="witness_by_suggestion" id="witness_by_suggestion">
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
+
                             <div class="row g-2 mb-1 align-items-start">
                                 <div class="col-3">
-                                    <label for="sp_note" class="form-label mt-1">Special Note</label>
+                                    <label for="sp_note" class="form-label mt-1">Sp. Note</label>
                                 </div>
                                 <div class="col-9">
-                                    <textarea class="form-control" name="sp_note" id="sp_note" rows="2"></textarea>
+                                    <textarea class="form-control" name="sp_note" id="sp_note" rows="3"></textarea>
                                 </div>
                             </div>
+                            <!--
                             <div class="row g-2 align-items-start">
                                 <div class="col-3">
                                     <label for="note" class="form-label mt-1"> NABL Report Disclaimer</label>
@@ -785,6 +909,7 @@
                                     <textarea class="form-control" name="note" id="note" rows="3"></textarea>
                                 </div>
                             </div>
+                            -->
                         </div>
                     </div>
                 </form>
@@ -816,6 +941,8 @@
 <script>
     var loginUserId = {{ auth()->id() }};
     var checkFileRoute = "{{ route('check-file_exists') }}";
+    window.locationNablDefault = "{{ getCurrentLocation()->location_nabl_applicable == 'Yes' ? 'NABL' : 'Non NABL' }}";
+    window.locationNablTests = "{{ getCurrentLocation()->location_nabl_test ?? '' }}";
 </script>
 <script src="{{ URL::asset('views/js/test_report_mpt.js?ver='.getJsVersion()) }}"></script>
 @endpush

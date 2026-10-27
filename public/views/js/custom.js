@@ -773,7 +773,7 @@ jQuery(document).on('show.bs.modal', '.modal', function () {
 // new code start
 jQuery(document).on('shown.bs.modal', '.modal', function () {
     const $modal = jQuery(this);
-    if ($modal.attr('id') === 'OfferModal' || $modal.attr('id') === 'MaterialInwardModal') {
+    if ($modal.attr('id') === 'OfferModal' || $modal.attr('id') === 'MaterialInwardModal' || $modal.attr('id') === 'TestReportUtModal') {
         return;
     }
     jQuery.fn.modal.Constructor.prototype._enforceFocus = function () { };
