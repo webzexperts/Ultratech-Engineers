@@ -876,6 +876,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/test_report_dpt_developer_application-list',  [TestReportDptController::class, 'existsDeveloperApplication'])->name('test_report_dpt_developer_application-list');
     Route::get('/test_report_dpt_lighting-list',              [TestReportDptController::class, 'existsLighting'])->name('test_report_dpt_lighting-list');
     Route::get('/test_report_dpt_background_light-list',       [TestReportDptController::class, 'existsBackgroundLight'])->name('test_report_dpt_background_light-list');
+    Route::get('/test_report_dpt_reviewed_by-list',            [TestReportDptController::class, 'existsReviewedBy'])->name('test_report_dpt_reviewed_by-list');
+    Route::get('/test_report_dpt_witness_by-list',             [TestReportDptController::class, 'existsWitnessBy'])->name('test_report_dpt_witness_by-list');
 
 
     /* Duplication Verification Route */
@@ -1150,6 +1152,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/test_report_mpt_drg_no-list',                [TestReportMptController::class, 'existsDrgNo'])->name('test_report_mpt_drg_no-list');
     Route::get('/test_report_mpt_test_carried_out_at-list',  [TestReportMptController::class, 'existsTestCarriedOutAt'])->name('test_report_mpt_test_carried_out_at-list');
     Route::get('/test_report_mpt_stage_of_test-list',        [TestReportMptController::class, 'existsStageOfTest'])->name('test_report_mpt_stage_of_test-list');
+    Route::get('/test_report_mpt_stage_of_exa-list',         [TestReportMptController::class, 'existsStageOfExa'])->name('test_report_mpt_stage_of_exa-list');
     Route::get('/test_report_mpt_surface_condition-list',    [TestReportMptController::class, 'existsSurfaceCondition'])->name('test_report_mpt_surface_condition-list');
     Route::get('/test_report_mpt_surface_temp-list',         [TestReportMptController::class, 'existsSurfaceTemp'])->name('test_report_mpt_surface_temp-list');
     Route::get('/test_report_mpt_thickness-list',            [TestReportMptController::class, 'existsThickness'])->name('test_report_mpt_thickness-list');
@@ -1165,6 +1168,8 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/test_report_mpt_yoke_wt_lift_check-list',    [TestReportMptController::class, 'existsYokeWtLiftCheck'])->name('test_report_mpt_yoke_wt_lift_check-list');
     Route::get('/test_report_mpt_discontinuity_evaluation-list', [TestReportMptController::class, 'existsDiscontinuityEvaluation'])->name('test_report_mpt_discontinuity_evaluation-list');
     Route::get('/test_report_mpt_product_code-list',           [TestReportMptController::class, 'existsProductCode'])->name('test_report_mpt_product_code-list');
+    Route::get('/test_report_mpt_reviewed_by-list',          [TestReportMptController::class, 'existsReviewedBy'])->name('test_report_mpt_reviewed_by-list');
+    Route::get('/test_report_mpt_witness_by-list',           [TestReportMptController::class, 'existsWitnessBy'])->name('test_report_mpt_witness_by-list');
     Route::get('/customer_dc_non_returnable_vehicle_no-list', [CustomerDCNonReturnableController::class, 'getVehicleNoList'])->name('customer_dc_non_returnable_vehicle_no-list');
     Route::get('/customer_dc_non_returnable_mode_of_transport-list', [CustomerDCNonReturnableController::class, 'getModeOfTransportList'])->name('customer_dc_non_returnable_mode_of_transport-list');
     Route::get('/customer_dc_non_returnable_sp_note-list', [CustomerDCNonReturnableController::class, 'getSpNoteList'])->name('customer_dc_non_returnable_sp_note-list');

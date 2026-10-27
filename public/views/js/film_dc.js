@@ -606,7 +606,7 @@ function updateFormLockState() {
         jQuery('input[name="from_type_id"], input[name="job_type_fix"], input[name="film_size_unit_fix"]')
             .addClass('skip-tab')
             .attr('tabindex', '-1');
-        jQuery('#customer_id').prop('disabled', true).addClass('skip-tab');
+        jQuery('#customer_id').prop('readonly', true).addClass('skip-tab');
         if (typeof setSelect2Readonly === 'function') {
             setSelect2Readonly('#customer_id', true);
         }
@@ -617,7 +617,7 @@ function updateFormLockState() {
         jQuery('input[name="from_type_id"], input[name="job_type_fix"], input[name="film_size_unit_fix"]')
             .addClass('skip-tab')
             .attr('tabindex', '-1');
-        jQuery('#customer_id').prop('disabled', true).addClass('skip-tab');
+        jQuery('#customer_id').prop('readonly', true).addClass('skip-tab');
         if (typeof setSelect2Readonly === 'function') {
             setSelect2Readonly('#customer_id', true);
         }
@@ -628,7 +628,7 @@ function updateFormLockState() {
         jQuery('input[name="from_type_id"], input[name="job_type_fix"], input[name="film_size_unit_fix"]')
             .removeClass('skip-tab')
             .removeAttr('tabindex');
-        jQuery('#customer_id').prop('disabled', false).removeClass('skip-tab');
+        jQuery('#customer_id').prop('readonly', false).removeClass('skip-tab');
         if (typeof setSelect2Readonly === 'function') {
             setSelect2Readonly('#customer_id', false);
         }
@@ -759,7 +759,7 @@ function resetToAddMode() {
     setRadioReadonly('input[name="from_type_id"]', false);
     setRadioReadonly('input[name="job_type_fix"]', false);
     setRadioReadonly('input[name="film_size_unit_fix"]', false);
-    jQuery('#customer_id').prop('disabled', false);
+    jQuery('#customer_id').prop('readonly', false);
     if (typeof setSelect2Readonly === 'function') {
         setSelect2Readonly('#customer_id', false);
     }
@@ -802,7 +802,7 @@ function openEditMode(id) {
     setRadioReadonly('input[name="from_type_id"]', false);
     setRadioReadonly('input[name="job_type_fix"]', false);
     setRadioReadonly('input[name="film_size_unit_fix"]', false);
-    jQuery('#customer_id').prop('disabled', false);
+    jQuery('#customer_id').prop('readonly', false);
 
     jQuery('#submitbtn').show().prop('disabled', false).text('Update');
     jQuery('#preview_btn').attr('tabindex', '0').show();
@@ -918,7 +918,7 @@ function loadPendingCustomers(selectedId = null, dcId = null) {
             var formid = jQuery('#id').val();
             if (formid > 0 || formid != "" || _isEditMode) {
                 jQuery('#pending_btn').prop('disabled', true);
-                jQuery('#customer_id').prop('disabled', true);
+                jQuery('#customer_id').prop('readonly', true);
                 if (typeof setSelect2Readonly === 'function') {
                     setSelect2Readonly('#customer_id', true);
                 }

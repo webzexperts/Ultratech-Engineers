@@ -250,7 +250,7 @@ class MaterialInwardController extends Controller
                 $dVal->mode = 'Update';
                 $dVal->thickness = $dVal->thickness ?? '';
                 $dVal->job_desc = $dVal->job_desc ?? '';
-                $dVal->process_type_fix = $dVal->process_type ?? 'Fresh';
+                $dVal->process_type_fix = $dVal->process_type_fix ?? 'Fresh';
                 $dVal->process_type_name = $dVal->type_of_testing_id_fix ?? '';
                 $dVal->offer_details_id = $dVal->offer_details_id ?? 0;
 
@@ -444,9 +444,19 @@ class MaterialInwardController extends Controller
                 foreach ($details as $row) {
                     if (($row['mode'] ?? '') == 'Delete') continue;
 
+                    if($request->nabl_type_fix == 'NABL' && $row['process_type_fix'] != 'Repair'){
+                        $is_observation_sheet = 'Yes';
+                    }else if($row['process_type_fix'] == 'Repair'){
+                        $is_observation_sheet = 'N/A';
+                    }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
+                        $is_observation_sheet = 'N/A';
+                    }else{
+                        $is_observation_sheet = 'No';
+                    }
+
                     MaterialInwardDetails::create([
                         'material_inward_id'   => $mi->material_inward_id,
-                        'process_type_fix'         => $row['process_type_fix'] ?? $row['process_type'] ?? 'Fresh',
+                        'process_type_fix'         => $row['process_type_fix'] ?? $row['process_type_fix'] ?? 'Fresh',
                         'type_of_testing_id_fix'  => $row['type_of_testing_id_fix'] ?? 'RT',
                         'sr_no'                => $row['sr_no'] ?? null,
                         'lab_id'               => $row['lab_id'] ?? '',
@@ -460,6 +470,7 @@ class MaterialInwardController extends Controller
                         'quantity'             => $row['quantity'] ?? 1,
                         'remark'               => $row['remark'] ?? null,
                         'offer_details_id'     => null,
+                        'is_observation_sheet'   => $is_observation_sheet,
                     ]);
                 }
             }
@@ -644,9 +655,19 @@ class MaterialInwardController extends Controller
                             continue;
                         }
 
+                        if($request->nabl_type_fix == 'NABL' && $row['process_type_fix'] != 'Repair'){
+                            $is_observation_sheet = 'Yes';
+                        }else if($row['process_type_fix'] == 'Repair'){
+                            $is_observation_sheet = 'N/A';
+                        }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
+                            $is_observation_sheet = 'N/A';
+                        }else{
+                            $is_observation_sheet = 'No';
+                        }
+
                         MaterialInwardDetails::create([
                             'material_inward_id'   => $mi->material_inward_id,
-                            'process_type_fix'         => $row['process_type_fix'] ?? $row['process_type'] ?? 'Fresh',
+                            'process_type_fix'         => $row['process_type_fix'] ?? $row['process_type_fix'] ?? 'Fresh',
                             'type_of_testing_id_fix'  => $row['type_of_testing_id_fix'] ?? 'RT',
                             'sr_no'                => $row['sr_no'] ?? null,
                             'lab_id'               => $row['lab_id'] ?? '',
@@ -660,14 +681,41 @@ class MaterialInwardController extends Controller
                             'quantity'             => $row['quantity'] ?? 1,
                             'remark'               => $row['remark'] ?? null,
                             'offer_details_id'     => null,
+                            'is_observation_sheet'   => $is_observation_sheet,
                         ]);
                     }
                     elseif ($mode == 'Update') {
                         if (!empty($row['material_inward_details_id'])) {
                             $det = MaterialInwardDetails::where('material_inward_details_id', $row['material_inward_details_id'])->first();
+
+                            $detailId = $row['material_inward_details_id'];
+                            $existsInDownstream = DB::table('observation_sheet_details')->where('material_inward_details_id', $detailId)->exists()
+                                || DB::table('test_report_rt')->where('material_inward_details_id', $detailId)->exists()
+                                || DB::table('test_report_ut')->where('material_inward_details_id', $detailId)->exists()
+                                || DB::table('test_report_mpt')->where('material_inward_details_id', $detailId)->exists()
+                                || DB::table('test_report_dpt')->where('material_inward_details_id', $detailId)->exists();
+
+
+                            if ($existsInDownstream) {
+                                $is_observation_sheet = DB::table('material_inward_details')
+                                    ->where('material_inward_details_id', $detailId)
+                                    ->value('is_observation_sheet');
+                            } else {
+                                if($request->nabl_type_fix == 'NABL' && $row['process_type_fix'] != 'Repair'){
+                                    $is_observation_sheet = 'Yes';
+                                }else if($row['process_type_fix'] == 'Repair'){
+                                    $is_observation_sheet = 'N/A';
+                                }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
+                                    $is_observation_sheet = 'N/A';
+                                }else{
+                                    $is_observation_sheet = 'No';
+                                }
+                            }
+
+
                             if ($det) {
                                 $det->update([
-                                    'process_type_fix'        => $row['process_type_fix'] ?? $row['process_type'] ?? 'Fresh',
+                                    'process_type_fix'        => $row['process_type_fix'] ?? $row['process_type_fix'] ?? 'Fresh',
                                     'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? 'RT',
                                     'sr_no'               => $row['sr_no'] ?? null,
                                     'lab_id'              => $row['lab_id'] ?? '',
@@ -680,13 +728,14 @@ class MaterialInwardController extends Controller
                                     'thickness'        => $row['thickness'] ?? $row['thickness'] ?? null,
                                     'quantity'            => $row['quantity'] ?? 1,
                                     'remark'              => $row['remark'] ?? null,
+                                    'is_observation_sheet'   => $is_observation_sheet,
                                 ]);
 
                                 // Reverse effect on offer_details
                                 $offerDetId = $row['offer_details_id'] ?? $det->offer_details_id;
                                 if ($isFromOffer && !empty($offerDetId)) {
-                                    DB::table('offer_details')->where('offer_details_id', $offerDetId)->update([
-                                        'process_type_fix'    => $row['process_type_fix'] ?? $row['process_type'] ?? 'Fresh',
+                                    $var = OfferDetails::where('offer_details_id', $offerDetId)->update([
+                                        'process_type_fix'    => $row['process_type_fix'] ?? $row['process_type_fix'] ?? 'Fresh',
                                         'type_of_testing_id_fix' => $row['type_of_testing_id_fix'] ?? 'RT',
                                         'sr_no'               => $row['sr_no'] ?? null,
                                         'lab_id'              => $row['lab_id'] ?? '',

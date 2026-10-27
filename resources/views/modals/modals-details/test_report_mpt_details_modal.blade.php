@@ -15,6 +15,37 @@
 
                     <div class="row mt-2">
                         <div class="col-12">
+                            <!-- Job Description -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4"><label for="det_job_description" class="form-label" id="lbl_det_job_description">Job Description</label></div>
+                                <div class="col-8">
+                                    <input type="text" name="job_description" id="det_job_description" class="form-control">
+                                </div>
+                            </div>
+                            <!-- Material -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="det_material_id" class="form-label" id="lbl_material_id">Material <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <select class="js-example-basic-single" name="material_id" id="det_material_id" required style="width: 100%;">
+                                        <option value="">Select Material</option>
+                                        @forelse(getMaterial() as $m)
+                                            <option value="{{ $m->id }}">{{ $m->material }}</option>
+                                        @empty
+                                        @endforelse
+                                    </select>
+                                    <div class="invalid-tooltip">Select Material.</div>
+                                </div>
+                            </div>
+                            <!-- Thickness  -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4"><label for="det_thickness" class="form-label" id="lbl_thickness">Thickness</label></div>
+                                <div class="col-8">
+                                    <input type="text" name="thickness" id="det_thickness" class="form-control">
+                                </div>
+                            </div>
+
                             <!-- MPI Test No. -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="det_mpt_test_no" class="form-label" id="lbl_det_mpt_test_no">MPT Test No. <sup class="astric">*</sup></label></div>
@@ -34,20 +65,31 @@
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="det_quantity" class="form-label">Quantity <sup class="astric">*</sup></label></div>
                                 <div class="col-8">
-                                    <input type="number" name="quantity" id="det_quantity" class="form-control isInteger" value="1" readonly tabindex="-1" style="background-color: #e9ecef; cursor: not-allowed;" required>
+                                    <input type="number" name="quantity" id="det_quantity" class="form-control isInteger" required>
                                     <div class="invalid-tooltip">Enter Quantity.</div>
                                 </div>
                             </div>
-                            <!-- Discontinuity Evaluation -->
+                            <!-- Observation -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start "><label for="det_observation" class="form-label" id="lbl_observation">Observation</label></div>
+                                <div class="col-8 " >
+                                    <textarea name="observation" id="det_observation" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Old Discontinuity Evaluation Commented Out -->
+                            <!--
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="det_discontinuity_evaluation" class="form-label">Discontinuity Evaluation <sup class="astric">*</sup></label></div>
                                 <div class="col-8">
-                                    <input type="text" name="discontinuity_evaluation" id="det_discontinuity_evaluation" class="form-control" onkeyup="suggestDiscontinuityEvaluation(event, this)" autocomplete="off" required>
+                                    <input type="text" name="discontinuity_evaluation" id="det_discontinuity_evaluation" class="form-control" onkeyup="suggestDiscontinuityEvaluation(event, this)" autocomplete="off">
                                     <div id="det_discontinuity_evaluation_list"></div>
                                     <input type="hidden" name="det_discontinuity_evaluation_suggestion" id="det_discontinuity_evaluation_suggestion">
                                     <div class="invalid-tooltip">Enter Discontinuity Evaluation.</div>
                                 </div>
                             </div>
+                            -->
+
                             <!-- Result Dropdown -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="detail_result_id" class="form-label">Result <sup class="astric">*</sup></label></div>

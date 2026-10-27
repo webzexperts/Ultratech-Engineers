@@ -1109,7 +1109,7 @@ class ObservationSheetController extends Controller
                 'pend.from_type_id_fix',
                 'pend.pending_qty',
                 'mid.type_of_testing_id_fix',
-                DB::raw("IF(pend.test_report_rt_id > 0, 'Repair', mid.process_type) as process_type"),
+                DB::raw("IF(pend.test_report_rt_id > 0, 'Repair', mid.process_type_fix) as process_type"),
                 'mid.type_of_job_id',
                 'mid.job_desc_id',
                 //'mid.part_id',

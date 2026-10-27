@@ -44,9 +44,12 @@ class TestReportDptController extends Controller
             'test_report_dpt.test_carried_out_at',
             'test_report_dpt.job_type_fix',
             'customers.customer',
+            'test_method.test_method',
+            'acceptance_standards.acceptance_standard',
             'material_inward.dc_no',
             'material_inward.dc_date',
-            'material_inward.po_no',
+            // 'material_inward.po_no',
+            \DB::raw("IFNULL(test_report_dpt.po_no, material_inward.po_no) as po_no"),
             'material_inward.po_date',
             // 'type_of_job.type_of_job',
             // 'job_descriptions.job_description',
@@ -56,12 +59,15 @@ class TestReportDptController extends Controller
             'materials.material',
             'test_report_dpt.product_code',
             'test_report_dpt.total_qty',
+            'test_report_dpt.sp_note',
             'test_report_dpt.created_on',
             'test_report_dpt.created_by',
             'test_report_dpt.last_by',
             'test_report_dpt.last_on'
         ])
         ->leftJoin('customers', 'customers.id', '=', 'test_report_dpt.customer_id')
+        ->leftJoin('test_method', 'test_method.test_method_id', '=', 'test_report_dpt.test_method_id')
+        ->leftJoin('acceptance_standards', 'acceptance_standards.id', '=', 'test_report_dpt.acceptance_standard_id')
         // ->leftJoin('type_of_job', 'type_of_job.id', '=', 'test_report_dpt.type_of_job_id')
         // ->leftJoin('job_descriptions', 'job_descriptions.id', '=', 'test_report_dpt.job_desc_id')
         ->leftJoin('materials', 'materials.id', '=', 'test_report_dpt.material_id')
@@ -72,7 +78,8 @@ class TestReportDptController extends Controller
 
         $dataTable = DataTables::of($reports)
         ->filterColumn('test_report_dpt.test_report_no', function($query, $keyword) {
-            applySequenceSearch($query, $keyword, 'test_report_dpt.test_report_no');
+            // applySequenceSearch($query, $keyword, 'test_report_dpt.test_report_no');
+            applynumber($query, $keyword, 'test_report_dpt.test_report_no');
         })
         ->editColumn('test_report_date', function($report) {
             return $report->test_report_date != null
@@ -98,6 +105,21 @@ class TestReportDptController extends Controller
         ->filterColumn('material_inward.po_date', function ($q, $k) {
             applyDate($q, $k, 'material_inward.po_date');
         })
+        ->filterColumn('test_method.test_method', function ($query, $keyword) {
+            $query->where('test_method.test_method', 'like', "%" . trim($keyword) . "%");
+        })
+        ->filterColumn('acceptance_standards.acceptance_standard', function ($query, $keyword) {
+            $query->where('acceptance_standards.acceptance_standard', 'like', "%" . trim($keyword) . "%");
+        })
+        ->filterColumn('test_report_dpt.po_no', function($query, $keyword) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('test_report_dpt.po_no', 'like', "%{$keyword}%")
+                  ->orWhere('material_inward.po_no', 'like', "%{$keyword}%");
+            });
+        })
+        ->filterColumn('test_report_dpt.sp_note', function ($query, $keyword) {
+            $query->where('test_report_dpt.sp_note', 'like', "%" . trim($keyword) . "%");
+        })
         ->filterColumn('part_no', function($query, $keyword) {
             $query->where(function($q) use ($keyword) {
                 $q->where('test_report_dpt.part_no', 'like', "%{$keyword}%");
@@ -108,14 +130,35 @@ class TestReportDptController extends Controller
                 $q->where('test_report_dpt.drg_no', 'like', "%{$keyword}%");
             });
         })
+        ->filterColumn('test_report_dpt.nabl_type_fix', function ($query, $keyword) {
+            $globalSearch = request()->input('search.value');
+            $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
+            $lowerKeyword = strtolower(trim($searchValue));
+            if ($lowerKeyword === 'nabl') {
+                $query->where('test_report_dpt.nabl_type_fix', '=', 'NABL');
+            } elseif ($lowerKeyword === 'non nabl' || $lowerKeyword === 'non-nabl' || $lowerKeyword === 'nonnabl') {
+                $query->where('test_report_dpt.nabl_type_fix', '=', 'Non NABL');
+            } else {
+                $query->where('test_report_dpt.nabl_type_fix', 'like', "{$lowerKeyword}%");
+            }
+        })
         ->filterColumn('test_report_dpt.job_type_fix', function ($query, $keyword) {
             $globalSearch = request()->input('search.value');
             $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
             $lowerKeyword = strtolower(trim($searchValue));
+            /*
             if ($lowerKeyword === 'welding') {
                 $query->where('test_report_dpt.job_type_fix', '=', 'Welding');
             } elseif ($lowerKeyword === 'non-welding' || $lowerKeyword === 'non welding') {
                 $query->where('test_report_dpt.job_type_fix', '=', 'Non-Welding');
+            } else {
+                $query->where('test_report_dpt.job_type_fix', 'like', "{$lowerKeyword}%");
+            }
+            */
+            if ($lowerKeyword === 'casting') {
+                $query->where('test_report_dpt.job_type_fix', '=', 'Casting');
+            } elseif ($lowerKeyword === 'fabrication') {
+                $query->where('test_report_dpt.job_type_fix', '=', 'Fabrication');
             } else {
                 $query->where('test_report_dpt.job_type_fix', 'like', "{$lowerKeyword}%");
             }
@@ -167,11 +210,11 @@ class TestReportDptController extends Controller
             'customer_id' => 'required',
             // 'type_of_job_id' => 'required',
             // 'job_desc_id' => 'required',
-            'job_desc' => 'required',
-            'material_id' => 'required',
-            'area_of_coverage_id' => 'required',
+            // 'job_desc' => 'required',
+            // 'material_id' => 'required',
+            // 'area_of_coverage_id' => 'required',
         ], [
-            'job_desc.required' => 'Enter Job Description.',
+            // 'job_desc.required' => 'Enter Job Description.',
         ]);
 
         if ($request->entry_type_fix === 'From Inward' && $request->material_inward_details_id) {
@@ -319,45 +362,81 @@ class TestReportDptController extends Controller
                 'observation_sheet_details_id' => $obsId,
                 'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
-                'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
+                // 'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
+                'job_type_fix' => $request->job_type_fix ?? 'Casting',
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 // 'type_of_job_id' => $request->type_of_job_id,
                 // 'job_desc_id' => $request->job_desc_id,
                 'type_of_job_id' => $request->type_of_job_id ?? null,
+                'type_of_job' => $request->type_of_job,
+                'project' => $request->project,
+                'po_no' => $request->po_no ?? null,
+                'test_method_id' => !empty($request->test_method_id) ? $request->test_method_id : null,
+                'job_desc_label' => $request->job_desc_label,
                 'job_desc_id' => null,
-                'job_desc' => $request->job_desc,
-                'part_no' => $request->part_no,
-                'drg_no' => $request->drg_no,
-                'material_id' => $request->material_id,
-                'heat_no' => $request->heat_no,
-                'product_code' => $request->product_code,
+                // 'job_desc' => $request->job_desc,
+                'job_desc' => $request->job_desc ?? null,
+                // 'part_no' => $request->part_no,
+                'part_no' => $request->part_no ?? null,
+                // 'drg_no' => $request->drg_no,
+                'drg_no' => $request->drg_no ?? null,
+                // 'material_id' => $request->material_id,
+                'material_id' => $request->material_id ?? null,
+                // 'heat_no' => $request->heat_no,
+                'heat_no' => $request->heat_no ?? null,
+                // 'product_code' => $request->product_code,
+                'product_code' => $request->product_code ?? null,
                 'date_of_testing' => !empty($request->date_of_testing) ? Date::createFromFormat('d/m/Y', $request->date_of_testing)->format('Y-m-d') : null,
                 'date_of_testing_value' => $request->date_of_testing_value,
+                'date_of_receipt' => !empty($request->date_of_receipt) ? Date::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null,
                 'test_carried_out_at' => $request->test_carried_out_at,
-                'amendment_no' => $request->amendment_no,
+                // 'amendment_no' => $request->amendment_no,
+                'amendment_no' => $request->amendment_no ?? null,
+                // 'amendment_date' => !empty($request->amendment_date) ? Date::createFromFormat('d/m/Y', $request->amendment_date)->format('Y-m-d') : null,
                 'amendment_date' => !empty($request->amendment_date) ? Date::createFromFormat('d/m/Y', $request->amendment_date)->format('Y-m-d') : null,
-                'amendment_reason' => $request->amendment_reason,
-                'stage_of_test' => $request->stage_of_test,
-                'area_of_coverage_id' => $request->area_of_coverage_id,
+                // 'amendment_reason' => $request->amendment_reason,
+                'amendment_reason' => $request->amendment_reason ?? null,
+                // 'stage_of_test' => $request->stage_of_test,
+                'stage_of_test' => $request->stage_of_test ?? null,
+                // 'area_of_coverage_id' => $request->area_of_coverage_id,
+                'area_of_coverage_id' => $request->area_of_coverage_id ?? null,
                 
                 'surface_condition' => $request->surface_condition,
+                'extent_of_exa' => $request->extent_of_exa,
+                'stage_of_exa' => $request->stage_of_exa,
                 'surface_temp' => $request->surface_temp,
-                'thickness' => $request->thickness,
-                'test_technique' => $request->test_technique,
-                'pre_cleaning' => $request->pre_cleaning,
-                'penetrant_application' => $request->penetrant_application,
-                'dwell_time' => $request->dwell_time,
-                'penetrant_remover' => $request->penetrant_remover,
+                'method' => $request->method,
+                'penetrant' => $request->penetrant,
                 'developer' => $request->developer,
-                'developer_application' => $request->developer_application,
+                'cleaner' => $request->cleaner,
+                'pre_cleaning' => $request->pre_cleaning,
+                'post_cleaning' => $request->post_cleaning,
+                'penetrant_time' => $request->penetrant_time,
                 'developing_time' => $request->developing_time,
-                'lighting' => $request->lighting,
-                'light_intensity' => $request->light_intensity,
-                'background_light' => $request->background_light,
-                'uva_light_intensity' => $request->uva_light_intensity,
+                'worksheet_no' => $request->worksheet_no,
+                'lighting_equipment' => $request->lighting_equipment,
+                'intensity' => $request->intensity,
+
+                // 'thickness' => $request->thickness,
+                'thickness' => $request->thickness ?? null,
+                // 'test_technique' => $request->test_technique,
+                'test_technique' => $request->test_technique ?? null,
+                // 'penetrant_application' => $request->penetrant_application,
+                'penetrant_application' => $request->penetrant_application ?? null,
+                // 'dwell_time' => $request->dwell_time,
+                'dwell_time' => $request->dwell_time ?? null,
+                // 'penetrant_remover' => $request->penetrant_remover,
+                'penetrant_remover' => $request->penetrant_remover ?? null,
+                // 'developer_application' => $request->developer_application,
+                'developer_application' => $request->developer_application ?? null,
+                // 'background_light' => $request->background_light,
+                'background_light' => $request->background_light ?? null,
+                // 'uva_light_intensity' => $request->uva_light_intensity,
+                'uva_light_intensity' => $request->uva_light_intensity ?? null,
                 
-                'procedure_ref_id' => $request->procedure_ref_id,
+                // 'procedure_ref_id' => $request->procedure_ref_id,
+                'procedure_ref_id' => $request->procedure_ref_id ?? null,
                 'acceptance_standard_id' => $request->acceptance_standard_id,
                 'dpt_test_no_label' => $request->filled('dpt_test_no_label') ? $request->dpt_test_no_label : 'DPT Test No.',
                 'heat_no_label' => $request->filled('heat_no_label') ? $request->heat_no_label : 'Heat No.',
@@ -368,11 +447,18 @@ class TestReportDptController extends Controller
                 'ulr_no' => $ulr_no,
                 'ulr_sequence' => $ulr_sequence,
                 'ulr_year' => $ulr_year,
-                'tested_by_authority_person_id' => $request->tested_by_authority_person_id,
-                'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id,
+                'performed_by_authority_person_id' => !empty($request->performed_by_authority_person_id) ? $request->performed_by_authority_person_id : null,
+                'examined_by_authority_person_id' => !empty($request->examined_by_authority_person_id) ? $request->examined_by_authority_person_id : null,
+                'reviewed_by' => $request->reviewed_by,
+                'witness_by' => $request->witness_by,
+                // 'tested_by_authority_person_id' => $request->tested_by_authority_person_id,
+                'tested_by_authority_person_id' => $request->tested_by_authority_person_id ?? null,
+                // 'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id,
+                'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id ?? null,
                 'authorized_by_authority_person_id' => $request->authorized_by_authority_person_id,
                 'sp_note' => $request->sp_note,
-                'note' => $request->note,
+                // 'note' => $request->note,
+                'note' => $request->note ?? null,
                 'assign_format_no'      => $assign_format_no,
                 'company_id' => Auth::user()->company_id,
                 'year_id' => $year_data->id,
@@ -402,12 +488,26 @@ class TestReportDptController extends Controller
             if (!empty($details)) {
                 foreach ($details as $row) {
                     if (empty($row) || ($row['mode'] ?? '') === 'Delete') continue;
+                    /*
                     TestReportDptDetails::create([
                         'test_report_dpt_id' => $report->test_report_dpt_id,
                         'dpt_test_no' => $row['dpt_test_no'],
                         'heat_no' => $row['heat_no'],
                         'quantity' => $row['quantity'],
                         'discontinuity_evaluation' => $row['discontinuity_evaluation'],
+                        'result_id' => !empty($row['detail_result_id']) ? $row['detail_result_id'] : null,
+                    ]);
+                    */
+                    TestReportDptDetails::create([
+                        'test_report_dpt_id' => $report->test_report_dpt_id,
+                        'job_description' => $row['job_description'] ?? null,
+                        'material_id' => !empty($row['material_id']) ? $row['material_id'] : null,
+                        'thickness' => $row['thickness'] ?? null,
+                        'dpt_test_no' => $row['dpt_test_no'],
+                        'heat_no' => $row['heat_no'],
+                        'quantity' => $row['quantity'] ?? 1,
+                        'observation' => $row['observation'] ?? null,
+                        'discontinuity_evaluation' => $row['discontinuity_evaluation'] ?? null,
                         'result_id' => !empty($row['detail_result_id']) ? $row['detail_result_id'] : null,
                     ]);
                 }
@@ -547,11 +647,11 @@ class TestReportDptController extends Controller
             'customer_id' => 'required',
             // 'type_of_job_id' => 'required',
             // 'job_desc_id' => 'required',
-            'job_desc' => 'required',
-            'material_id' => 'required',
-            'area_of_coverage_id' => 'required',
+            // 'job_desc' => 'required',
+            // 'material_id' => 'required',
+            // 'area_of_coverage_id' => 'required',
         ], [
-            'job_desc.required' => 'Enter Job Description.',
+            // 'job_desc.required' => 'Enter Job Description.',
         ]);
 
         $report = TestReportDpt::where('test_report_dpt_id', $request->id)->first();
@@ -691,45 +791,81 @@ class TestReportDptController extends Controller
                 'observation_sheet_details_id' => $request->observation_sheet_details_id ?? null,
                 'entry_type_fix' => $request->entry_type_fix ?? $report->entry_type_fix ?? 'Manual',
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
-                'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
+                // 'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
+                'job_type_fix' => $request->job_type_fix ?? 'Casting',
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 // 'type_of_job_id' => $request->type_of_job_id,
                 // 'job_desc_id' => $request->job_desc_id,
                 'type_of_job_id' => $request->type_of_job_id ?? null,
+                'type_of_job' => $request->type_of_job,
+                'project' => $request->project,
+                'po_no' => $request->po_no ?? null,
+                'test_method_id' => !empty($request->test_method_id) ? $request->test_method_id : null,
+                'job_desc_label' => $request->job_desc_label,
                 'job_desc_id' => null,
-                'job_desc' => $request->job_desc,
-                'part_no' => $request->part_no,
-                'drg_no' => $request->drg_no,
-                'material_id' => $request->material_id,
-                'heat_no' => $request->heat_no,
-                'product_code' => $request->product_code,
+                // 'job_desc' => $request->job_desc,
+                'job_desc' => $request->job_desc ?? null,
+                // 'part_no' => $request->part_no,
+                'part_no' => $request->part_no ?? null,
+                // 'drg_no' => $request->drg_no,
+                'drg_no' => $request->drg_no ?? null,
+                // 'material_id' => $request->material_id,
+                'material_id' => $request->material_id ?? null,
+                // 'heat_no' => $request->heat_no,
+                'heat_no' => $request->heat_no ?? null,
+                // 'product_code' => $request->product_code,
+                'product_code' => $request->product_code ?? null,
                 'date_of_testing' => !empty($request->date_of_testing) ? Date::createFromFormat('d/m/Y', $request->date_of_testing)->format('Y-m-d') : null,
                 'date_of_testing_value' => $request->date_of_testing_value,
+                'date_of_receipt' => !empty($request->date_of_receipt) ? Date::createFromFormat('d/m/Y', $request->date_of_receipt)->format('Y-m-d') : null,
                 'test_carried_out_at' => $request->test_carried_out_at,
-                'amendment_no' => $request->amendment_no,
+                // 'amendment_no' => $request->amendment_no,
+                'amendment_no' => $request->amendment_no ?? null,
+                // 'amendment_date' => !empty($request->amendment_date) ? Date::createFromFormat('d/m/Y', $request->amendment_date)->format('Y-m-d') : null,
                 'amendment_date' => !empty($request->amendment_date) ? Date::createFromFormat('d/m/Y', $request->amendment_date)->format('Y-m-d') : null,
-                'amendment_reason' => $request->amendment_reason,
-                'stage_of_test' => $request->stage_of_test,
-                'area_of_coverage_id' => $request->area_of_coverage_id,
+                // 'amendment_reason' => $request->amendment_reason,
+                'amendment_reason' => $request->amendment_reason ?? null,
+                // 'stage_of_test' => $request->stage_of_test,
+                'stage_of_test' => $request->stage_of_test ?? null,
+                // 'area_of_coverage_id' => $request->area_of_coverage_id,
+                'area_of_coverage_id' => $request->area_of_coverage_id ?? null,
                 
                 'surface_condition' => $request->surface_condition,
+                'extent_of_exa' => $request->extent_of_exa,
+                'stage_of_exa' => $request->stage_of_exa,
                 'surface_temp' => $request->surface_temp,
-                'thickness' => $request->thickness,
-                'test_technique' => $request->test_technique,
-                'pre_cleaning' => $request->pre_cleaning,
-                'penetrant_application' => $request->penetrant_application,
-                'dwell_time' => $request->dwell_time,
-                'penetrant_remover' => $request->penetrant_remover,
+                'method' => $request->method,
+                'penetrant' => $request->penetrant,
                 'developer' => $request->developer,
-                'developer_application' => $request->developer_application,
+                'cleaner' => $request->cleaner,
+                'pre_cleaning' => $request->pre_cleaning,
+                'post_cleaning' => $request->post_cleaning,
+                'penetrant_time' => $request->penetrant_time,
                 'developing_time' => $request->developing_time,
-                'lighting' => $request->lighting,
-                'light_intensity' => $request->light_intensity,
-                'background_light' => $request->background_light,
-                'uva_light_intensity' => $request->uva_light_intensity,
+                'worksheet_no' => $request->worksheet_no,
+                'lighting_equipment' => $request->lighting_equipment,
+                'intensity' => $request->intensity,
+
+                // 'thickness' => $request->thickness,
+                'thickness' => $request->thickness ?? null,
+                // 'test_technique' => $request->test_technique,
+                'test_technique' => $request->test_technique ?? null,
+                // 'penetrant_application' => $request->penetrant_application,
+                'penetrant_application' => $request->penetrant_application ?? null,
+                // 'dwell_time' => $request->dwell_time,
+                'dwell_time' => $request->dwell_time ?? null,
+                // 'penetrant_remover' => $request->penetrant_remover,
+                'penetrant_remover' => $request->penetrant_remover ?? null,
+                // 'developer_application' => $request->developer_application,
+                'developer_application' => $request->developer_application ?? null,
+                // 'background_light' => $request->background_light,
+                'background_light' => $request->background_light ?? null,
+                // 'uva_light_intensity' => $request->uva_light_intensity,
+                'uva_light_intensity' => $request->uva_light_intensity ?? null,
                 
-                'procedure_ref_id' => $request->procedure_ref_id,
+                // 'procedure_ref_id' => $request->procedure_ref_id,
+                'procedure_ref_id' => $request->procedure_ref_id ?? null,
                 'acceptance_standard_id' => $request->acceptance_standard_id,
                 'dpt_test_no_label' => $request->filled('dpt_test_no_label') ? $request->dpt_test_no_label : 'DPT Test No.',
                 'heat_no_label' => $request->filled('heat_no_label') ? $request->heat_no_label : 'Heat No.',
@@ -741,11 +877,18 @@ class TestReportDptController extends Controller
                 'ulr_no' => $ulr_no,
                 'ulr_sequence' => $ulr_sequence,
                 'ulr_year' => $ulr_year,
-                'tested_by_authority_person_id' => $request->tested_by_authority_person_id,
-                'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id,
+                'performed_by_authority_person_id' => !empty($request->performed_by_authority_person_id) ? $request->performed_by_authority_person_id : null,
+                'examined_by_authority_person_id' => !empty($request->examined_by_authority_person_id) ? $request->examined_by_authority_person_id : null,
+                'reviewed_by' => $request->reviewed_by,
+                'witness_by' => $request->witness_by,
+                // 'tested_by_authority_person_id' => $request->tested_by_authority_person_id,
+                'tested_by_authority_person_id' => $request->tested_by_authority_person_id ?? null,
+                // 'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id,
+                'reviewed_by_authority_person_id' => $request->reviewed_by_authority_person_id ?? null,
                 'authorized_by_authority_person_id' => $request->authorized_by_authority_person_id,
                 'sp_note' => $request->sp_note,
-                'note' => $request->note,
+                // 'note' => $request->note,
+                'note' => $request->note ?? null,
                 'last_by' => Auth::id(),
                 'last_on' => Carbon::now('Asia/Kolkata')->toDateTimeString(),
             ]);
@@ -792,6 +935,7 @@ class TestReportDptController extends Controller
                     $mode = $row['mode'] ?? '';
 
                     if ($mode === 'Insert') {
+                        /*
                         TestReportDptDetails::create([
                             'test_report_dpt_id' => $report->test_report_dpt_id,
                             'dpt_test_no' => $row['dpt_test_no'],
@@ -800,13 +944,39 @@ class TestReportDptController extends Controller
                             'discontinuity_evaluation' => $row['discontinuity_evaluation'],
                             'result_id' => !empty($row['detail_result_id']) ? $row['detail_result_id'] : null,
                         ]);
+                        */
+                        TestReportDptDetails::create([
+                            'test_report_dpt_id' => $report->test_report_dpt_id,
+                            'job_description' => $row['job_description'] ?? null,
+                            'material_id' => !empty($row['material_id']) ? $row['material_id'] : null,
+                            'thickness' => $row['thickness'] ?? null,
+                            'dpt_test_no' => $row['dpt_test_no'],
+                            'heat_no' => $row['heat_no'],
+                            'quantity' => $row['quantity'] ?? 1,
+                            'observation' => $row['observation'] ?? null,
+                            'discontinuity_evaluation' => $row['discontinuity_evaluation'] ?? null,
+                            'result_id' => !empty($row['detail_result_id']) ? $row['detail_result_id'] : null,
+                        ]);
                     } elseif ($mode === 'Update') {
                         if (!empty($row['test_report_dpt_details_id'])) {
+                            /*
                             TestReportDptDetails::where('test_report_dpt_details_id', $row['test_report_dpt_details_id'])->update([
                                 'dpt_test_no' => $row['dpt_test_no'],
                                 'heat_no' => $row['heat_no'],
                                 'quantity' => $row['quantity'],
                                 'discontinuity_evaluation' => $row['discontinuity_evaluation'],
+                                'result_id' => !empty($row['detail_result_id']) ? $row['detail_result_id'] : null,
+                            ]);
+                            */
+                            TestReportDptDetails::where('test_report_dpt_details_id', $row['test_report_dpt_details_id'])->update([
+                                'job_description' => $row['job_description'] ?? null,
+                                'material_id' => !empty($row['material_id']) ? $row['material_id'] : null,
+                                'thickness' => $row['thickness'] ?? null,
+                                'dpt_test_no' => $row['dpt_test_no'],
+                                'heat_no' => $row['heat_no'],
+                                'quantity' => $row['quantity'] ?? 1,
+                                'observation' => $row['observation'] ?? null,
+                                'discontinuity_evaluation' => $row['discontinuity_evaluation'] ?? null,
                                 'result_id' => !empty($row['detail_result_id']) ? $row['detail_result_id'] : null,
                             ]);
                         }
@@ -1286,6 +1456,7 @@ class TestReportDptController extends Controller
             'test_report_dpt.nabl_type_fix',
             'test_report_dpt.job_type_fix',
             // 'type_of_job.type_of_job',
+            'test_report_dpt.type_of_job',
             // 'job_descriptions.job_description',
             'test_report_dpt.job_desc as job_description',
             'test_report_dpt.part_no',
@@ -1458,7 +1629,7 @@ class TestReportDptController extends Controller
 
     public function existsLighting(Request $request)
     {
-        return $this->existsSuggestion('test_report_dpt', 'lighting', $request->term, 'lightingList', 'lighting');
+        return $this->existsSuggestion('test_report_dpt', 'lighting_equipment', $request->term, 'lightingEquipmentList', 'lighting_equipment');
     }
 
     public function existsBackgroundLight(Request $request)
@@ -1469,6 +1640,16 @@ class TestReportDptController extends Controller
     public function existsProductCode(Request $request)
     {
         return $this->existsSuggestion('test_report_dpt', 'product_code', $request->term, 'productCodeList', 'product_code');
+    }
+
+    public function existsReviewedBy(Request $request)
+    {
+        return $this->existsSuggestion('test_report_dpt', 'reviewed_by', $request->term, 'reviewedByList', 'reviewed_by');
+    }
+
+    public function existsWitnessBy(Request $request)
+    {
+        return $this->existsSuggestion('test_report_dpt', 'witness_by', $request->term, 'witnessByList', 'witness_by');
     }
 
     private function existsSuggestion($table, $column, $term, $listId, $parentId)
@@ -1512,7 +1693,9 @@ class TestReportDptController extends Controller
             'test_report_dpt_id',
             'note',
             'dpt_test_no_label',
-            'heat_no_label'
+            'heat_no_label',
+            'nabl_type_fix',
+            'job_type_fix'
         ])
         ->where('current_location_id', $location_data->location_id)
         ->orderBy('test_report_dpt_id', 'desc')
@@ -1524,11 +1707,22 @@ Disclaimer : *Marked informations as given by customer that can affects the vali
 
         $dpt_test_no_label = 'DPT Test No.';
         $heat_no_label = 'Heat No.';
+        $nabl_type_fix = 'Non NABL';
+        $job_type_fix = 'Casting';
 
         if ($lnr_data) {
             $note = $lnr_data->note ?? $note;
             $dpt_test_no_label = !empty($lnr_data->dpt_test_no_label) ? $lnr_data->dpt_test_no_label : 'DPT Test No.';
             $heat_no_label = !empty($lnr_data->heat_no_label) ? $lnr_data->heat_no_label : 'Heat No.';
+            $nabl_type_fix = !empty($lnr_data->nabl_type_fix) ? $lnr_data->nabl_type_fix : 'Non NABL';
+            // $job_type_fix = !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : 'Casting';
+            $jobType = !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : 'Casting';
+            if ($jobType === 'Non-Welding') {
+                $jobType = 'Casting';
+            } elseif ($jobType === 'Welding') {
+                $jobType = 'Fabrication';
+            }
+            $job_type_fix = $jobType;
         }
 
         return response()->json([
@@ -1536,7 +1730,9 @@ Disclaimer : *Marked informations as given by customer that can affects the vali
             'lnr_data'      => [
                 'note'              => $note,
                 'dpt_test_no_label' => $dpt_test_no_label,
-                'heat_no_label'     => $heat_no_label
+                'heat_no_label'     => $heat_no_label,
+                'nabl_type_fix'    => $nabl_type_fix,
+                'job_type_fix'     => $job_type_fix
             ]
         ]);
     }

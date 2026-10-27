@@ -66,11 +66,12 @@ function fillReportDetailTable() {
     let validRows = test_report_dpt_details_data.filter(row => row.mode !== 'Delete');
 
     if (validRows.length === 0) {
-        tbody.append(`<tr><td colspan="7" class="text-center">No Test Report Details Added</td></tr>`);
+        tbody.append(`<tr><td colspan="10" class="text-center">No Test Report Details Added</td></tr>`);
     } else {
         validRows.forEach((row) => {
             let formIndx = test_report_dpt_details_data.indexOf(row);
             let actionDropdown = DetailsActionDropdown('editReportDetails', 'removeReportDetails');
+            /*
             let rowHtml = `<tr>
                 <td>
                    ${actionDropdown}
@@ -81,6 +82,22 @@ function fillReportDetailTable() {
                 <td>${row.heat_no || ''}</td>
                 <td>${row.quantity || 0}</td>
                 <td>${row.discontinuity_evaluation || ''}</td>
+                <td>${row.result_name || ''}</td>
+            </tr>`;
+            */
+            let rowHtml = `<tr>
+                <td>
+                   ${actionDropdown}
+                    <input type="hidden" name="form_indx" value="${formIndx}"/>
+                </td>
+                <td>${row.sr_no}</td>
+                <td>${row.job_description || ''}</td>
+                <td>${row.material_name || ''}</td>
+                <td>${row.thickness || ''}</td>
+                <td>${row.dpt_test_no || ''}</td>
+                <td>${row.heat_no || ''}</td>
+                <td>${row.quantity || 0}</td>
+                <td>${row.observation || ''}</td>
                 <td>${row.result_name || ''}</td>
             </tr>`;
             tbody.append(rowHtml);
@@ -98,10 +115,16 @@ function updateQtySummary(rows) {
 }
 
 function applyDynamicDetailLabels() {
+    let rawJobDesc = jQuery('#job_desc_label').val();
     let rawDpt = jQuery('#dpt_test_no_label').val();
     let rawHeat = jQuery('#heat_no_label').val();
+
+    let jobDescLabel = (rawJobDesc && rawJobDesc.trim() !== '') ? rawJobDesc.trim() : 'Job Desc.';
     let dptLabel = (rawDpt && rawDpt.trim() !== '') ? rawDpt.trim() : 'DPT Test No.';
     let heatLabel = (rawHeat && rawHeat.trim() !== '') ? rawHeat.trim() : 'Heat No.';
+
+    jQuery('#th_job_description').text(jobDescLabel);
+    jQuery('#lbl_det_job_description').text(jobDescLabel);
 
     jQuery('#th_dpt_test_no').text(dptLabel);
     jQuery('#lbl_det_dpt_test_no').html(`${dptLabel} <sup class="astric">*</sup>`);
@@ -111,7 +134,7 @@ function applyDynamicDetailLabels() {
     jQuery('#lbl_det_heat_no').text(heatLabel);
 }
 
-jQuery(document).on('change blur', '#dpt_test_no_label, #heat_no_label', function () {
+jQuery(document).on('change blur input', '#job_desc_label, #dpt_test_no_label, #heat_no_label', function () {
     applyDynamicDetailLabels();
 });
 applyDynamicDetailLabels();
@@ -730,8 +753,107 @@ function fillCustomerDropdown() {
     });
 }
 
+function isLocationNablAllowed(testName) {
+    if (typeof window.locationNablDefault !== 'undefined' && window.locationNablDefault === 'Non NABL') {
+        return false;
+    }
+    if (typeof window.locationNablTests !== 'undefined' && window.locationNablTests.trim() !== '') {
+        let allowed = window.locationNablTests.split(',').map(s => s.trim().toUpperCase());
+        if (!allowed.includes(testName.toUpperCase())) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function lockParentRadios(lock) {
+    if (!isLocationNablAllowed('DPT')) {
+        setRadioReadonly('#TestReportDptModal input[name="nabl_type_fix"]', true);
+    } else {
+        setRadioReadonly('#TestReportDptModal input[name="nabl_type_fix"]', lock);
+    }
+    setRadioReadonly('#TestReportDptModal input[name="job_type_fix"]', lock);
+}
+
+function focusInitialTestReportDptField() {
+    let modal = jQuery('#TestReportDptModal');
+    ['nabl_type_fix', 'job_type_fix'].forEach(function (name) {
+        let $group = modal.find('input[name="' + name + '"]');
+        $group.attr('tabindex', '-1');
+        let $chk = $group.filter(':checked');
+        if (!$chk.length) $chk = $group.first();
+        $chk.attr('tabindex', '0');
+    });
+    let $target = modal.find('input[name="nabl_type_fix"]:checked');
+    if (!$target.length) $target = modal.find('input[name="nabl_type_fix"]').first();
+    setTimeout(() => {
+        if ($target.length) $target[0].focus();
+    }, 30);
+}
+
+// Tab navigation across top parent radios: nabl_type_fix -> job_type_fix -> test_report_sequence
+jQuery(document).on('keydown', '#TestReportDptModal input[name="nabl_type_fix"]', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && !e.shiftKey) {
+        e.preventDefault();
+        let $target = jQuery('#TestReportDptModal input[name="job_type_fix"]:checked');
+        if (!$target.length) $target = jQuery('#TestReportDptModal input[name="job_type_fix"]').first();
+        $target.attr('tabindex', '0');
+        if ($target.length) $target[0].focus();
+    }
+});
+
+jQuery(document).on('keydown', '#TestReportDptModal input[name="job_type_fix"]', function (e) {
+    if (e.key === 'Tab' || e.keyCode === 9) {
+        if (e.shiftKey) {
+            e.preventDefault();
+            let $prev = jQuery('#TestReportDptModal input[name="nabl_type_fix"]:checked');
+            if (!$prev.length) $prev = jQuery('#TestReportDptModal input[name="nabl_type_fix"]').first();
+            $prev.attr('tabindex', '0');
+            if ($prev.length) $prev[0].focus();
+        } else {
+            e.preventDefault();
+            let $seq = jQuery('#TestReportDptModal #test_report_sequence');
+            if ($seq.prop('readonly')) {
+                jQuery('#TestReportDptModal #test_report_date').focus();
+            } else {
+                $seq.focus().select();
+            }
+        }
+    }
+});
+
+jQuery(document).on('keydown', '#TestReportDptModal #test_report_sequence', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && e.shiftKey) {
+        e.preventDefault();
+        let $target = jQuery('#TestReportDptModal input[name="job_type_fix"]:checked');
+        if (!$target.length) $target = jQuery('#TestReportDptModal input[name="job_type_fix"]').first();
+        $target.attr('tabindex', '0');
+        if ($target.length) $target[0].focus();
+    }
+});
+
+jQuery(document).on('keydown', '#TestReportDptModal #test_report_date', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && e.shiftKey) {
+        let $seq = jQuery('#TestReportDptModal #test_report_sequence');
+        if ($seq.prop('readonly')) {
+            e.preventDefault();
+            let $target = jQuery('#TestReportDptModal input[name="job_type_fix"]:checked');
+            if (!$target.length) $target = jQuery('#TestReportDptModal input[name="job_type_fix"]').first();
+            $target.attr('tabindex', '0');
+            if ($target.length) $target[0].focus();
+        }
+    }
+});
+
+jQuery(document).on('change', '#TestReportDptModal input[name="nabl_type_fix"], #TestReportDptModal input[name="job_type_fix"]', function () {
+    let name = jQuery(this).attr('name');
+    jQuery('#TestReportDptModal').find('input[name="' + name + '"]').attr('tabindex', '-1');
+    jQuery(this).attr('tabindex', '0');
+});
+
 jQuery('#TestReportDptModal').on('shown.bs.modal', function () {
-    jQuery('#test_report_sequence').focus();
+    // jQuery('#test_report_sequence').focus();
+    focusInitialTestReportDptField();
     validateAmendmentFields();
 });
 
@@ -761,14 +883,17 @@ function resetDptForm() {
     // jQuery('#type_of_job_id').val('').trigger('change');
     // jQuery('#job_desc_id').val('').trigger('change');
     jQuery('#type_of_job_id').val('');
-    jQuery('#job_desc').val('');
-    jQuery('#material_id').val('').trigger('change');
-    jQuery('#area_of_coverage_id').val('').trigger('change');
-    jQuery('#procedure_ref_id').val('').trigger('change');
-    jQuery('#acceptance_standard_id').val('').trigger('change');
-    jQuery('#tested_by_authority_person_id').val('').trigger('change');
-    jQuery('#reviewed_by_authority_person_id').val('').trigger('change');
-    jQuery('#authorized_by_authority_person_id').val('').trigger('change');
+    // jQuery('#job_desc').val('');
+    // jQuery('#material_id').val('').trigger('change');
+    // jQuery('#area_of_coverage_id').val('').trigger('change');
+    // jQuery('#procedure_ref_id').val('').trigger('change');
+    jQuery('#test_method_id').val('').trigger('change.select2');
+    jQuery('#acceptance_standard_id').val('').trigger('change.select2');
+    // jQuery('#tested_by_authority_person_id').val('').trigger('change');
+    // jQuery('#reviewed_by_authority_person_id').val('').trigger('change');
+    jQuery('#performed_by_authority_person_id').val('').trigger('change.select2');
+    jQuery('#examined_by_authority_person_id').val('').trigger('change.select2');
+    jQuery('#authorized_by_authority_person_id').val('').trigger('change.select2');
 
     jQuery('#defectogram_image_doc').val('');
     jQuery('#defectogram_image').val('');
@@ -785,12 +910,49 @@ function resetDptForm() {
     fillChemicalTable();
     fillReportDetailTable();
 
+    function isLocationNablAllowed(testName) {
+        if (typeof window.locationNablDefault !== 'undefined' && window.locationNablDefault === 'Non NABL') {
+            return false;
+        }
+        if (typeof window.locationNablTests !== 'undefined' && window.locationNablTests.trim() !== '') {
+            let allowed = window.locationNablTests.split(',').map(s => s.trim().toUpperCase());
+            if (!allowed.includes(testName.toUpperCase())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function lockParentRadios(lock) {
+        if (!isLocationNablAllowed('DPT')) {
+            setRadioReadonly('#TestReportDptModal input[name="nabl_type_fix"]', true);
+        } else {
+            setRadioReadonly('#TestReportDptModal input[name="nabl_type_fix"]', lock);
+        }
+        setRadioReadonly('#TestReportDptModal input[name="job_type_fix"]', lock);
+    }
+
     setRadioReadonly('input[name="entry_type_fix"]', false);
+    /*
     setRadioReadonly('input[name="nabl_type_fix"]', false);
     setRadioReadonly('input[name="job_type_fix"]', false);
     jQuery('#entry_type_manual').prop('checked', true);
     jQuery('input[name="nabl_type_fix"][value="Non NABL"]').prop('checked', true).trigger('change');
     jQuery('input[name="job_type_fix"][value="Non-Welding"]').prop('checked', true);
+    */
+    jQuery('#entry_type_manual').prop('checked', true);
+    let defaultNabl = !isLocationNablAllowed('DPT') ? 'Non NABL' : 'Non NABL';
+    jQuery('#TestReportDptModal').find('input[name="nabl_type_fix"][value="' + defaultNabl + '"]').prop('checked', true);
+    // jQuery('#TestReportDptModal').find('input[name="job_type_fix"][value="Non-Welding"]').prop('checked', true);
+    jQuery('#TestReportDptModal').find('input[name="job_type_fix"][value="Casting"]').prop('checked', true);
+    lockParentRadios(false);
+    ['nabl_type_fix', 'job_type_fix'].forEach(function (name) {
+        let $group = jQuery('#TestReportDptModal').find('input[name="' + name + '"]');
+        $group.attr('tabindex', '-1');
+        let $chk = $group.filter(':checked');
+        if (!$chk.length) $chk = $group.first();
+        $chk.attr('tabindex', '0');
+    });
     applyDynamicDetailLabels();
 
     setSelect2Readonly('#customer_id', false);
@@ -1010,24 +1172,30 @@ function removeChemicalDetails(elem) {
 // -----------------------------------------------------
 // Grid 2: Test Report Details row actions
 // -----------------------------------------------------
-jQuery('#addDetailRowBtn').on('click', function () {
+function resetReportDetailsForm() {
     jQuery('#DPTReportDetailsForm')[0].reset();
-    jQuery('#detail_result_id').val('').trigger('change');
+    jQuery('#DPTReportDetailsForm').removeClass('was-validated');
+    jQuery('#det_material_id').val('').trigger('change.select2');
+    jQuery('#detail_result_id').val('').trigger('change.select2');
+    jQuery('#DPTReportDetailsForm input[type="hidden"]').val('');
+    jQuery('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
+}
+
+jQuery('#addDetailRowBtn').on('click', function () {
+    resetReportDetailsForm();
     jQuery('#det_form_type').val('add');
-    jQuery('#det_form_index').val('');
-    jQuery('#det_row_index').val('');
-
-    jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
-
+    jQuery('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
     jQuery('#DPTReportDetailsModal').modal('show');
 });
 
 jQuery('#DPTReportDetailsModal').on('shown.bs.modal', function () {
+    /*
     let type = jQuery('#det_form_type').val();
     if (type === 'add') {
         jQuery('#det_quantity').val(1);
     }
     jQuery('#det_quantity').prop('readonly', true).attr('tabindex', '-1');
+    */
 });
 
 jQuery('#submitDetailsRowBtn').on('click', function () {
@@ -1037,12 +1205,20 @@ jQuery('#submitDetailsRowBtn').on('click', function () {
         return;
     }
 
-    let testNo = jQuery('#det_dpt_test_no').val();
-    let heatNo = jQuery('#det_heat_no').val();
-    jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
-    let quantity = 1;
-    let evaluation = jQuery('#det_discontinuity_evaluation').val();
-    let resultId = jQuery('#detail_result_id').val();
+    let job_description = jQuery('#det_job_description').val() || '';
+    let material_id = jQuery('#det_material_id').val() || null;
+    let material_name = jQuery('#det_material_id option:selected').val() ? jQuery('#det_material_id option:selected').text() : '';
+    let thickness = jQuery('#det_thickness').val() || '';
+    let testNo = jQuery('#det_dpt_test_no').val() || '';
+    let heatNo = jQuery('#det_heat_no').val() || '';
+    let quantity = parseInt(jQuery('#det_quantity').val() || 0);
+    if (quantity < 1) {
+        toastr.error('Enter Quantity greater than 0.');
+        return;
+    }
+    let observation = jQuery('#det_observation').val() || '';
+    let evaluation = jQuery('#det_discontinuity_evaluation').val() || '';
+    let resultId = jQuery('#detail_result_id').val() || null;
     let resultText = jQuery('#detail_result_id option:selected').text().trim();
 
     let type = jQuery('#det_form_type').val();
@@ -1055,45 +1231,37 @@ jQuery('#submitDetailsRowBtn').on('click', function () {
         return row.dpt_test_no == testNo;
     });
 
-    // if (isDuplicate) {
-    //     toastr.error('Duplicate DPT Test No. Entry Not Allowed.');
-    //     return;
-    // }
+    let rowData = {
+        test_report_dpt_details_id: (type === 'edit' && test_report_dpt_details_data[index]) ? (test_report_dpt_details_data[index].test_report_dpt_details_id || '') : '',
+        job_description: job_description,
+        material_id: material_id,
+        material_name: material_name,
+        thickness: thickness,
+        dpt_test_no: testNo,
+        heat_no: heatNo,
+        quantity: quantity,
+        observation: observation,
+        discontinuity_evaluation: evaluation,
+        detail_result_id: resultId,
+        result_name: resultText,
+        mode: type === 'add' ? 'Insert' : 'Update'
+    };
 
     if (type === 'add') {
-        test_report_dpt_details_data.push({
-            test_report_dpt_details_id: '',
-            dpt_test_no: testNo,
-            heat_no: heatNo,
-            quantity: quantity,
-            discontinuity_evaluation: evaluation,
-            detail_result_id: resultId,
-            result_name: resultText,
-            mode: 'Insert'
-        });
+        rowData.sr_no = test_report_dpt_details_data.filter(r => r.mode !== 'Delete').length + 1;
+        test_report_dpt_details_data.push(rowData);
         resequenceReportDetails();
         fillReportDetailTable();
 
         // Reset details sub-form and keep modal open for next entry
-        jQuery('#DPTReportDetailsForm')[0].reset();
-        jQuery('#detail_result_id').val('').trigger('change');
+        resetReportDetailsForm();
         jQuery('#det_form_type').val('add');
-        jQuery('#det_form_index').val('');
-        jQuery('#det_row_index').val('');
-
-        jQuery('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
-        jQuery('#det_dpt_test_no').focus();
+        jQuery('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
+        jQuery('#det_job_description').focus();
     } else {
-        let row = test_report_dpt_details_data[index];
-        row.dpt_test_no = testNo;
-        row.heat_no = heatNo;
-        row.quantity = quantity;
-        row.discontinuity_evaluation = evaluation;
-        row.detail_result_id = resultId;
-        row.result_name = resultText;
-        if (row.mode !== 'Insert') {
-            row.mode = 'Update';
-        }
+        rowData.sr_no = parseInt(jQuery('#det_row_index').val()) || (parseInt(index) + 1);
+        rowData.mode = (rowData.test_report_dpt_details_id > 0) ? 'Update' : 'Insert';
+        test_report_dpt_details_data[index] = rowData;
         resequenceReportDetails();
         fillReportDetailTable();
         jQuery('#DPTReportDetailsModal').modal('hide');
@@ -1101,20 +1269,24 @@ jQuery('#submitDetailsRowBtn').on('click', function () {
 });
 
 function editReportDetails(elem) {
+    resetReportDetailsForm();
     let index = jQuery(elem).parents('tr').find('input[name="form_indx"]').val();
     let row = test_report_dpt_details_data[index];
 
     jQuery('#det_form_type').val('edit');
     jQuery('#det_form_index').val(index);
-    jQuery('#test_report_dpt_details_id').val(row.test_report_dpt_details_id);
+    jQuery('#det_row_index').val(row.sr_no);
+    jQuery('#test_report_dpt_details_id').val(row.test_report_dpt_details_id || '');
 
-    jQuery('#det_dpt_test_no').val(row.dpt_test_no);
-    jQuery('#det_heat_no').val(row.heat_no);
-    jQuery('#det_quantity').val(row.quantity);
-    jQuery('#det_discontinuity_evaluation').val(row.discontinuity_evaluation);
-    jQuery('#detail_result_id').val(row.detail_result_id).trigger('change');
-
-    jQuery('#det_quantity').val(row.quantity || 1).prop('readonly', true).attr('tabindex', '-1');
+    jQuery('#det_job_description').val(row.job_description || '');
+    jQuery('#det_material_id').val(row.material_id).trigger('change.select2');
+    jQuery('#det_thickness').val(row.thickness || '');
+    jQuery('#det_dpt_test_no').val(row.dpt_test_no || '');
+    jQuery('#det_heat_no').val(row.heat_no || '');
+    jQuery('#det_quantity').val(row.quantity || '').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
+    jQuery('#det_observation').val(row.observation || '');
+    jQuery('#det_discontinuity_evaluation').val(row.discontinuity_evaluation || '');
+    jQuery('#detail_result_id').val(row.detail_result_id || row.result_id).trigger('change.select2');
 
     jQuery('#DPTReportDetailsModal').modal('show');
 }
@@ -1270,44 +1442,58 @@ function fetchAndFillTestReportDpt(id) {
                 jQuery('#test_report_sequence').val(reportMasterData.test_report_sequence);
                 jQuery('#test_report_no').val(reportMasterData.test_report_no);
                 jQuery('#test_report_date').val(reportMasterData.test_report_date);
-                jQuery('#customer_client').val(reportMasterData.customer_client);
-                jQuery('#part_no').val(reportMasterData.part_no);
-                jQuery('#drg_no').val(reportMasterData.drg_no);
-                jQuery('#heat_no').val(reportMasterData.heat_no);
-                jQuery('#product_code').val(reportMasterData.product_code);
-                jQuery('#dc_no').val(reportMasterData.dc_no);
-                jQuery('#dc_date').val(reportMasterData.dc_date);
-                jQuery('#po_no').val(reportMasterData.po_no);
-                jQuery('#po_date').val(reportMasterData.po_date);
-                jQuery('#date_of_receipt').val(reportMasterData.date_of_receipt);
-                jQuery('#date_of_testing').val(reportMasterData.date_of_testing);
-                jQuery('#date_of_testing_value').val(reportMasterData.date_of_testing_value);
-                jQuery('#test_carried_out_at').val(reportMasterData.test_carried_out_at);
-                jQuery('#amendment_no').val(reportMasterData.amendment_no);
-                jQuery('#amendment_date').val(reportMasterData.amendment_date);
-                jQuery('#amendment_reason').val(reportMasterData.amendment_reason);
-                jQuery('#stage_of_test').val(reportMasterData.stage_of_test);
+                jQuery('#customer_client').val(reportMasterData.customer_client || '');
+                jQuery('#date_of_receipt').val(reportMasterData.date_of_receipt || '');
+                jQuery('#date_of_testing').val(reportMasterData.date_of_testing || '');
+                // jQuery('#date_of_testing_value').val(reportMasterData.date_of_testing_value);
+                jQuery('#type_of_job').val(reportMasterData.type_of_job || '');
+                jQuery('#project').val(reportMasterData.project || '');
+                jQuery('#po_no').val(reportMasterData.po_no || '');
+                // jQuery('#po_date').val(reportMasterData.po_date);
+                // jQuery('#part_no').val(reportMasterData.part_no);
+                // jQuery('#drg_no').val(reportMasterData.drg_no);
+                // jQuery('#heat_no').val(reportMasterData.heat_no);
+                // jQuery('#product_code').val(reportMasterData.product_code);
+                // jQuery('#dc_no').val(reportMasterData.dc_no);
+                // jQuery('#dc_date').val(reportMasterData.dc_date);
+                // jQuery('#amendment_no').val(reportMasterData.amendment_no);
+                // jQuery('#amendment_date').val(reportMasterData.amendment_date);
+                // jQuery('#amendment_reason').val(reportMasterData.amendment_reason);
+                // jQuery('#stage_of_test').val(reportMasterData.stage_of_test);
 
-                jQuery('#surface_condition').val(reportMasterData.surface_condition);
-                jQuery('#surface_temp').val(reportMasterData.surface_temp);
-                jQuery('#thickness').val(reportMasterData.thickness);
-                jQuery('#test_technique').val(reportMasterData.test_technique);
-                jQuery('#pre_cleaning').val(reportMasterData.pre_cleaning);
-                jQuery('#penetrant_application').val(reportMasterData.penetrant_application);
-                jQuery('#dwell_time').val(reportMasterData.dwell_time);
-                jQuery('#penetrant_remover').val(reportMasterData.penetrant_remover);
-                jQuery('#developer').val(reportMasterData.developer);
-                jQuery('#developer_application').val(reportMasterData.developer_application);
-                jQuery('#developing_time').val(reportMasterData.developing_time);
-                jQuery('#lighting').val(reportMasterData.lighting);
-                jQuery('#light_intensity').val(reportMasterData.light_intensity);
-                jQuery('#background_light').val(reportMasterData.background_light);
-                jQuery('#uva_light_intensity').val(reportMasterData.uva_light_intensity);
+                jQuery('#test_method_id').val(zeroToEmpty(reportMasterData.test_method_id)).trigger('change.select2');
+                jQuery('#acceptance_standard_id').val(zeroToEmpty(reportMasterData.acceptance_standard_id)).trigger('change.select2');
+                jQuery('#surface_condition').val(reportMasterData.surface_condition || '');
+                jQuery('#extent_of_exa').val(reportMasterData.extent_of_exa || '');
+                jQuery('#stage_of_exa').val(reportMasterData.stage_of_exa || '');
+                jQuery('#surface_temp').val(reportMasterData.surface_temp || '');
+                jQuery('#method').val(reportMasterData.method || '');
+                jQuery('#penetrant').val(reportMasterData.penetrant || '');
+                jQuery('#developer').val(reportMasterData.developer || '');
+                jQuery('#cleaner').val(reportMasterData.cleaner || '');
+                jQuery('#pre_cleaning').val(reportMasterData.pre_cleaning || '');
+                jQuery('#post_cleaning').val(reportMasterData.post_cleaning || '');
+                jQuery('#penetrant_time').val(reportMasterData.penetrant_time || '');
+                jQuery('#developing_time').val(reportMasterData.developing_time || '');
+                jQuery('#worksheet_no').val(reportMasterData.worksheet_no || '');
+                jQuery('#test_carried_out_at').val(reportMasterData.test_carried_out_at || '');
 
-                jQuery('#sp_note').val(reportMasterData.sp_note);
-                jQuery('#note').val(reportMasterData.note || '');
-                jQuery('#pend_qty').val(res.pend_qty);
-                jQuery('#total_qty').val(reportMasterData.total_qty);
+                // jQuery('#thickness').val(reportMasterData.thickness);
+                // jQuery('#test_technique').val(reportMasterData.test_technique);
+                // jQuery('#penetrant_application').val(reportMasterData.penetrant_application);
+                // jQuery('#dwell_time').val(reportMasterData.dwell_time);
+                // jQuery('#penetrant_remover').val(reportMasterData.penetrant_remover);
+                // jQuery('#developer_application').val(reportMasterData.developer_application);
+                jQuery('#lighting_equipment').val(reportMasterData.lighting_equipment || '');
+                jQuery('#intensity').val(reportMasterData.intensity || '');
+                // jQuery('#background_light').val(reportMasterData.background_light);
+                // jQuery('#uva_light_intensity').val(reportMasterData.uva_light_intensity);
+
+                jQuery('#job_desc_label').val(reportMasterData.job_desc_label || '');
+                jQuery('#sp_note').val(reportMasterData.sp_note || '');
+                // jQuery('#note').val(reportMasterData.note || '');
+                // jQuery('#pend_qty').val(res.pend_qty);
+                jQuery('#total_qty').val(reportMasterData.total_qty || '');
 
                 jQuery('#material_inward_details_id').val((reportMasterData.material_inward_details_id && reportMasterData.material_inward_details_id != 0) ? reportMasterData.material_inward_details_id : '');
                 jQuery('#observation_sheet_details_id').val((reportMasterData.observation_sheet_details_id && reportMasterData.observation_sheet_details_id != 0) ? reportMasterData.observation_sheet_details_id : '');
@@ -1349,14 +1535,17 @@ function fetchAndFillTestReportDpt(id) {
                 // jQuery('#type_of_job_id').val(zeroToEmpty(reportMasterData.type_of_job_id)).trigger('change');
                 // jQuery('#job_desc_id').val(zeroToEmpty(reportMasterData.job_desc_id)).trigger('change');
                 jQuery('#type_of_job_id').val(zeroToEmpty(reportMasterData.type_of_job_id));
-                jQuery('#job_desc').val(reportMasterData.job_description || reportMasterData.job_desc || '');
-                jQuery('#material_id').val(zeroToEmpty(reportMasterData.material_id)).trigger('change');
-                jQuery('#area_of_coverage_id').val(zeroToEmpty(reportMasterData.area_of_coverage_id)).trigger('change');
-                jQuery('#procedure_ref_id').val(zeroToEmpty(reportMasterData.procedure_ref_id)).trigger('change');
-                jQuery('#acceptance_standard_id').val(zeroToEmpty(reportMasterData.acceptance_standard_id)).trigger('change');
-                jQuery('#tested_by_authority_person_id').val(zeroToEmpty(reportMasterData.tested_by_authority_person_id)).trigger('change');
-                jQuery('#reviewed_by_authority_person_id').val(zeroToEmpty(reportMasterData.reviewed_by_authority_person_id)).trigger('change');
-                jQuery('#authorized_by_authority_person_id').val(zeroToEmpty(reportMasterData.authorized_by_authority_person_id)).trigger('change');
+                // jQuery('#job_desc').val(reportMasterData.job_description || reportMasterData.job_desc || '');
+                // jQuery('#material_id').val(zeroToEmpty(reportMasterData.material_id)).trigger('change');
+                // jQuery('#area_of_coverage_id').val(zeroToEmpty(reportMasterData.area_of_coverage_id)).trigger('change');
+                // jQuery('#procedure_ref_id').val(zeroToEmpty(reportMasterData.procedure_ref_id)).trigger('change');
+                // jQuery('#tested_by_authority_person_id').val(zeroToEmpty(reportMasterData.tested_by_authority_person_id)).trigger('change');
+                // jQuery('#reviewed_by_authority_person_id').val(zeroToEmpty(reportMasterData.reviewed_by_authority_person_id)).trigger('change');
+                jQuery('#performed_by_authority_person_id').val(zeroToEmpty(reportMasterData.performed_by_authority_person_id)).trigger('change.select2');
+                jQuery('#examined_by_authority_person_id').val(zeroToEmpty(reportMasterData.examined_by_authority_person_id)).trigger('change.select2');
+                jQuery('#authorized_by_authority_person_id').val(zeroToEmpty(reportMasterData.authorized_by_authority_person_id)).trigger('change.select2');
+                jQuery('#reviewed_by').val(reportMasterData.reviewed_by || '');
+                jQuery('#witness_by').val(reportMasterData.witness_by || '');
 
                 jQuery('#dpt_test_no_label').val(reportMasterData.dpt_test_no_label || '');
                 jQuery('#heat_no_label').val(reportMasterData.heat_no_label || '');
@@ -1501,6 +1690,10 @@ jQuery(document).on('click', '#submitbtn', function (e) {
 
     for (let i = 0; i < activeDetails.length; i++) {
         let row = activeDetails[i];
+        if (!row.material_id) {
+            toastr.error('Select Material in Test Report Details.');
+            return;
+        }
         if (!row.dpt_test_no || row.dpt_test_no.trim() === '') {
             let dptLabel = jQuery('#dpt_test_no_label').val()?.trim() || 'DPT Test No.';
             toastr.error(`Please Enter ${dptLabel}.`);
@@ -1510,10 +1703,12 @@ jQuery(document).on('click', '#submitbtn', function (e) {
             toastr.error('Enter Quantity greater than 0.');
             return;
         }
+        /*
         if (!row.discontinuity_evaluation || row.discontinuity_evaluation.trim() === '') {
             toastr.error(`Please Enter Discontinuity Evaluation`);
             return;
         }
+        */
         if (!row.detail_result_id || String(row.detail_result_id).trim() === '') {
             toastr.error(`Please Enter Result`);
             return;
@@ -1702,6 +1897,12 @@ function suggestBackgroundLight(event, element) {
 function suggestProductCode(event, element) {
     bindSuggestionAutocomplete(element, 'test_report_dpt_product_code-list');
 }
+function suggestReviewedBy(event, element) {
+    bindSuggestionAutocomplete(element, 'test_report_dpt_reviewed_by-list');
+}
+function suggestWitnessBy(event, element) {
+    bindSuggestionAutocomplete(element, 'test_report_dpt_witness_by-list');
+}
 
 function bindSuggestionAutocomplete(element, url) {
     let parentId = jQuery(element).attr('id');
@@ -1775,12 +1976,12 @@ function fillCopyModalTable() {
             <td>${item.nabl_type_fix || ''}</td>
             <td>${item.job_type_fix || ''}</td>` +
             // `<td>${item.type_of_job || ''}</td>` +
-            `<td>${item.job_description || ''}</td>
-            <td>${item.part_no || ''}</td>
-            <td>${item.drg_no || ''}</td>
-            <td>${item.material || ''}</td>
-            <td>${item.product_code || ''}</td>
-        </tr>`;
+            // <td>${item.job_description || ''}</td>
+            // <td>${item.part_no || ''}</td>
+            // <td>${item.drg_no || ''}</td>
+            // <td>${item.material || ''}</td>
+            // <td>${item.product_code || ''}</td>
+            `</tr>`;
         tbody.append(rowHtml);
     });
 
@@ -1851,6 +2052,13 @@ jQuery(document).on('click', '#submitCopyReportDptBtn', function () {
     }).then((resultMaster) => {
         let copyMaster = resultMaster.isConfirmed;
 
+        if (!copyMaster) {
+            return;
+        }
+
+        performCopyDptReport(reportId, true, false);
+
+        /*
         Swal.fire({
             title: 'Confirmation',
             text: 'Do You want to Copy Test Report Details?',
@@ -1876,6 +2084,7 @@ jQuery(document).on('click', '#submitCopyReportDptBtn', function () {
 
             performCopyDptReport(reportId, copyMaster, copyDetails);
         });
+        */
     });
 });
 
@@ -1911,26 +2120,49 @@ function performCopyDptReport(reportId, copyMaster, copyDetails) {
                     jQuery('#stage_of_test').val(copyData.stage_of_test || '');
                     */
 
+                    jQuery('#customer_client').val(copyData.customer_client || '');
+                    // jQuery('#type_of_job').val(copyData.type_of_job || '');
+                    jQuery('#project').val(copyData.project || '');
+                    jQuery('#po_no').val(copyData.po_no || '');
+                    jQuery('#test_method_id').val(zeroToEmpty(copyData.test_method_id)).trigger('change.select2');
+                    jQuery('#job_desc_label').val(copyData.job_desc_label || '');
+                    jQuery('#dpt_test_no_label').val(copyData.dpt_test_no_label || '');
+                    jQuery('#heat_no_label').val(copyData.heat_no_label || '');
+                    jQuery('#acceptance_standard_id').val(zeroToEmpty(copyData.acceptance_standard_id)).trigger('change.select2');
+
                     jQuery('#surface_condition').val(copyData.surface_condition || '');
+                    jQuery('#extent_of_exa').val(copyData.extent_of_exa || '');
+                    jQuery('#stage_of_exa').val(copyData.stage_of_exa || '');
                     jQuery('#surface_temp').val(copyData.surface_temp || '');
-                    // jQuery('#thickness').val(copyData.thickness || '');
-                    jQuery('#test_technique').val(copyData.test_technique || '');
+                    jQuery('#method').val(copyData.method || '');
+                    jQuery('#penetrant').val(copyData.penetrant || '');
+                    jQuery('#cleaner').val(copyData.cleaner || '');
                     jQuery('#pre_cleaning').val(copyData.pre_cleaning || '');
-                    jQuery('#penetrant_application').val(copyData.penetrant_application || '');
-                    jQuery('#dwell_time').val(copyData.dwell_time || '');
-                    jQuery('#penetrant_remover').val(copyData.penetrant_remover || '');
+                    jQuery('#post_cleaning').val(copyData.post_cleaning || '');
+                    jQuery('#penetrant_time').val(copyData.penetrant_time || '');
                     jQuery('#developer').val(copyData.developer || '');
-                    jQuery('#developer_application').val(copyData.developer_application || '');
                     jQuery('#developing_time').val(copyData.developing_time || '');
-                    jQuery('#lighting').val(copyData.lighting || '');
-                    jQuery('#light_intensity').val(copyData.light_intensity || '');
-                    jQuery('#background_light').val(copyData.background_light || '');
-                    jQuery('#uva_light_intensity').val(copyData.uva_light_intensity || '');
+                    jQuery('#worksheet_no').val(copyData.worksheet_no || '');
+                    // jQuery('#thickness').val(copyData.thickness || '');
+                    // jQuery('#test_technique').val(copyData.test_technique || '');
+                    // jQuery('#penetrant_application').val(copyData.penetrant_application || '');
+                    // jQuery('#dwell_time').val(copyData.dwell_time || '');
+                    // jQuery('#penetrant_remover').val(copyData.penetrant_remover || '');
+                    // jQuery('#developer_application').val(copyData.developer_application || '');
+                    jQuery('#lighting_equipment').val(copyData.lighting_equipment || '');
+                    jQuery('#intensity').val(copyData.intensity || '');
+                    jQuery('#reviewed_by').val(copyData.reviewed_by || '');
+                    jQuery('#witness_by').val(copyData.witness_by || '');
+                    jQuery('#performed_by_authority_person_id').val(zeroToEmpty(copyData.performed_by_authority_person_id)).trigger('change.select2');
+                    jQuery('#examined_by_authority_person_id').val(zeroToEmpty(copyData.examined_by_authority_person_id)).trigger('change.select2');
+                    jQuery('#authorized_by_authority_person_id').val(zeroToEmpty(copyData.authorized_by_authority_person_id)).trigger('change.select2');
+                    // jQuery('#background_light').val(copyData.background_light || '');
+                    // jQuery('#uva_light_intensity').val(copyData.uva_light_intensity || '');
 
                     if (copyData.sp_note) {
                         jQuery('#sp_note').val(copyData.sp_note || '');
                     }
-                    jQuery('#note').val(copyData.note || '');
+                    // jQuery('#note').val(copyData.note || '');
 
                     /*
                     if (copyData.material_id) {
@@ -1940,20 +2172,15 @@ function performCopyDptReport(reportId, copyMaster, copyDetails) {
                         jQuery('#area_of_coverage_id').val(copyData.area_of_coverage_id).trigger('change');
                     }
                     */
-                    if (copyData.procedure_ref_id) {
-                        // jQuery('#procedure_ref_id').val(copyData.procedure_ref_id).trigger('change');
-                    }
-                    if (copyData.acceptance_standard_id) {
-                        // jQuery('#acceptance_standard_id').val(copyData.acceptance_standard_id).trigger('change');
-                    }
-                    if (copyData.reviewed_by_authority_person_id) {
-                        // jQuery('#reviewed_by_authority_person_id').val(copyData.reviewed_by_authority_person_id).trigger('change');
-                    }
-                    if (copyData.authorized_by_authority_person_id) {
-                        // jQuery('#authorized_by_authority_person_id').val(copyData.authorized_by_authority_person_id).trigger('change');
-                    }
-                    jQuery('#dpt_test_no_label').val(copyData.dpt_test_no_label || '');
-                    jQuery('#heat_no_label').val(copyData.heat_no_label || '');
+                    // if (copyData.procedure_ref_id) {
+                    // jQuery('#procedure_ref_id').val(copyData.procedure_ref_id).trigger('change');
+                    // }
+                    // if (copyData.reviewed_by_authority_person_id) {
+                    // jQuery('#reviewed_by_authority_person_id').val(copyData.reviewed_by_authority_person_id).trigger('change');
+                    // }
+                    // if (copyData.authorized_by_authority_person_id) {
+                    //     jQuery('#authorized_by_authority_person_id').val(copyData.authorized_by_authority_person_id).trigger('change.select2');
+                    // }
                     applyDynamicDetailLabels();
                 }
 
@@ -2009,7 +2236,7 @@ function performCopyDptReport(reportId, copyMaster, copyDetails) {
 
                 setTimeout(function () {
                     // jQuery('#type_of_job_id').focus();
-                    jQuery('#job_desc').focus();
+                    jQuery('#project').focus();
                 }, 100);
             }
         },
@@ -2049,9 +2276,45 @@ function getTRLNRData() {
             if (data.response_code == 1 && data.lnr_data != null) {
                 var lnr = data.lnr_data;
                 jQuery('#note').val(lnr.note ?? "");
+                jQuery('#job_desc_label').val(lnr.job_desc_label ?? "Job Desc.");
                 jQuery('#dpt_test_no_label').val(lnr.dpt_test_no_label ?? "");
                 jQuery('#heat_no_label').val(lnr.heat_no_label ?? "");
                 applyDynamicDetailLabels();
+
+                if (!_openForEdit) {
+                    if (lnr.nabl_type_fix) {
+                        let targetNabl = lnr.nabl_type_fix;
+                        // if (!isLocationNablAllowed('DPT')) {
+                        if (typeof window.locationNablDefault !== 'undefined' && window.locationNablDefault === 'Non NABL') {
+                            targetNabl = 'Non NABL';
+                        } else if (typeof isLocationNablAllowed === 'function' && !isLocationNablAllowed('DPT')) {
+                            targetNabl = 'Non NABL';
+                        }
+                        jQuery('#TestReportDptModal').find('input[name="nabl_type_fix"][value="' + targetNabl + '"]').prop('checked', true);
+                        handleNablTypeChange();
+                    }
+                    if (lnr.job_type_fix) {
+                        let targetJob = lnr.job_type_fix;
+                        // Map old Non-Welding/Welding values if present
+                        if (targetJob === 'Non-Welding') {
+                            targetJob = 'Casting';
+                        } else if (targetJob === 'Welding') {
+                            targetJob = 'Fabrication';
+                        }
+                        // jQuery('#TestReportDptModal').find('input[name="job_type_fix"][value="' + lnr.job_type_fix + '"]').prop('checked', true);
+                        jQuery('#TestReportDptModal').find('input[name="job_type_fix"][value="' + targetJob + '"]').prop('checked', true);
+                    }
+                    if (typeof lockParentRadios === 'function') {
+                        lockParentRadios(false);
+                    }
+                    ['nabl_type_fix', 'job_type_fix'].forEach(function (name) {
+                        let $group = jQuery('#TestReportDptModal').find('input[name="' + name + '"]');
+                        $group.attr('tabindex', '-1');
+                        let $chk = $group.filter(':checked');
+                        if (!$chk.length) $chk = $group.first();
+                        $chk.attr('tabindex', '0');
+                    });
+                }
             }
         },
         error: function () {
