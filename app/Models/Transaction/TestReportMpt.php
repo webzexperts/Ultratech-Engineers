@@ -25,6 +25,22 @@ class TestReportMpt extends Model
         'job_type_fix',
         'from_type_id_fix',
         'customer_client',
+        'date_of_receipt',
+        'type_of_job',
+        'project',
+        'po_no',
+        'test_method_id',
+        'extent_of_exa',
+        'stage_of_exa',
+        'method',
+        'field_indicator',
+        'background_contrast',
+        'worksheet_no',
+        'job_desc_label',
+        'performed_by_authority_person_id',
+        'examined_by_authority_person_id',
+        'reviewed_by',
+        'witness_by',
         'type_of_job_id',
         'job_desc_id',
         'job_desc',
@@ -81,6 +97,8 @@ class TestReportMpt extends Model
         'locked_on'
     ];
 
+    protected $hidden = ['defectogram_image_blob'];
+
     public function setMaterialInwardDetailsIdAttribute($value)
     {
         $this->attributes['material_inward_details_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
@@ -94,6 +112,21 @@ class TestReportMpt extends Model
     public function setFromTypeIdFixAttribute($value)
     {
         $this->attributes['from_type_id_fix'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
+
+    public function setTestMethodIdAttribute($value)
+    {
+        $this->attributes['test_method_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
+
+    public function setPerformedByAuthorityPersonIdAttribute($value)
+    {
+        $this->attributes['performed_by_authority_person_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
+    }
+
+    public function setExaminedByAuthorityPersonIdAttribute($value)
+    {
+        $this->attributes['examined_by_authority_person_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;
     }
 
     public function equipment_details()

@@ -25,6 +25,24 @@ class TestReportDpt extends Model
         'job_type_fix',
         'from_type_id_fix',
         'customer_client',
+        'date_of_receipt',
+        'type_of_job',
+        'project',
+        'po_no',
+        'test_method_id',
+        'extent_of_exa',
+        'stage_of_exa',
+        'method',
+        'penetrant',
+        'cleaner',
+        'post_cleaning',
+        'penetrant_time',
+        'worksheet_no',
+        'job_desc_label',
+        'performed_by_authority_person_id',
+        'examined_by_authority_person_id',
+        'reviewed_by',
+        'witness_by',
         'type_of_job_id',
         'job_desc_id',
         'job_desc',
@@ -52,8 +70,8 @@ class TestReportDpt extends Model
         'developer',
         'developer_application',
         'developing_time',
-        'lighting',
-        'light_intensity',
+        'lighting_equipment',
+        'intensity',
         'background_light',
         'uva_light_intensity',
         'procedure_ref_id',
@@ -82,6 +100,7 @@ class TestReportDpt extends Model
         'locked_by',
         'locked_on',
     ];
+    protected $hidden = ['defectogram_image_blob'];
 
     public function setMaterialInwardDetailsIdAttribute($value)
     {

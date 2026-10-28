@@ -24,10 +24,16 @@ function DetailsActionDropdown(editFunc, removeFunc) {
 }
 
 function applyDynamicDetailLabels() {
+    let rawJobDesc = $('#job_desc_label').val();
     let rawMpt = $('#mpt_test_no_label').val();
     let rawHeat = $('#heat_no_label').val();
+
+    let jobDescLabel = (rawJobDesc && rawJobDesc.trim() !== '') ? rawJobDesc.trim() : 'Job Desc.';
     let mptLabel = (rawMpt && rawMpt.trim() !== '') ? rawMpt.trim() : 'MPI Test No.';
     let heatLabel = (rawHeat && rawHeat.trim() !== '') ? rawHeat.trim() : 'Heat No.';
+
+    $('#th_job_description').text(jobDescLabel);
+    $('#lbl_det_job_description').text(jobDescLabel);
 
     $('#th_mpt_test_no').text(mptLabel);
     $('#lbl_det_mpt_test_no').html(`${mptLabel} <sup class="astric">*</sup>`);
@@ -37,7 +43,7 @@ function applyDynamicDetailLabels() {
     $('#lbl_det_heat_no').text(heatLabel);
 }
 
-$(document).on('change blur', '#mpt_test_no_label, #heat_no_label', function () {
+$(document).on('change blur input', '#job_desc_label, #mpt_test_no_label, #heat_no_label', function () {
     applyDynamicDetailLabels();
 });
 
@@ -48,6 +54,16 @@ function parseDateStr(str) {
         return new Date(parts[2], parts[1] - 1, parts[0]);
     }
     return null;
+}
+
+function formatDateStr(sqlDate) {
+    if (!sqlDate || sqlDate === '0000-00-00') return '';
+    if (sqlDate.indexOf('/') !== -1) return sqlDate;
+    let parts = sqlDate.split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return sqlDate;
 }
 
 function validateDates() {
@@ -116,18 +132,25 @@ $(document).ready(function () {
     });
 
     $('#TestReportMptModal').on('shown.bs.modal', function () {
-        setTimeout(function () {
-            let seqInput = $('#test_report_sequence');
-            if (seqInput.prop('readonly')) {
-                let dateInput = $('#test_report_date');
-                dateInput.focus().select();
-                setTimeout(function () {
-                    dateInput.datepicker('hide');
-                }, 50);
-            } else {
-                seqInput.focus().select();
-            }
-        }, 150);
+        validateAmendmentFields();
+        if (_openForEdit) {
+            setTimeout(function () {
+                let seqInput = $('#test_report_sequence');
+                if (seqInput.prop('readonly')) {
+                    let dateInput = $('#test_report_date');
+                    dateInput.focus().select();
+                    setTimeout(function () {
+                        dateInput.datepicker('hide');
+                    }, 50);
+                } else {
+                    seqInput.focus().select();
+                }
+            }, 150);
+        } else {
+            setTimeout(function () {
+                focusInitialTestReportMptField();
+            }, 100);
+        }
     });
 
     $('#add_mpt_report_btn').on('click', function () {
@@ -149,11 +172,10 @@ $(document).ready(function () {
         }, 200);
     });
 
-    // Focus to Job Description after Copy Modal closes
+    // Focus to Project after Copy Modal closes
     $('#CopyReportMptModal').on('hidden.bs.modal', function () {
         setTimeout(function () {
-            // $('#job_desc_id').focus();
-            $('#job_desc').focus();
+            $('#project').focus();
         }, 200);
     });
 
@@ -377,7 +399,7 @@ $(document).ready(function () {
             $('#dc_date').val(row.dc_date);
             $('#po_no').val(row.po_no);
             $('#po_date').val(row.po_date);
-            $('#date_of_receipt').val(row.material_inward_date);
+            $('#date_of_receipt').val(row.material_inward_date ? formatDateStr(row.material_inward_date) : '');
             // $('#test_carried_out_at').val(row.test_at_fix);
 
             // $('#type_of_job_id').val(row.type_of_job_id).trigger('change.select2');
@@ -403,9 +425,14 @@ $(document).ready(function () {
                 test_report_mpt_details_data = [{
                     test_report_mpt_details_id: 0,
                     sr_no: 1,
+                    job_description: row.job_desc || '',
+                    material_id: row.material_id || '',
+                    material_name: row.material || '',
+                    thickness: row.thickness || '',
                     mpt_test_no: '',
-                    heat_no: '',
+                    heat_no: row.heat_no || '',
                     quantity: 1,
+                    observation: '',
                     discontinuity_evaluation: '',
                     result_id: '',
                     result_name: '',
@@ -417,9 +444,14 @@ $(document).ready(function () {
                 test_report_mpt_details_data = [{
                     test_report_mpt_details_id: 0,
                     sr_no: 1,
+                    job_description: row.job_desc || '',
+                    material_id: row.material_id || '',
+                    material_name: row.material || '',
+                    thickness: row.thickness || '',
                     mpt_test_no: '',
-                    heat_no: '',
+                    heat_no: row.heat_no || '',
                     quantity: initialQty,
+                    observation: '',
                     discontinuity_evaluation: '',
                     result_id: '',
                     result_name: '',
@@ -478,13 +510,13 @@ $(document).ready(function () {
                     <td>${row.nabl_type_fix || ''}</td>
                     <td>${row.job_type_fix || ''}</td>` +
                     // `<td>${row.type_of_job || ''}</td>` +
-                    `<td>${row.job_description || ''}</td>
-                    <td>${row.part_no || ''}</td>
-                    <td>${row.drg_no || ''}</td>
-                    <td>${row.material || ''}</td>
-                    <td>${row.heat_no || ''}</td>
-                    <td>${row.product_code || ''}</td>
-                </tr>`;
+                    // <td>${row.job_description || ''}</td>
+                    // <td>${row.part_no || ''}</td>
+                    // <td>${row.drg_no || ''}</td>
+                    // <td>${row.material || ''}</td>
+                    // <td>${row.heat_no || ''}</td>
+                    // <td>${row.product_code || ''}</td>
+                    `</tr>`;
                 tbody.append(rowHtml);
             });
         }
@@ -548,6 +580,13 @@ $(document).ready(function () {
         }).then((resultMaster) => {
             let copyMaster = resultMaster.isConfirmed;
 
+            if (!copyMaster) {
+                return;
+            }
+
+            performCopyReport(reportId, true, false);
+
+            /*
             Swal.fire({
                 title: 'Confirmation',
                 text: 'Do You want to Copy Test Report Details?',
@@ -573,6 +612,7 @@ $(document).ready(function () {
 
                 performCopyReport(reportId, copyMaster, copyDetails);
             });
+            */
         });
     });
 
@@ -590,26 +630,51 @@ $(document).ready(function () {
 
                     if (copyMaster) {
                         $('#customer_client').val(d.customer_client || '');
+                        $('#type_of_job').val(d.type_of_job || '');
+                        $('#project').val(d.project || '');
+
+                        // PO & DC fields copied per user rule
+                        $('#po_no').val(d.po_no || '');
+                        // Technical fields
+                        $('#extent_of_exa').val(d.extent_of_exa || '');
+                        $('#stage_of_exa').val(d.stage_of_exa || '');
                         $('#surface_condition').val(d.surface_condition || '');
                         $('#surface_temp').val(d.surface_temp || '');
+                        $('#method').val(d.method || '');
                         $('#test_technique').val(d.test_technique || '');
                         $('#type_of_magnetization').val(d.type_of_magnetization || '');
                         $('#type_of_current').val(d.type_of_current || '');
+                        $('#field_indicator').val(d.field_indicator || '');
+                        $('#yoke_wt_lift_check').val(d.yoke_wt_lift_check || '');
+                        $('#background_contrast').val(d.background_contrast || '');
                         $('#prod_pole_spacing').val(d.prod_pole_spacing || '');
                         $('#performance_verification').val(d.performance_verification || '');
                         $('#lighting').val(d.lighting || '');
                         $('#light_intensity').val(d.light_intensity || '');
                         $('#background_light').val(d.background_light || '');
                         $('#uva_light_intensity').val(d.uva_light_intensity || '');
-                        $('#yoke_wt_lift_check').val(d.yoke_wt_lift_check || '');
+                        $('#worksheet_no').val(d.worksheet_no || '');
                         $('#sp_note').val(d.sp_note || '');
                         $('#note').val(d.note || '');
+                        $('#reviewed_by').val(d.reviewed_by || '');
+                        $('#witness_by').val(d.witness_by || '');
+
+                        // Labels copy
+                        $('#job_desc_label').val(d.job_desc_label || '');
                         $('#mpt_test_no_label').val(d.mpt_test_no_label || '');
                         $('#heat_no_label').val(d.heat_no_label || '');
                         applyDynamicDetailLabels();
 
-                        // Do not copy required fields (customer_id, type_of_job_id, job_desc_id, material_id, date_of_testing, test_carried_out_at, area_of_coverage_id, procedure_ref_id, acceptance_standard_id, tested_by_authority_person_id)
-                        // Do not copy thickness, reviewed_by_authority_person_id, authorized_by_authority_person_id per requirements
+                        // Authority persons copy
+                        if (d.performed_by_authority_person_id) {
+                            $('#performed_by_authority_person_id').val(d.performed_by_authority_person_id).trigger('change.select2');
+                        }
+                        if (d.examined_by_authority_person_id) {
+                            $('#examined_by_authority_person_id').val(d.examined_by_authority_person_id).trigger('change.select2');
+                        }
+                        if (d.authorized_by_authority_person_id) {
+                            $('#authorized_by_authority_person_id').val(d.authorized_by_authority_person_id).trigger('change.select2');
+                        }
                     }
 
                     /*
@@ -641,6 +706,9 @@ $(document).ready(function () {
                     }
                     */
 
+                    setTimeout(function () {
+                        $('#project').focus();
+                    }, 100);
                 }
             },
             complete: function () {
@@ -673,18 +741,16 @@ $(document).ready(function () {
         $('#MPTReportDetailsForm')[0].reset();
         $('#det_form_type').val('add');
         $('#test_report_mpt_details_id').val(0);
+        $('#det_material_id').val('').trigger('change.select2');
+        $('#detail_result_id').val('').trigger('change.select2');
 
-        $('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
+        $('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
 
         $('#MPTReportDetailsModal').modal('show');
     });
 
     $('#MPTReportDetailsModal').on('shown.bs.modal', function () {
-        let type = $('#det_form_type').val();
-        if (type === 'add') {
-            $('#det_quantity').val(1);
-        }
-        $('#det_quantity').prop('readonly', true).attr('tabindex', '-1');
+        $('#det_job_description').focus();
     });
 
     // Requirement 5: Focus Navigation on Modal Close
@@ -696,7 +762,7 @@ $(document).ready(function () {
     });
     $('#MPTReportDetailsModal').on('hidden.bs.modal', function () {
         setTimeout(function () {
-            $('#tested_by_authority_person_id').focus();
+            $('#performed_by_authority_person_id').select2('focus');
         }, 200);
     });
 
@@ -852,10 +918,18 @@ $(document).ready(function () {
 
         var form_type = $('#det_form_type').val();
         var form_index = $('#det_form_index').val();
+        var job_description = $('#det_job_description').val();
+        var material_id = $('#det_material_id').val();
+        var material_name = $('#det_material_id option:selected').val() ? $('#det_material_id option:selected').text() : '';
+        var thickness = $('#det_thickness').val();
         var mpt_test_no = $('#det_mpt_test_no').val();
         var heat_no = $('#det_heat_no').val();
-        $('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
-        var quantity = 1;
+        var quantity = parseInt($('#det_quantity').val()) || 0;
+        if (quantity < 1) {
+            toastr.error('Enter Quantity greater than 0.');
+            return;
+        }
+        var observation = $('#det_observation').val();
         var discontinuity_evaluation = $('#det_discontinuity_evaluation').val();
         var result_id = $('#detail_result_id').val();
         var result_name = $('#detail_result_id option:selected').text();
@@ -872,30 +946,39 @@ $(document).ready(function () {
         }
 
         var rowData = {
+            test_report_mpt_details_id: $('#test_report_mpt_details_id').val() || 0,
+            job_description: job_description,
+            material_id: material_id,
+            material_name: material_name,
+            thickness: thickness,
             mpt_test_no: mpt_test_no,
             heat_no: heat_no,
             quantity: quantity,
+            observation: observation,
             discontinuity_evaluation: discontinuity_evaluation,
             result_id: result_id,
             result_name: result_name,
-            mode: form_type === 'edit' ? 'Update' : 'Add'
+            mode: form_type === 'edit' ? (parseInt($('#test_report_mpt_details_id').val()) > 0 ? 'Update' : 'Insert') : 'Insert'
         };
 
         if (form_type === 'edit') {
+            rowData.sr_no = parseInt($('#det_row_index').val()) || (parseInt(form_index) + 1);
             test_report_mpt_details_data[form_index] = rowData;
             renderReportDetailsTable();
             calculateTotalQty();
             $('#MPTReportDetailsModal').modal('hide');
         } else {
+            rowData.sr_no = test_report_mpt_details_data.filter(function (r) { return r.mode !== 'Delete'; }).length + 1;
             test_report_mpt_details_data.push(rowData);
             renderReportDetailsTable();
             calculateTotalQty();
             form.reset();
             $('#detail_result_id').val('').trigger('change.select2');
+            $('#det_material_id').val('').trigger('change.select2');
             $('#det_form_type').val('add');
-            $('#det_quantity').val(1).prop('readonly', true).attr('tabindex', '-1');
+            $('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
             $(form).removeClass('was-validated');
-            $('#det_mpt_test_no').focus();
+            $('#det_job_description').focus();
         }
     });
 
@@ -906,7 +989,7 @@ $(document).ready(function () {
         loadLatestReportNumber();
         fillCustomerDropdown();
         setTimeout(function () {
-            $('#test_report_sequence').focus();
+            focusInitialTestReportMptField();
         }, 100);
     });
 
@@ -916,6 +999,10 @@ $(document).ready(function () {
 
         if (!form.checkValidity()) {
             $(form).addClass('was-validated');
+            let $firstInvalid = $(form).find(':invalid').first();
+            if ($firstInvalid.length) {
+                $firstInvalid.focus();
+            }
             return;
         }
 
@@ -955,6 +1042,14 @@ $(document).ready(function () {
         var activeDetails = test_report_mpt_details_data.filter(function (row) { return row.mode !== 'Delete'; });
         if (activeDetails.length === 0) {
             toastr.error('Please Add At Least One Test Report MPT Detail');
+            return;
+        }
+
+        var invalidMatDetail = activeDetails.find(function (row) {
+            return !row.material_id;
+        });
+        if (invalidMatDetail) {
+            toastr.error('Select Material in Test Report Details.');
             return;
         }
 
@@ -1115,17 +1210,8 @@ $(document).ready(function () {
             loadLatestReportNumber();
             fillCustomerDropdown();
             setTimeout(function () {
-                let seqInput = $('#test_report_sequence');
-                if (seqInput.prop('readonly')) {
-                    let dateInput = $('#test_report_date');
-                    dateInput.focus().select();
-                    setTimeout(function () {
-                        dateInput.datepicker('hide');
-                    }, 50);
-                } else {
-                    seqInput.focus().select();
-                }
-            }, 150);
+                focusInitialTestReportMptField();
+            }, 100);
         }
     });
 
@@ -1134,17 +1220,8 @@ $(document).ready(function () {
         loadLatestReportNumber();
         fillCustomerDropdown();
         setTimeout(function () {
-            let seqInput = $('#test_report_sequence');
-            if (seqInput.prop('readonly')) {
-                let dateInput = $('#test_report_date');
-                dateInput.focus().select();
-                setTimeout(function () {
-                    dateInput.datepicker('hide');
-                }, 50);
-            } else {
-                seqInput.focus().select();
-            }
-        }, 150);
+            focusInitialTestReportMptField();
+        }, 100);
     });
 });
 
@@ -1192,6 +1269,55 @@ function loadLatestReportNumber() {
     });
 }
 
+function isLocationNablAllowed(testName = 'MPT') {
+    if (typeof window.locationNablDefault !== 'undefined' && window.locationNablDefault === 'Non NABL') {
+        return false;
+    }
+    if (typeof window.locationNablTests !== 'undefined' && window.locationNablTests.trim() !== '') {
+        let allowed = window.locationNablTests.split(',').map(s => s.trim().toUpperCase());
+        if (!allowed.includes(testName.toUpperCase())) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function focusInitialTestReportMptField() {
+    let modal = $('#TestReportMptModal');
+    let $checkedNabl = modal.find('input[name="nabl_type_fix"]:checked');
+    if (!$checkedNabl.length) {
+        $checkedNabl = modal.find('input[name="nabl_type_fix"]').first();
+    }
+    let $checkedJob = modal.find('input[name="job_type_fix"]:checked');
+    if (!$checkedJob.length) {
+        $checkedJob = modal.find('input[name="job_type_fix"]').first();
+    }
+
+    modal.find('input[name="nabl_type_fix"]').attr('tabindex', '-1');
+    $checkedNabl.attr('tabindex', '0');
+
+    modal.find('input[name="job_type_fix"]').attr('tabindex', '-1');
+    $checkedJob.attr('tabindex', '0');
+
+    modal.find('input[name="nabl_type_fix"]').not($checkedNabl).blur();
+    modal.find('input[name="job_type_fix"]').not($checkedJob).blur();
+
+    setTimeout(() => {
+        if ($checkedNabl.length) {
+            $checkedNabl[0].focus();
+        }
+    }, 50);
+}
+
+function lockParentRadios(lock) {
+    if (!isLocationNablAllowed('MPT')) {
+        setRadioReadonly('#TestReportMptModal input[name="nabl_type_fix"]', true);
+    } else {
+        setRadioReadonly('#TestReportMptModal input[name="nabl_type_fix"]', lock);
+    }
+    setRadioReadonly('#TestReportMptModal input[name="job_type_fix"]', lock);
+}
+
 function setAddMode() {
     _openForEdit = false;
     dbUlrId = null;
@@ -1201,13 +1327,7 @@ function setAddMode() {
     $('#detail_em_id').find('.temp-option').remove();
     $('#detail_mm_id').find('.temp-option').remove();
     $('#submitbtn').prop('disabled', false);
-    var lastNote = $('#note').val();
-    var lastMptTestNoLabel = $('#mpt_test_no_label').val();
-    var lastHeatNoLabel = $('#heat_no_label').val();
     $('#commonTestReportMptForm')[0].reset();
-    $('#note').val(lastNote);
-    if (lastMptTestNoLabel) $('#mpt_test_no_label').val(lastMptTestNoLabel);
-    if (lastHeatNoLabel) $('#heat_no_label').val(lastHeatNoLabel);
     $('#commonTestReportMptForm').removeClass('was-validated');
     $('#commonTestReportMptForm .is-invalid, #commonTestReportMptForm .is-valid').removeClass('is-invalid is-valid');
     $('#id').val('');
@@ -1221,11 +1341,18 @@ function setAddMode() {
     $('#preview_btn, #add_new').hide();
 
     setRadioReadonly('input[name="entry_type_fix"]', false);
+    /*
     setRadioReadonly('input[name="nabl_type_fix"]', false);
     setRadioReadonly('input[name="job_type_fix"]', false);
     $('#entry_type_manual').prop('checked', true);
     $('input[name="nabl_type_fix"][value="Non NABL"]').prop('checked', true).trigger('change');
-    $('input[name="job_type_fix"][value="Non-Welding"]').prop('checked', true);
+    $('input[name="job_type_fix"][value="Casting"]').prop('checked', true);
+    */
+    $('#entry_type_manual').prop('checked', true);
+    let defaultNabl = !isLocationNablAllowed('MPT') ? 'Non NABL' : 'Non NABL';
+    $('#TestReportMptModal').find('input[name="nabl_type_fix"][value="' + defaultNabl + '"]').prop('checked', true);
+    $('#TestReportMptModal').find('input[name="job_type_fix"][value="Casting"]').prop('checked', true);
+    lockParentRadios(false);
     $('#mpt_test_no_label').prop('readonly', false);
     $('#heat_no_label').prop('readonly', false);
     applyDynamicDetailLabels();
@@ -1239,6 +1366,8 @@ function setAddMode() {
     $('#test_report_date').val(dateVal).trigger('change');
 
     $('#customer_client').val('');
+    $('#type_of_job').val('');
+    $('#project').val('');
     $('#part_no').val('');
     $('#drg_no').val('');
     $('#heat_no').val('');
@@ -1253,12 +1382,17 @@ function setAddMode() {
     $('#test_carried_out_at').val('');
     $('#amendment_no, #amendment_date, #amendment_reason').val('').prop('readonly', true).css('pointer-events', 'none').addClass('skip-tab').attr('tabindex', '-1');
     $('#stage_of_test').val('');
+    $('#stage_of_exa').val('');
+    $('#extent_of_exa').val('');
     $('#surface_condition').val('');
     $('#surface_temp').val('');
+    $('#method').val('');
     $('#thickness').val('');
     $('#test_technique').val('');
     $('#type_of_magnetization').val('');
     $('#type_of_current').val('');
+    $('#field_indicator').val('');
+    $('#background_contrast').val('');
     $('#prod_pole_spacing').val('');
     $('#performance_verification').val('');
     $('#lighting').val('');
@@ -1266,9 +1400,16 @@ function setAddMode() {
     $('#background_light').val('');
     $('#uva_light_intensity').val('');
     $('#yoke_wt_lift_check').val('');
+    $('#worksheet_no').val('');
     $('#sp_note').val('');
+    $('#note').val('');
     $('#total_qty').val('');
     $('#pend_qty').val('');
+
+    $('#job_desc_label').val('');
+    $('#mpt_test_no_label').val('');
+    $('#heat_no_label').val('');
+    applyDynamicDetailLabels();
 
     // $('#type_of_job_id').val('').trigger('change.select2');
     // $('#job_desc_id').val('').trigger('change.select2');
@@ -1278,6 +1419,15 @@ function setAddMode() {
     $('#area_of_coverage_id').val('').trigger('change.select2');
     $('#procedure_ref_id').val('').trigger('change.select2');
     $('#acceptance_standard_id').val('').trigger('change.select2');
+    $('#test_method_id').val('').trigger('change.select2');
+
+    $('#performed_by_authority_person_id').val('').trigger('change.select2');
+    $('#examined_by_authority_person_id').val('').trigger('change.select2');
+    $('#authorized_by_authority_person_id').val('').trigger('change.select2');
+    $('#tested_by_authority_person_id').val('').trigger('change.select2');
+    $('#reviewed_by_authority_person_id').val('').trigger('change.select2');
+    $('#reviewed_by').val('');
+    $('#witness_by').val('');
 
     $('#defectogram_image_doc').val('');
     $('#defectogram_image').val('');
@@ -1517,6 +1667,7 @@ function updateQtySummary(rows) {
     if (!rows) {
         rows = typeof test_report_mpt_details_data !== 'undefined' ? test_report_mpt_details_data.filter(function (row) { return row.mode !== 'Delete'; }) : [];
     }
+    /*
     var nablType = $('input[name="nabl_type_fix"]:checked').val() || 'Non NABL';
     if (nablType === 'NABL') {
         $('#total_qty').val(1);
@@ -1528,6 +1679,9 @@ function updateQtySummary(rows) {
         }
         $('#total_qty').val(sum > 0 ? sum : '');
     }
+    */
+    var sum = rows.reduce(function (acc, row) { return acc + parseInt(row.quantity || 0); }, 0);
+    $('#total_qty').val(sum > 0 ? sum : '');
 }
 
 function renderReportDetailsTable() {
@@ -1548,17 +1702,20 @@ function renderReportDetailsTable() {
                 <input type="hidden" name="det_form_indx" value="${i}"/>
             </td>
             <td>${row.sr_no || activeCount}</td>
+            <td>${row.job_description || ''}</td>
+            <td>${row.material_name || ''}</td>
+            <td>${row.thickness || ''}</td>
             <td>${row.mpt_test_no || ''}</td>
             <td>${row.heat_no || ''}</td>
             <td>${row.quantity || ''}</td>
-            <td>${row.discontinuity_evaluation || ''}</td>
+            <td>${row.observation || ''}</td>
             <td>${row.result_name || ''}</td>
         </tr>`;
         tbody.append(tr);
     });
 
     if (activeCount === 0) {
-        tbody.html('<tr><td colspan="7" class="text-center">No Test Report Details Added</td></tr>');
+        tbody.html('<tr><td colspan="10" class="text-center">No Test Report Details Added</td></tr>');
     }
     updateQtySummary();
 }
@@ -1569,13 +1726,20 @@ function editReportDetails(th) {
 
     $('#det_form_type').val('edit');
     $('#det_form_index').val(index);
-    $('#det_mpt_test_no').val(row.mpt_test_no);
-    $('#det_heat_no').val(row.heat_no);
+    $('#det_row_index').val(row.sr_no || (parseInt(index) + 1));
+    $('#test_report_mpt_details_id').val(row.test_report_mpt_details_id || 0);
 
-    $('#det_quantity').val(row.quantity || 1).prop('readonly', true).attr('tabindex', '-1');
+    $('#det_job_description').val(row.job_description || '');
+    $('#det_material_id').val(row.material_id || '').trigger('change.select2');
+    $('#det_thickness').val(row.thickness || '');
+    $('#det_mpt_test_no').val(row.mpt_test_no || '');
+    $('#det_heat_no').val(row.heat_no || '');
 
-    $('#det_discontinuity_evaluation').val(row.discontinuity_evaluation);
-    $('#detail_result_id').val(row.result_id).trigger('change.select2');
+    $('#det_quantity').val(row.quantity || '').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
+
+    $('#det_observation').val(row.observation || '');
+    $('#det_discontinuity_evaluation').val(row.discontinuity_evaluation || '');
+    $('#detail_result_id').val(row.result_id || row.detail_result_id || '').trigger('change.select2');
     $('#MPTReportDetailsModal').modal('show');
 }
 
@@ -1599,6 +1763,7 @@ function calculateTotalQty() {
             total += parseInt(row.quantity) || 0;
         }
     });
+    /*
     let entryType = $('input[name="entry_type_fix"]:checked').val() || 'Manual';
     if (entryType === 'From Inward') {
         var pendQty = parseInt($('#pend_qty').val()) || 0;
@@ -1606,7 +1771,8 @@ function calculateTotalQty() {
             toastr.error('Total Qty Cannot Be Greater Than Pending Qty.');
         }
     }
-    $('#total_qty').val(total);
+    */
+    $('#total_qty').val(total > 0 ? total : '');
 }
 
 function handleNablTypeChange() {
@@ -1836,17 +2002,20 @@ function editMptReport(id) {
                 } else {
                     $('#nabl_non_nabl').prop('checked', true);
                 }
-                if (m.job_type_fix == 'Welding') {
-                    $('#job_welding').prop('checked', true);
+                if (m.job_type_fix == 'Fabrication') {
+                    $('#job_type_fabrication').prop('checked', true);
                 } else {
-                    $('#job_casting').prop('checked', true);
+                    $('#job_type_casting').prop('checked', true);
                 }
                 setRadioReadonly('input[name="nabl_type_fix"]', true);
                 setRadioReadonly('input[name="job_type_fix"]', true);
+                $('#job_desc_label').val(m.job_desc_label || '');
                 $('#mpt_test_no_label').val(m.mpt_test_no_label || '').prop('readonly', false);
                 $('#heat_no_label').val(m.heat_no_label || '').prop('readonly', false);
                 applyDynamicDetailLabels();
                 $('#customer_client').val(m.customer_client);
+                $('#type_of_job').val(m.type_of_job || '');
+                $('#project').val(m.project || '');
                 // $('#type_of_job_id').val(m.type_of_job_id).trigger('change.select2');
                 // $('#job_desc_id').val(m.job_desc_id).trigger('change.select2');
                 $('#type_of_job_id').val(zeroToEmpty(m.type_of_job_id));
@@ -1860,21 +2029,25 @@ function editMptReport(id) {
                 $('#dc_date').val(m.dc_date);
                 $('#po_no').val(m.po_no);
                 $('#po_date').val(m.po_date);
-                $('#date_of_receipt').val(m.date_of_receipt);
+                $('#date_of_receipt').val(m.date_of_receipt ? formatDateStr(m.date_of_receipt) : '');
                 $('#date_of_testing').val(m.date_of_testing);
                 $('#date_of_testing_value').val(m.date_of_testing_value || m.date_of_testing);
-                $('#test_carried_out_at').val(m.test_carried_out_at);
+                $('#test_carried_out_at').val(m.test_carried_out_at || '');
                 $('#amendment_no').val(m.amendment_no || '');
                 $('#amendment_date').val(m.amendment_date || '');
                 $('#amendment_reason').val(m.amendment_reason || '');
                 $('#stage_of_test').val(m.stage_of_test);
+                $('#stage_of_exa').val(m.stage_of_exa || '');
                 $('#area_of_coverage_id').val(m.area_of_coverage_id).trigger('change.select2');
                 $('#surface_condition').val(m.surface_condition);
                 $('#surface_temp').val(m.surface_temp);
+                $('#method').val(m.method || '');
                 $('#thickness').val(m.thickness);
                 $('#test_technique').val(m.test_technique);
                 $('#type_of_magnetization').val(m.type_of_magnetization);
                 $('#type_of_current').val(m.type_of_current);
+                $('#field_indicator').val(m.field_indicator || '');
+                $('#background_contrast').val(m.background_contrast || '');
                 $('#prod_pole_spacing').val(m.prod_pole_spacing);
                 $('#performance_verification').val(m.performance_verification);
                 $('#lighting').val(m.lighting);
@@ -1882,8 +2055,11 @@ function editMptReport(id) {
                 $('#background_light').val(m.background_light);
                 $('#uva_light_intensity').val(m.uva_light_intensity);
                 $('#yoke_wt_lift_check').val(m.yoke_wt_lift_check);
+                $('#worksheet_no').val(m.worksheet_no || '');
+                $('#extent_of_exa').val(m.extent_of_exa || '');
                 $('#procedure_ref_id').val(m.procedure_ref_id).trigger('change.select2');
                 $('#acceptance_standard_id').val(m.acceptance_standard_id).trigger('change.select2');
+                $('#test_method_id').val(m.test_method_id || '').trigger('change.select2');
                 dbUlrId = m.ulr_id;
                 dbUlrSequence = m.ulr_sequence;
                 dbUlrNo = m.ulr_no;
@@ -1901,9 +2077,13 @@ function editMptReport(id) {
                 _preventUlrFetch = false;
 
                 handleNablTypeChange();
+                $('#performed_by_authority_person_id').val(zeroToEmpty(m.performed_by_authority_person_id)).trigger('change.select2');
+                $('#examined_by_authority_person_id').val(zeroToEmpty(m.examined_by_authority_person_id)).trigger('change.select2');
+                $('#authorized_by_authority_person_id').val(zeroToEmpty(m.authorized_by_authority_person_id)).trigger('change.select2');
                 $('#tested_by_authority_person_id').val(zeroToEmpty(m.tested_by_authority_person_id)).trigger('change.select2');
                 $('#reviewed_by_authority_person_id').val(zeroToEmpty(m.reviewed_by_authority_person_id)).trigger('change.select2');
-                $('#authorized_by_authority_person_id').val(zeroToEmpty(m.authorized_by_authority_person_id)).trigger('change.select2');
+                $('#reviewed_by').val(m.reviewed_by || '');
+                $('#witness_by').val(m.witness_by || '');
                 $('#sp_note').val(m.sp_note);
                 $('#note').val(m.note || '');
                 $('#total_qty').val(m.total_qty);
@@ -1958,9 +2138,14 @@ function editMptReport(id) {
                 test_report_mpt_details_data = (res.details || []).map(function (row) {
                     return {
                         test_report_mpt_details_id: row.test_report_mpt_details_id || 0,
+                        job_description: row.job_description || '',
+                        material_id: row.material_id || '',
+                        material_name: row.material_name || row.material || '',
+                        thickness: row.thickness || '',
                         mpt_test_no: row.mpt_test_no || '',
                         heat_no: row.heat_no || '',
                         quantity: row.quantity || 1,
+                        observation: row.observation || '',
                         discontinuity_evaluation: row.discontinuity_evaluation || '',
                         result_id: row.result_id || '',
                         result_name: row.result_name || row.result || '',
@@ -2009,7 +2194,8 @@ function suggestCustomerClient(e, element) { commonSuggestionAjax({ inputElement
 function suggestPartNo(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#part_no_list', url: 'test_report_mpt_part_no-list', responseListKey: 'partNoList' }); }
 function suggestDrgNo(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#drg_no_list', url: 'test_report_mpt_drg_no-list', responseListKey: 'drgNoList' }); }
 function suggestTestCarriedOutAt(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#test_carried_out_at_list', url: 'test_report_mpt_test_carried_out_at-list', responseListKey: 'testCarriedOutAtList' }); }
-function suggestStageOfTest(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#stage_of_test_list', url: 'test_report_mpt_stage_of_test-list', responseListKey: 'stageOfTestList' }); }
+function suggestStageOfExa(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#stage_of_exa_list', url: 'test_report_mpt_stage_of_exa-list', responseListKey: 'stageOfExaList' }); }
+function suggestStageOfTest(e, element) { suggestStageOfExa(e, element); }
 function suggestSurfaceCondition(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#surface_condition_list', url: 'test_report_mpt_surface_condition-list', responseListKey: 'surfaceConditionList' }); }
 function suggestSurfaceTemp(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#surface_temp_list', url: 'test_report_mpt_surface_temp-list', responseListKey: 'surfaceTempList' }); }
 function suggestThickness(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#thickness_list', url: 'test_report_mpt_thickness-list', responseListKey: 'thicknessList' }); }
@@ -2030,6 +2216,22 @@ function suggestProductCode(e, element) {
         listSelector: '#product_code_list',
         url: 'test_report_mpt_product_code-list',
         responseListKey: 'productCodeList'
+    });
+}
+function suggestReviewedBy(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#reviewed_by_list',
+        url: 'test_report_mpt_reviewed_by-list',
+        responseListKey: 'reviewedByList'
+    });
+}
+function suggestWitnessBy(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#witness_by_list',
+        url: 'test_report_mpt_witness_by-list',
+        responseListKey: 'witnessByList'
     });
 }
 
@@ -2149,9 +2351,6 @@ $(document).on('input change', '#amendment_no, #amendment_date', function () {
     validateAmendmentFields();
 });
 
-$('#TestReportMptModal').on('shown.bs.modal', function () {
-    validateAmendmentFields();
-});
 
 $(document).on('change', '#detail_em_id', function () {
     var option = $(this).find('option:selected');
@@ -2323,10 +2522,32 @@ function getTRLNRData() {
         success: function (data) {
             if (data.response_code == 1 && data.lnr_data != null) {
                 var lnr = data.lnr_data;
-                $('#note').val(lnr.note ?? "");
-                $('#mpt_test_no_label').val(lnr.mpt_test_no_label ?? "");
-                $('#heat_no_label').val(lnr.heat_no_label ?? "");
-                applyDynamicDetailLabels();
+                if (!_openForEdit) {
+                    $('#method').val(lnr.method || '');
+                    $('#job_desc_label').val(lnr.job_desc_label || '');
+                    $('#mpt_test_no_label').val(lnr.mpt_test_no_label || '');
+                    $('#heat_no_label').val(lnr.heat_no_label || '');
+                    $('#test_carried_out_at').val(lnr.test_carried_out_at || '');
+                    applyDynamicDetailLabels();
+
+                    if (lnr.nabl_type_fix) {
+                        let targetNabl = lnr.nabl_type_fix;
+                        if (!isLocationNablAllowed('MPT')) {
+                            targetNabl = 'Non NABL';
+                        }
+                        let $nablGroup = $('#TestReportMptModal').find('input[name="nabl_type_fix"]');
+                        $nablGroup.prop('checked', false).blur();
+                        $nablGroup.filter('[value="' + targetNabl + '"]').prop('checked', true);
+                        handleNablTypeChange();
+                    }
+                    if (lnr.job_type_fix) {
+                        let $jobGroup = $('#TestReportMptModal').find('input[name="job_type_fix"]');
+                        $jobGroup.prop('checked', false).blur();
+                        $jobGroup.filter('[value="' + lnr.job_type_fix + '"]').prop('checked', true);
+                    }
+                    lockParentRadios(false);
+                    focusInitialTestReportMptField();
+                }
             }
         },
         error: function () {
@@ -2334,5 +2555,65 @@ function getTRLNRData() {
         }
     });
 }
+
+// Tab navigation across top parent radios: nabl_type_fix -> job_type_fix -> test_report_sequence
+$(document).on('keydown', '#TestReportMptModal input[name="nabl_type_fix"]', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && !e.shiftKey) {
+        e.preventDefault();
+        let $target = $('#TestReportMptModal input[name="job_type_fix"]:checked');
+        if (!$target.length) $target = $('#TestReportMptModal input[name="job_type_fix"]').first();
+        $target.attr('tabindex', '0');
+        if ($target.length) $target[0].focus();
+    }
+});
+
+$(document).on('keydown', '#TestReportMptModal input[name="job_type_fix"]', function (e) {
+    if (e.key === 'Tab' || e.keyCode === 9) {
+        if (e.shiftKey) {
+            e.preventDefault();
+            let $prev = $('#TestReportMptModal input[name="nabl_type_fix"]:checked');
+            if (!$prev.length) $prev = $('#TestReportMptModal input[name="nabl_type_fix"]').first();
+            $prev.attr('tabindex', '0');
+            if ($prev.length) $prev[0].focus();
+        } else {
+            e.preventDefault();
+            let $seq = $('#TestReportMptModal #test_report_sequence');
+            if ($seq.prop('readonly')) {
+                $('#TestReportMptModal #test_report_date').focus();
+            } else {
+                $seq.focus().select();
+            }
+        }
+    }
+});
+
+$(document).on('keydown', '#TestReportMptModal #test_report_sequence', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && e.shiftKey) {
+        e.preventDefault();
+        let $target = $('#TestReportMptModal input[name="job_type_fix"]:checked');
+        if (!$target.length) $target = $('#TestReportMptModal input[name="job_type_fix"]').first();
+        $target.attr('tabindex', '0');
+        if ($target.length) $target[0].focus();
+    }
+});
+
+$(document).on('keydown', '#TestReportMptModal #test_report_date', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && e.shiftKey) {
+        let $seq = $('#TestReportMptModal #test_report_sequence');
+        if ($seq.prop('readonly')) {
+            e.preventDefault();
+            let $target = $('#TestReportMptModal input[name="job_type_fix"]:checked');
+            if (!$target.length) $target = $('#TestReportMptModal input[name="job_type_fix"]').first();
+            $target.attr('tabindex', '0');
+            if ($target.length) $target[0].focus();
+        }
+    }
+});
+
+$(document).on('change', '#TestReportMptModal input[name="nabl_type_fix"], #TestReportMptModal input[name="job_type_fix"]', function () {
+    let name = $(this).attr('name');
+    $('#TestReportMptModal').find('input[name="' + name + '"]').attr('tabindex', '-1');
+    $(this).attr('tabindex', '0');
+});
 
 

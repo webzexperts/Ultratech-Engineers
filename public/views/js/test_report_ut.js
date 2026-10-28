@@ -620,7 +620,9 @@ jQuery(document).on('click', '#submitDetailsRowBtn', function () {
         jQuery('#det_form_type').val('add');
         jQuery('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
         //toastr.success('Details added successfully.');
-        jQuery('#det_ut_test_no').focus();
+        // jQuery('#det_ut_test_no').focus();
+        jQuery('#det_job_description').focus();
+
     } else {
         rowData.sr_no = parseInt(serialized.row_index);
         rowData.mode = (rowData.test_report_ut_details_id > 0) ? 'Update' : 'Insert';
@@ -927,6 +929,31 @@ function fillCustomerDropdown() {
     });
 }
 
+function lockParentRadios(lock) {
+    if (typeof window.locationNablDefault !== 'undefined' && window.locationNablDefault === 'Non NABL') {
+        setRadioReadonly('#TestReportUtModal input[name="nabl_type_fix"]', true);
+    } else {
+        setRadioReadonly('#TestReportUtModal input[name="nabl_type_fix"]', lock);
+    }
+    setRadioReadonly('#TestReportUtModal input[name="job_type_fix"]', lock);
+}
+
+function focusInitialTestReportUtField() {
+    let modal = jQuery('#TestReportUtModal');
+    ['nabl_type_fix', 'job_type_fix'].forEach(function (name) {
+        let $group = modal.find('input[name="' + name + '"]');
+        $group.attr('tabindex', '-1');
+        let $chk = $group.filter(':checked');
+        if (!$chk.length) $chk = $group.first();
+        $chk.attr('tabindex', '0');
+    });
+    let $target = modal.find('input[name="nabl_type_fix"]:checked');
+    if (!$target.length) $target = modal.find('input[name="nabl_type_fix"]').first();
+    setTimeout(() => {
+        if ($target.length) $target[0].focus();
+    }, 30);
+}
+
 // Reset Main Form
 function resetMainForm() {
     _openForEdit = false;
@@ -1053,8 +1080,20 @@ function resetMainForm() {
 
     // Reset radio buttons to defaults (Keep editable for manual selection)
     setRadioReadonly('input[name="entry_type_fix"]', false);
-    setRadioReadonly('input[name="nabl_type_fix"]', false);
-    setRadioReadonly('input[name="job_type_fix"]', false);
+
+    jQuery('#TestReportUtModal').find('input[name="job_type_fix"][value="Casting"]').prop('checked', true);
+    let defaultNabl = (typeof window.locationNablDefault !== 'undefined' && window.locationNablDefault === 'Non NABL') ? 'Non NABL' : 'Non NABL';
+    jQuery('#TestReportUtModal').find('input[name="nabl_type_fix"][value="' + defaultNabl + '"]').prop('checked', true);
+
+    lockParentRadios(false);
+
+    ['nabl_type_fix', 'job_type_fix'].forEach(function (name) {
+        let $group = jQuery('#TestReportUtModal').find('input[name="' + name + '"]');
+        $group.attr('tabindex', '-1');
+        let $chk = $group.filter(':checked');
+        if (!$chk.length) $chk = $group.first();
+        $chk.attr('tabindex', '0');
+    });
 
     setSelect2Readonly('#customer_id', false);
     jQuery('#material_inward_details_id').val('');
@@ -1361,6 +1400,7 @@ function fetchAndFillTestReportUt(id) {
                 jQuery('#date_of_testing').val(reportMasterData.date_of_testing);
                 jQuery('#date_of_testing_value').val(reportMasterData.date_of_testing_value || '');
                 jQuery('#total_qty').val(reportMasterData.total_qty || '');
+                jQuery('#date_of_receipt').val(reportMasterData.date_of_receipt);
 
                 // Fill all text / select fields
                 jQuery('#customer_client').val(reportMasterData.customer_client || '');
@@ -1976,18 +2016,84 @@ jQuery(document).on('change', '#amendment_no, #amendment_date', function () {
 // Trigger on load/edit
 jQuery('#TestReportUtModal').on('shown.bs.modal', function () {
     validateAmendmentFields();
-    setTimeout(function () {
-        let seqInput = jQuery('#test_report_sequence');
-        if (seqInput.prop('readonly')) {
-            let dateInput = jQuery('#test_report_date');
-            dateInput.focus().select();
-            setTimeout(function () {
-                dateInput.datepicker('hide');
-            }, 50);
+    if (_openForEdit) {
+        setTimeout(function () {
+            let seqInput = jQuery('#test_report_sequence');
+            if (seqInput.prop('readonly')) {
+                let dateInput = jQuery('#test_report_date');
+                dateInput.focus().select();
+                setTimeout(function () {
+                    dateInput.datepicker('hide');
+                }, 50);
+            } else {
+                seqInput.focus().select();
+            }
+        }, 150);
+    } else {
+        setTimeout(function () {
+            focusInitialTestReportUtField();
+        }, 100);
+    }
+});
+
+// Tab navigation across top parent radios: nabl_type_fix -> job_type_fix -> test_report_sequence
+jQuery(document).on('keydown', '#TestReportUtModal input[name="nabl_type_fix"]', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && !e.shiftKey) {
+        e.preventDefault();
+        let $target = jQuery('#TestReportUtModal input[name="job_type_fix"]:checked');
+        if (!$target.length) $target = jQuery('#TestReportUtModal input[name="job_type_fix"]').first();
+        $target.attr('tabindex', '0');
+        if ($target.length) $target[0].focus();
+    }
+});
+
+jQuery(document).on('keydown', '#TestReportUtModal input[name="job_type_fix"]', function (e) {
+    if (e.key === 'Tab' || e.keyCode === 9) {
+        if (e.shiftKey) {
+            e.preventDefault();
+            let $prev = jQuery('#TestReportUtModal input[name="nabl_type_fix"]:checked');
+            if (!$prev.length) $prev = jQuery('#TestReportUtModal input[name="nabl_type_fix"]').first();
+            $prev.attr('tabindex', '0');
+            if ($prev.length) $prev[0].focus();
         } else {
-            seqInput.focus().select();
+            e.preventDefault();
+            let $seq = jQuery('#TestReportUtModal #test_report_sequence');
+            if ($seq.prop('readonly')) {
+                jQuery('#TestReportUtModal #test_report_date').focus();
+            } else {
+                $seq.focus().select();
+            }
         }
-    }, 150);
+    }
+});
+
+jQuery(document).on('keydown', '#TestReportUtModal #test_report_sequence', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && e.shiftKey) {
+        e.preventDefault();
+        let $target = jQuery('#TestReportUtModal input[name="job_type_fix"]:checked');
+        if (!$target.length) $target = jQuery('#TestReportUtModal input[name="job_type_fix"]').first();
+        $target.attr('tabindex', '0');
+        if ($target.length) $target[0].focus();
+    }
+});
+
+jQuery(document).on('keydown', '#TestReportUtModal #test_report_date', function (e) {
+    if ((e.key === 'Tab' || e.keyCode === 9) && e.shiftKey) {
+        let $seq = jQuery('#TestReportUtModal #test_report_sequence');
+        if ($seq.prop('readonly')) {
+            e.preventDefault();
+            let $target = jQuery('#TestReportUtModal input[name="job_type_fix"]:checked');
+            if (!$target.length) $target = jQuery('#TestReportUtModal input[name="job_type_fix"]').first();
+            $target.attr('tabindex', '0');
+            if ($target.length) $target[0].focus();
+        }
+    }
+});
+
+jQuery(document).on('change', '#TestReportUtModal input[name="nabl_type_fix"], #TestReportUtModal input[name="job_type_fix"]', function () {
+    let name = jQuery(this).attr('name');
+    jQuery('#TestReportUtModal').find('input[name="' + name + '"]').attr('tabindex', '-1');
+    jQuery(this).attr('tabindex', '0');
 });
 
 // Modal events
@@ -2098,13 +2204,13 @@ function fillCopyReportModalTable() {
             <td>${item.nabl_type_fix || ''}</td>
             <td>${item.job_type_fix || ''}</td>` +
             // `<td>${item.type_of_job || ''}</td>` +
-            `<td>${item.job_description || ''}</td>
-            <td>${item.part_no || ''}</td>
-            <td>${item.drg_no || ''}</td>
-            <td>${item.material || ''}</td>
-            <td>${item.heat_no || ''}</td>
-            <td>${item.product_code || ''}</td>
-        </tr>`;
+            // <td>${item.job_description || ''}</td>
+            // <td>${item.part_no || ''}</td>
+            // <td>${item.drg_no || ''}</td>
+            // <td>${item.material || ''}</td>
+            // <td>${item.heat_no || ''}</td>
+            // <td>${item.product_code || ''}</td>
+            `</tr>`;
         tbody.append(rowHtml);
     });
 
@@ -2139,6 +2245,13 @@ jQuery('#CopyReportUtModal').on('shown.bs.modal', function () {
     }
 });
 
+// Focus to Project after Copy Modal closes
+jQuery('#CopyReportUtModal').on('hidden.bs.modal', function () {
+    setTimeout(function () {
+        jQuery('#project').focus();
+    }, 200);
+});
+
 jQuery(document).on('change', 'input[name="copy_report_id"]', function () {
     selectedCopyReportUtId = jQuery(this).val();
 });
@@ -2171,6 +2284,13 @@ jQuery(document).on('click', '#submitCopyReportUtBtn', function () {
     }).then((resultMaster) => {
         let copyMaster = resultMaster.isConfirmed;
 
+        if (!copyMaster) {
+            return;
+        }
+
+        performCopyReport(reportId, true, false);
+
+        /*
         Swal.fire({
             title: 'Confirmation',
             text: 'Do You want to Copy Test Report Details?',
@@ -2196,6 +2316,7 @@ jQuery(document).on('click', '#submitCopyReportUtBtn', function () {
 
             performCopyReport(reportId, copyMaster, copyDetails);
         });
+        */
     });
 });
 
@@ -2214,7 +2335,7 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
                     jQuery('#customer_client').val(d.customer_client || '');
                     jQuery('#type_of_job').val(d.type_of_job || '');
                     jQuery('#project').val(d.project || '');
-                    jQuery('#test_method_id').val(zeroToEmpty(d.test_method_id)).trigger('change.select2');
+                    // jQuery('#test_method_id').val(zeroToEmpty(d.test_method_id)).trigger('change.select2');
                     jQuery('#job_desc_label').val(d.job_desc_label || '');
                     jQuery('#surface_condition').val(d.surface_condition || '');
                     jQuery('#extent_of_exa').val(d.extent_of_exa || '');
@@ -2236,15 +2357,15 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
                     if (d.sp_note) {
                         jQuery('#sp_note').val(d.sp_note || '');
                     }
-                    // jQuery('#performed_by_authority_person_id').val(zeroToEmpty(d.performed_by_authority_person_id)).trigger('change.select2');
-                    // jQuery('#examined_by_authority_person_id').val(zeroToEmpty(d.examined_by_authority_person_id)).trigger('change.select2');
+                    jQuery('#performed_by_authority_person_id').val(zeroToEmpty(d.performed_by_authority_person_id)).trigger('change.select2');
+                    jQuery('#examined_by_authority_person_id').val(zeroToEmpty(d.examined_by_authority_person_id)).trigger('change.select2');
                     jQuery('#reviewed_by').val(d.reviewed_by || '');
                     jQuery('#witness_by').val(d.witness_by || '');
                     applyDynamicDetailLabels();
 
                     // Do not copy required fields (tested_by_authority_person_id is required, reviewed & authorized are not)
-                    jQuery('#reviewed_by_authority_person_id').val(zeroToEmpty(d.reviewed_by_authority_person_id)).trigger('change.select2');
-                    // jQuery('#authorized_by_authority_person_id').val(zeroToEmpty(d.authorized_by_authority_person_id)).trigger('change.select2');
+                    // jQuery('#reviewed_by_authority_person_id').val(zeroToEmpty(d.reviewed_by_authority_person_id)).trigger('change.select2');
+                    jQuery('#authorized_by_authority_person_id').val(zeroToEmpty(d.authorized_by_authority_person_id)).trigger('change.select2');
                 }
 
                 /*
@@ -2276,10 +2397,9 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
                 }
                 */
 
-                // Focus on type of job dropdown after copy completes
+                // Focus on Project after copy completes
                 setTimeout(function () {
-                    // jQuery('#type_of_job_id').focus();
-                    jQuery('#job_desc').focus();
+                    jQuery('#project').focus();
                 }, 100);
             }
         },
@@ -2307,10 +2427,6 @@ function validateAmendmentFields() {
 }
 
 jQuery(document).on('input change', '#amendment_no, #amendment_date', function () {
-    validateAmendmentFields();
-});
-
-jQuery('#TestReportUtModal').on('shown.bs.modal', function () {
     validateAmendmentFields();
 });
 
@@ -2413,12 +2529,24 @@ function getTRLNRData() {
 
                 if (!_openForEdit) {
                     if (lnr.nabl_type_fix) {
-                        jQuery('input[name="nabl_type_fix"][value="' + lnr.nabl_type_fix + '"]').prop('checked', true);
+                        let targetNabl = lnr.nabl_type_fix;
+                        if (typeof window.locationNablDefault !== 'undefined' && window.locationNablDefault === 'Non NABL') {
+                            targetNabl = 'Non NABL';
+                        }
+                        jQuery('#TestReportUtModal').find('input[name="nabl_type_fix"][value="' + targetNabl + '"]').prop('checked', true);
                         handleNablTypeChange();
                     }
                     if (lnr.job_type_fix) {
-                        jQuery('input[name="job_type_fix"][value="' + lnr.job_type_fix + '"]').prop('checked', true);
+                        jQuery('#TestReportUtModal').find('input[name="job_type_fix"][value="' + lnr.job_type_fix + '"]').prop('checked', true);
                     }
+                    lockParentRadios(false);
+                    ['nabl_type_fix', 'job_type_fix'].forEach(function (name) {
+                        let $group = jQuery('#TestReportUtModal').find('input[name="' + name + '"]');
+                        $group.attr('tabindex', '-1');
+                        let $chk = $group.filter(':checked');
+                        if (!$chk.length) $chk = $group.first();
+                        $chk.attr('tabindex', '0');
+                    });
                 }
             }
         },

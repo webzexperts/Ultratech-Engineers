@@ -50,6 +50,7 @@ class TestReportUt extends Model
         'product_code',
         'date_of_testing',
         'date_of_testing_value',
+        'date_of_receipt',
         'test_carried_out_at',
         'amendment_no',
         'amendment_date',
@@ -90,6 +91,7 @@ class TestReportUt extends Model
         'locked_by',
         'locked_on',
     ];
+    protected $hidden = ['defectogram_image_blob'];
 
     public function setMaterialInwardDetailsIdAttribute($value)
     {

@@ -77,7 +77,8 @@ class TestReportRtController extends Controller
 
         $dataTable = DataTables::of($reports)
         ->filterColumn('test_report_rt.test_report_no', function($query, $keyword) {
-            applySequenceSearch($query, $keyword, 'test_report_rt.test_report_no');
+            // applySequenceSearch($query, $keyword, 'test_report_rt.test_report_no');
+            applynumber($query, $keyword, 'test_report_rt.test_report_no');
         })
         ->editColumn('test_report_date', function($report) {
             return $report->test_report_date != null
@@ -112,6 +113,18 @@ class TestReportRtController extends Controller
             $query->where(function($q) use ($keyword) {
                 $q->where('test_report_rt.drg_no', 'like', "%{$keyword}%");
             });
+        })
+        ->filterColumn('test_report_rt.nabl_type_fix', function ($query, $keyword) {
+            $globalSearch = request()->input('search.value');
+            $searchValue = $globalSearch != '' ? $globalSearch : $keyword;
+            $lowerKeyword = strtolower(trim($searchValue));
+            if ($lowerKeyword === 'nabl') {
+                $query->where('test_report_rt.nabl_type_fix', '=', 'NABL');
+            } elseif ($lowerKeyword === 'non nabl' || $lowerKeyword === 'non-nabl' || $lowerKeyword === 'nonnabl') {
+                $query->where('test_report_rt.nabl_type_fix', '=', 'Non NABL');
+            } else {
+                $query->where('test_report_rt.nabl_type_fix', 'like', "{$lowerKeyword}%");
+            }
         })
         ->filterColumn('test_report_rt.job_type_fix', function ($query, $keyword) {
             $globalSearch = request()->input('search.value');

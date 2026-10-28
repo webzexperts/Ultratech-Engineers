@@ -94,7 +94,7 @@ use App\Models\Transaction\TestReportRt;
     */
     function getJsVersion()
     {
-        return "0.0.11";
+        return "0.0.06";
     } 
 
     /**
@@ -102,7 +102,7 @@ use App\Models\Transaction\TestReportRt;
     */
     function getCssVersion()
     {
-        return "0.0.04";
+        return "0.0.06";
     }
 
     // function getLatestSequence($modal,$sequence)

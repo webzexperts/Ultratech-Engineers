@@ -37,18 +37,20 @@
                             <th>Test At</th>
                             <th>Type</th>
                             <th>Customer</th>
-                            <th>DC No.</th>
-                            <th>DC Date</th>
-                            <th>PO No.</th>
-                            <th>PO Date</th>
+                            <th>Project</th>
+                            <!-- <th>DC No.</th>
+                            <th>DC Date</th> -->
+                            <!-- <th>PO No.</th> -->
+                            <!-- <th>PO Date</th> -->
                             <!-- <th>Type of Job</th> -->
-                            <th>Job Desc.</th>
+                            <!-- <th>Job Desc.</th>
                             <th>Part No. / Die No.</th>
                             <th>Drg. No.</th>
                             <th>Material</th>
                             <th>Heat No.</th>
-                            <th>Product Code</th>
-                            <th>Qty.</th>
+                            <th>Product Code</th> -->
+                            <th>Total Qty.</th>
+                            <th>Special Note</th>
                             <th>Modified By</th>
                             <th>Modified On</th>
                             <th>Created By</th>
@@ -74,7 +76,8 @@
             "processing": false,
             "serverSide": true,
             "scrollX": true,
-            "order": [[2, 'desc'], [22, 'desc']],
+            // "order": [[2, 'desc'], [22, 'desc']],
+            "order": [[2, 'desc'], [15, 'desc']],
             dom: 'Blfrtip',
             buttons: [{
                 extend: 'excel',
@@ -112,18 +115,20 @@
                 { data: 'test_carried_out_at', name: 'test_report_ut.test_carried_out_at' },
                 { data: 'job_type_fix', name: 'test_report_ut.job_type_fix' },
                 { data: 'customer', name: 'customers.customer' },
-                { data: 'dc_no', name: 'material_inward.dc_no' },
-                { data: 'dc_date', name: 'material_inward.dc_date' },
-                { data: 'po_no', name: 'material_inward.po_no' },
-                { data: 'po_date', name: 'material_inward.po_date' },
+                { data: 'project', name: 'test_report_ut.project' },
+                // { data: 'dc_no', name: 'material_inward.dc_no' },
+                // { data: 'dc_date', name: 'material_inward.dc_date' },
+                // { data: 'po_no', name: 'material_inward.po_no' },
+                // { data: 'po_date', name: 'material_inward.po_date' },
                 // { data: 'type_of_job', name: 'type_of_job.type_of_job' },
-                { data: 'job_description', name: 'test_report_ut.job_desc' },
-                { data: 'part_no', name: 'test_report_ut.part_no' },
-                { data: 'drg_no', name: 'test_report_ut.drg_no' },
-                { data: 'material', name: 'materials.material' },
-                { data: 'heat_no', name: 'test_report_ut.heat_no' },
-                { data: 'product_code', name: 'test_report_ut.product_code' },
+                // { data: 'job_description', name: 'test_report_ut.job_desc' },
+                // { data: 'part_no', name: 'test_report_ut.part_no' },
+                // { data: 'drg_no', name: 'test_report_ut.drg_no' },
+                // { data: 'material', name: 'materials.material' },
+                // { data: 'heat_no', name: 'test_report_ut.heat_no' },
+                // { data: 'product_code', name: 'test_report_ut.product_code' },
                 { data: 'total_qty', name: 'test_report_ut.total_qty' },
+                { data: 'sp_note', name: 'test_report_ut.sp_note' },
                 { data: 'last_by', name: 'last_by' },
                 { data: 'last_on', name: 'test_report_ut.last_on' },
                 { data: 'created_by', name: 'created_by' },
