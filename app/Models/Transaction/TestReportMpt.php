@@ -97,6 +97,8 @@ class TestReportMpt extends Model
         'locked_on'
     ];
 
+    protected $hidden = ['defectogram_image_blob'];
+
     public function setMaterialInwardDetailsIdAttribute($value)
     {
         $this->attributes['material_inward_details_id'] = (!empty($value) && (int)$value > 0) ? (int)$value : null;

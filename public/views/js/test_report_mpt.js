@@ -131,33 +131,6 @@ $(document).ready(function () {
         fillCustomerDropdown();
     });
 
-    function focusInitialTestReportMptField() {
-        let modal = $('#TestReportMptModal');
-        let $checkedNabl = modal.find('input[name="nabl_type_fix"]:checked');
-        if (!$checkedNabl.length) {
-            $checkedNabl = modal.find('input[name="nabl_type_fix"]').first();
-        }
-        let $checkedJob = modal.find('input[name="job_type_fix"]:checked');
-        if (!$checkedJob.length) {
-            $checkedJob = modal.find('input[name="job_type_fix"]').first();
-        }
-
-        modal.find('input[name="nabl_type_fix"]').attr('tabindex', '-1');
-        $checkedNabl.attr('tabindex', '0');
-
-        modal.find('input[name="job_type_fix"]').attr('tabindex', '-1');
-        $checkedJob.attr('tabindex', '0');
-
-        modal.find('input[name="nabl_type_fix"]').not($checkedNabl).blur();
-        modal.find('input[name="job_type_fix"]').not($checkedJob).blur();
-
-        setTimeout(() => {
-            if ($checkedNabl.length) {
-                $checkedNabl[0].focus();
-            }
-        }, 50);
-    }
-
     $('#TestReportMptModal').on('shown.bs.modal', function () {
         validateAmendmentFields();
         if (_openForEdit) {
@@ -199,11 +172,10 @@ $(document).ready(function () {
         }, 200);
     });
 
-    // Focus to Job Description after Copy Modal closes
+    // Focus to Project after Copy Modal closes
     $('#CopyReportMptModal').on('hidden.bs.modal', function () {
         setTimeout(function () {
-            // $('#job_desc_id').focus();
-            $('#job_desc').focus();
+            $('#project').focus();
         }, 200);
     });
 
@@ -734,6 +706,9 @@ $(document).ready(function () {
                     }
                     */
 
+                    setTimeout(function () {
+                        $('#project').focus();
+                    }, 100);
                 }
             },
             complete: function () {
@@ -1305,6 +1280,33 @@ function isLocationNablAllowed(testName = 'MPT') {
         }
     }
     return true;
+}
+
+function focusInitialTestReportMptField() {
+    let modal = $('#TestReportMptModal');
+    let $checkedNabl = modal.find('input[name="nabl_type_fix"]:checked');
+    if (!$checkedNabl.length) {
+        $checkedNabl = modal.find('input[name="nabl_type_fix"]').first();
+    }
+    let $checkedJob = modal.find('input[name="job_type_fix"]:checked');
+    if (!$checkedJob.length) {
+        $checkedJob = modal.find('input[name="job_type_fix"]').first();
+    }
+
+    modal.find('input[name="nabl_type_fix"]').attr('tabindex', '-1');
+    $checkedNabl.attr('tabindex', '0');
+
+    modal.find('input[name="job_type_fix"]').attr('tabindex', '-1');
+    $checkedJob.attr('tabindex', '0');
+
+    modal.find('input[name="nabl_type_fix"]').not($checkedNabl).blur();
+    modal.find('input[name="job_type_fix"]').not($checkedJob).blur();
+
+    setTimeout(() => {
+        if ($checkedNabl.length) {
+            $checkedNabl[0].focus();
+        }
+    }, 50);
 }
 
 function lockParentRadios(lock) {
