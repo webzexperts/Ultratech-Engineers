@@ -91,6 +91,7 @@ class TestReportUt extends Model
         'locked_by',
         'locked_on',
     ];
+    protected $hidden = ['defectogram_image_blob'];
 
     public function setMaterialInwardDetailsIdAttribute($value)
     {

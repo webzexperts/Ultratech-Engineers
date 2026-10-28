@@ -929,6 +929,31 @@ function fillCustomerDropdown() {
     });
 }
 
+function lockParentRadios(lock) {
+    if (typeof window.locationNablDefault !== 'undefined' && window.locationNablDefault === 'Non NABL') {
+        setRadioReadonly('#TestReportUtModal input[name="nabl_type_fix"]', true);
+    } else {
+        setRadioReadonly('#TestReportUtModal input[name="nabl_type_fix"]', lock);
+    }
+    setRadioReadonly('#TestReportUtModal input[name="job_type_fix"]', lock);
+}
+
+function focusInitialTestReportUtField() {
+    let modal = jQuery('#TestReportUtModal');
+    ['nabl_type_fix', 'job_type_fix'].forEach(function (name) {
+        let $group = modal.find('input[name="' + name + '"]');
+        $group.attr('tabindex', '-1');
+        let $chk = $group.filter(':checked');
+        if (!$chk.length) $chk = $group.first();
+        $chk.attr('tabindex', '0');
+    });
+    let $target = modal.find('input[name="nabl_type_fix"]:checked');
+    if (!$target.length) $target = modal.find('input[name="nabl_type_fix"]').first();
+    setTimeout(() => {
+        if ($target.length) $target[0].focus();
+    }, 30);
+}
+
 // Reset Main Form
 function resetMainForm() {
     _openForEdit = false;
@@ -1052,31 +1077,6 @@ function resetMainForm() {
             fillProbeTable();
         }
     });
-
-    function lockParentRadios(lock) {
-        if (typeof window.locationNablDefault !== 'undefined' && window.locationNablDefault === 'Non NABL') {
-            setRadioReadonly('#TestReportUtModal input[name="nabl_type_fix"]', true);
-        } else {
-            setRadioReadonly('#TestReportUtModal input[name="nabl_type_fix"]', lock);
-        }
-        setRadioReadonly('#TestReportUtModal input[name="job_type_fix"]', lock);
-    }
-
-    function focusInitialTestReportUtField() {
-        let modal = jQuery('#TestReportUtModal');
-        ['nabl_type_fix', 'job_type_fix'].forEach(function (name) {
-            let $group = modal.find('input[name="' + name + '"]');
-            $group.attr('tabindex', '-1');
-            let $chk = $group.filter(':checked');
-            if (!$chk.length) $chk = $group.first();
-            $chk.attr('tabindex', '0');
-        });
-        let $target = modal.find('input[name="nabl_type_fix"]:checked');
-        if (!$target.length) $target = modal.find('input[name="nabl_type_fix"]').first();
-        setTimeout(() => {
-            if ($target.length) $target[0].focus();
-        }, 30);
-    }
 
     // Reset radio buttons to defaults (Keep editable for manual selection)
     setRadioReadonly('input[name="entry_type_fix"]', false);
@@ -2245,6 +2245,13 @@ jQuery('#CopyReportUtModal').on('shown.bs.modal', function () {
     }
 });
 
+// Focus to Project after Copy Modal closes
+jQuery('#CopyReportUtModal').on('hidden.bs.modal', function () {
+    setTimeout(function () {
+        jQuery('#project').focus();
+    }, 200);
+});
+
 jQuery(document).on('change', 'input[name="copy_report_id"]', function () {
     selectedCopyReportUtId = jQuery(this).val();
 });
@@ -2390,10 +2397,9 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
                 }
                 */
 
-                // Focus on type of job dropdown after copy completes
+                // Focus on Project after copy completes
                 setTimeout(function () {
-                    // jQuery('#type_of_job_id').focus();
-                    jQuery('#job_desc').focus();
+                    jQuery('#project').focus();
                 }, 100);
             }
         },
