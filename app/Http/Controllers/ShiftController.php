@@ -250,7 +250,7 @@ class ShiftController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdShift as $dsKey)
                 {
-                    $output .= '<li parent-id="shift_name" list-id="shift_list" class="list-group-item" tabindex="0">'.$dsKey->shift_name.'</li>';
+                    $output .= '<li parent-id="shift_name" list-id="shift_list" class="list-group-item" tabindex="-1">'.$dsKey->shift_name.'</li>';
                 }
                 $output .= '</ul>';
 

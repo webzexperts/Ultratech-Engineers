@@ -182,7 +182,7 @@
                     ACTION BUTTONS
                 ========================================================== --}}
                 <div class="col-lg-12 text-end mt-3 mb-2">
-
+                @if(hasAccess("offer_authorised","add"))
                     <button
                         type="button"
                         class="btn btn-success me-1"
@@ -190,15 +190,13 @@
                     >
                         Authorise
                     </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-info me-1"
-                        id="btn-unauthorize"
-                    >
+                @endif
+                @if(hasAccess("offer_authorised","edit"))
+                    <button type="button"  class="btn btn-info me-1" id="btn-unauthorize">
                         Accept Unauthorise
                     </button>
-
+                @endif   
+                @if(hasAccess("offer_authorised","delete"))
                     <button
                         type="button"
                         class="btn btn-danger me-1 d-none"
@@ -207,6 +205,7 @@
                     >
                         Delete
                     </button>
+                @endif  
 
                     <button
                         type="button"
@@ -246,7 +245,7 @@
             info: false,
             lengthChange: false,
             ajax: {
-                url: "{{ route('listing-offer_authorized') }}",
+                url: "{{ route('listing-offer_authorised') }}",
                 type: "POST",
                 headers: headerOpt,
                 data: function(d) {

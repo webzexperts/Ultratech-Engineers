@@ -359,7 +359,7 @@ class OperatorController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdOperator as $dsKey)
                 {
-                    $output .= '<li parent-id="operator" list-id="operator_list" class="list-group-item" tabindex="0">'.$dsKey->operator.'</li>';
+                    $output .= '<li parent-id="operator" list-id="operator_list" class="list-group-item" tabindex="-1">'.$dsKey->operator.'</li>';
                 } 
                 $output .= '</ul>';
 
@@ -395,7 +395,7 @@ class OperatorController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdDesignation as $dfKey)
                 {
-                    $output .= '<li parent-id="designation" list-id="designation_list" class="list-group-item" tabindex="0">'.$dfKey->designation.'</li>';
+                    $output .= '<li parent-id="designation" list-id="designation_list" class="list-group-item" tabindex="-1">'.$dfKey->designation.'</li>';
                 } 
                 $output .= '</ul>';
 

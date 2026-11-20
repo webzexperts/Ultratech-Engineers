@@ -338,7 +338,7 @@ class AerbDocumentController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdAerbDocuments as $dsKey)
                 {
-                    $output .= '<li parent-id="aerb_documents_name" list-id="aerb_documents_name_list" class="list-group-item" tabindex="0">'.$dsKey->aerb_documents_name.'</li>';
+                    $output .= '<li parent-id="aerb_documents_name" list-id="aerb_documents_name_list" class="list-group-item" tabindex="-1">'.$dsKey->aerb_documents_name.'</li>';
                 }
                 $output .= '</ul>';
 

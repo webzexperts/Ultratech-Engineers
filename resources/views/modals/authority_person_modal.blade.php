@@ -125,6 +125,22 @@
                                     </div>
                                 </div>
 
+                                <div class="row g-1  mb-2">
+                                    <div class="col-lg-3">
+                                        <!-- <label class="form-check-label" for="authorized_by">
+                                            Authorized By
+                                        </label> -->
+                                    </div>
+                                    <div class="col-lg-4 d-flex gap-4 align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input operator_type_chk" type="checkbox" name="incharge" id="incharge" value="Yes">
+                                            <label class="form-check-label" for="incharge">
+                                            Incharge
+                                        </label>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 
                                 <div class="row g-2 mb-2 position-relative">
                                     <div class="col-3">

@@ -272,7 +272,7 @@ class IqiSensitivityController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdIqiSensitivity as $dsKey)
                 {
-                    $output .= '<li parent-id="iqi_sensitivity" list-id="iqi_sensitivity_list" class="list-group-item" tabindex="0">'.$dsKey->iqi_sensitivity.'</li>';
+                    $output .= '<li parent-id="iqi_sensitivity" list-id="iqi_sensitivity_list" class="list-group-item" tabindex="-1">'.$dsKey->iqi_sensitivity.'</li>';
                 }
                 $output .= '</ul>';
 

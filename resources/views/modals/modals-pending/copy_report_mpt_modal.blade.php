@@ -18,7 +18,7 @@
                                     <th>Report Date</th>
                                     <th>Customer</th>
                                     <th>NABL</th>
-                                    <th>Type</th>
+                                    <!-- <th>Type</th> -->
                                     <!-- <th>Type of Job</th> -->
                                     <!-- <th>Job Desc.</th>
                                     <th>Part No. / Die No.</th>

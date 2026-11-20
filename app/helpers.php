@@ -94,7 +94,7 @@ use App\Models\Transaction\TestReportRt;
     */
     function getJsVersion()
     {
-        return "0.0.06";
+        return "0.0.08";
     } 
 
     /**
@@ -102,7 +102,7 @@ use App\Models\Transaction\TestReportRt;
     */
     function getCssVersion()
     {
-        return "0.0.06";
+        return "0.0.08";
     }
 
     // function getLatestSequence($modal,$sequence)
@@ -850,7 +850,7 @@ use App\Models\Transaction\TestReportRt;
         if (!Auth::check()) {
             return false;
         }
-        if ($pageNm === 'switch_year' || $pageNm === 'switch-company_year' || $pageNm === 'aerb_documents_summary' || $pageNm === 'offer') {
+        if ($pageNm === 'switch_year' || $pageNm === 'switch-company_year' || $pageNm === 'aerb_documents_summary') {
             return true;
         }
         if (is_array($pageNm)) {
@@ -3167,6 +3167,53 @@ function checkPdf($remotePdfUrl, $localFilePath, $returnurl) {
     function getAuthorizedByAuthorityPersons()
     {
         return AuthorityPerson::select('authority_person_id', 'operator', 'designation')->where('status', 'Active')->where('authorized_by', 'Yes')->orderBy('operator', 'asc')->get();
+    }
+
+    if (!function_exists('getAuthorityPersonsIncharge')) {
+        function getAuthorityPersonsIncharge($selected_id = null)
+        {
+            return AuthorityPerson::select('authority_person_id', 'operator', 'designation')
+                ->where(function ($query) use ($selected_id) {
+                    $query->where('status', 'Active')
+                        ->where('incharge', 'Yes');
+                    if (!empty($selected_id)) {
+                        $query->orWhere('authority_person_id', $selected_id);
+                    }
+                })
+                ->orderBy('operator', 'asc')
+                ->get();
+        }
+    }
+
+    if (!function_exists('getAuthorityPersonsRadiographer')) {
+        function getAuthorityPersonsRadiographer($selected_id = null)
+        {
+            return AuthorityPerson::select('authority_person_id', 'operator', 'designation')
+                ->where(function ($query) use ($selected_id) {
+                    $query->where('status', 'Active')
+                        ->where('authority_person_type_value_fix', 'Radiographer');
+                    if (!empty($selected_id)) {
+                        $query->orWhere('authority_person_id', $selected_id);
+                    }
+                })
+                ->orderBy('operator', 'asc')
+                ->get();
+        }
+    }
+
+    if (!function_exists('getRTCameras')) {
+        function getRTCameras($selected_id = null)
+        {
+            return RTCamera::select('rt_camera_id', 'rt_camera_name', 'rt_serial_no', 'name_for_display')
+                ->where(function ($query) use ($selected_id) {
+                    $query->where('rt_status', 'Active');
+                    if (!empty($selected_id)) {
+                        $query->orWhere('rt_camera_id', $selected_id);
+                    }
+                })
+                ->orderBy('name_for_display', 'asc')
+                ->get();
+        }
     }
 
     function getFindings()

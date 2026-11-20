@@ -489,7 +489,7 @@ class MaterialMptController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdCountry as $dsKey)
                 {
-                    $output .= '<li parent-id="mm_material_make" list-id="mm_material_make_list" class="list-group-item" tabindex="0">'.$dsKey->mm_material_make.'</li>';
+                    $output .= '<li parent-id="mm_material_make" list-id="mm_material_make_list" class="list-group-item" tabindex="-1">'.$dsKey->mm_material_make.'</li>';
                 }
                 $output .= '</ul>';
 

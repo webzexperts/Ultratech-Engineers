@@ -331,7 +331,7 @@ class ProbeUTController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdCountry as $dsKey)
                 {
-                    $output .= '<li parent-id="pu_size_of_probe" list-id="pu_size_of_probe_list" class="list-group-item" tabindex="0">'.$dsKey->pu_size_of_probe.'</li>';
+                    $output .= '<li parent-id="pu_size_of_probe" list-id="pu_size_of_probe_list" class="list-group-item" tabindex="-1">'.$dsKey->pu_size_of_probe.'</li>';
                 }
                 $output .= '</ul>';
 

@@ -444,16 +444,16 @@ class MaterialInwardController extends Controller
                 foreach ($details as $row) {
                     if (($row['mode'] ?? '') == 'Delete') continue;
 
-                    if($request->nabl_type_fix == 'NABL' && $row['process_type_fix'] != 'Repair'){
+                    // if($request->nabl_type_fix == 'NABL' && $row['process_type_fix'] != 'Repair'){
+                    //     $is_observation_sheet = 'Yes';
+                    // }else if($row['process_type_fix'] == 'Repair'){
+                    //     $is_observation_sheet = 'N/A';
+                    // }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
+                    //     $is_observation_sheet = 'N/A';
+                    // }else{
+                    //     $is_observation_sheet = 'No';
+                    // }
                         $is_observation_sheet = 'Yes';
-                    }else if($row['process_type_fix'] == 'Repair'){
-                        $is_observation_sheet = 'N/A';
-                    }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
-                        $is_observation_sheet = 'N/A';
-                    }else{
-                        $is_observation_sheet = 'No';
-                    }
-
                     MaterialInwardDetails::create([
                         'material_inward_id'   => $mi->material_inward_id,
                         'process_type_fix'         => $row['process_type_fix'] ?? $row['process_type_fix'] ?? 'Fresh',
@@ -655,15 +655,16 @@ class MaterialInwardController extends Controller
                             continue;
                         }
 
-                        if($request->nabl_type_fix == 'NABL' && $row['process_type_fix'] != 'Repair'){
+                        // if($request->nabl_type_fix == 'NABL' && $row['process_type_fix'] != 'Repair'){
+                        //     $is_observation_sheet = 'Yes';
+                        // }else if($row['process_type_fix'] == 'Repair'){
+                        //     $is_observation_sheet = 'N/A';
+                        // }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
+                        //     $is_observation_sheet = 'N/A';
+                        // }else{
+                        //     $is_observation_sheet = 'No';
+                        // }
                             $is_observation_sheet = 'Yes';
-                        }else if($row['process_type_fix'] == 'Repair'){
-                            $is_observation_sheet = 'N/A';
-                        }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
-                            $is_observation_sheet = 'N/A';
-                        }else{
-                            $is_observation_sheet = 'No';
-                        }
 
                         MaterialInwardDetails::create([
                             'material_inward_id'   => $mi->material_inward_id,
@@ -701,15 +702,16 @@ class MaterialInwardController extends Controller
                                     ->where('material_inward_details_id', $detailId)
                                     ->value('is_observation_sheet');
                             } else {
-                                if($request->nabl_type_fix == 'NABL' && $row['process_type_fix'] != 'Repair'){
-                                    $is_observation_sheet = 'Yes';
-                                }else if($row['process_type_fix'] == 'Repair'){
-                                    $is_observation_sheet = 'N/A';
-                                }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
-                                    $is_observation_sheet = 'N/A';
-                                }else{
-                                    $is_observation_sheet = 'No';
-                                }
+                                // if($request->nabl_type_fix == 'NABL' && $row['process_type_fix'] != 'Repair'){
+                                //     $is_observation_sheet = 'Yes';
+                                // }else if($row['process_type_fix'] == 'Repair'){
+                                //     $is_observation_sheet = 'N/A';
+                                // }else if($row['type_of_testing_id_fix'] != 'RT' && $request->nabl_type_fix != 'NABL'){
+                                //     $is_observation_sheet = 'N/A';
+                                // }else{
+                                //     $is_observation_sheet = 'No';
+                                // }
+                                 $is_observation_sheet = 'Yes';
                             }
 
 
@@ -1044,7 +1046,7 @@ class MaterialInwardController extends Controller
             if ($partNos->isNotEmpty()) {
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($partNos as $row) {
-                    $output .= '<li parent-id="die_no" list-id="inward_die_no_list" class="list-group-item" tabindex="0">' . e($row->part_no) . '</li>';
+                    $output .= '<li parent-id="die_no" list-id="inward_die_no_list" class="list-group-item" tabindex="-1">' . e($row->part_no) . '</li>';
                 }
                 $output .= '</ul>';
 
@@ -1080,7 +1082,7 @@ class MaterialInwardController extends Controller
             if ($drgNos->isNotEmpty()) {
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($drgNos as $row) {
-                    $output .= '<li parent-id="drg_no" list-id="inward_drg_no_list" class="list-group-item" tabindex="0">' . e($row->drg_no) . '</li>';
+                    $output .= '<li parent-id="drg_no" list-id="inward_drg_no_list" class="list-group-item" tabindex="-1">' . e($row->drg_no) . '</li>';
                 }
                 $output .= '</ul>';
 

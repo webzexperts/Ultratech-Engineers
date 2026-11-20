@@ -489,7 +489,7 @@ class EnclosureController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdEnclosure as $dsKey)
                 {
-                    $output .= '<li parent-id="enclosure_name" list-id="enclosure_name_list" class="list-group-item" tabindex="0">'.$dsKey->enclosure_name.'</li>';
+                    $output .= '<li parent-id="enclosure_name" list-id="enclosure_name_list" class="list-group-item" tabindex="-1">'.$dsKey->enclosure_name.'</li>';
                 }
                 $output .= '</ul>';
 
@@ -525,7 +525,7 @@ class EnclosureController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdEnclosure as $dsKey)
                 {
-                    $output .= '<li parent-id="enclosure_no" list-id="enclosure_no_list" class="list-group-item" tabindex="0">'.$dsKey->enclosure_no.'</li>';
+                    $output .= '<li parent-id="enclosure_no" list-id="enclosure_no_list" class="list-group-item" tabindex="-1">'.$dsKey->enclosure_no.'</li>';
                 }
                 $output .= '</ul>';
 

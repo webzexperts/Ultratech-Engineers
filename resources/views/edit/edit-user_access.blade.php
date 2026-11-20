@@ -15,7 +15,7 @@
                 <div class="card-body">
                     
                     <div class="live-preview">
-                       <form id="editUserAccessForm" class="stdform" method="post">
+                       <form id="editUserAccessForm" class="stdform" method="post" novalidate>
                         <input type="hidden" name="pageName" id="pageName" value="user_acess">
                             @csrf
                             <div class="row mb-3 d-flex justify-content-between">
@@ -23,7 +23,7 @@
                                     <div class="col-lg-2">
                                         <label for="user_id" class="form-label col-form-label">User</label>
                                     </div>
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-6 position-relative">
                                         <select class="js-example-basic-single zindexnotapply" data-placeholder="Select User" id="user_id" name="user_id" required>
                                             <option value="">Select User</option>
                                                 @forelse ($users as $user)
@@ -33,7 +33,7 @@
                                                         
                                         </select>
                                         <div class="invalid-tooltip">
-                                            Please Select Unit
+                                            Select User
                                         </div>
                                     </div>
                                 </div>

@@ -268,7 +268,7 @@ class AreaOfCoverageController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdAreaOfCoverage as $dsKey)
                 {
-                    $output .= '<li parent-id="area_of_coverage" list-id="area_of_coverage_list" class="list-group-item" tabindex="0">'.$dsKey->area_of_coverage.'</li>';
+                    $output .= '<li parent-id="area_of_coverage" list-id="area_of_coverage_list" class="list-group-item" tabindex="-1">'.$dsKey->area_of_coverage.'</li>';
                 }
                 $output .= '</ul>';
 

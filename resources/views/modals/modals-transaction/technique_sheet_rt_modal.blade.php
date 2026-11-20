@@ -40,12 +40,12 @@
                                 <div class="col-8">
                                     <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_non_welding" value="Non-Welding" checked>
-                                            <label class="form-check-label" for="job_type_non_welding">Non-Welding</label>
+                                            <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_casting" value="Casting" checked>
+                                            <label class="form-check-label" for="job_type_casting">Casting</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_welding" value="Welding">
-                                            <label class="form-check-label" for="job_type_welding">Welding</label>
+                                            <input class="form-check-input" type="radio" name="job_type_fix" id="job_type_fabrication" value="Fabrication">
+                                            <label class="form-check-label" for="job_type_fabrication">Fabrication</label>
                                         </div>
                                     </div>
                                 </div>
@@ -147,16 +147,15 @@
                                 </div>
                             </div> -->
 
-                            <!-- New Part No. Textbox with suggestion -->
-                            <div class="row g-2 mb-1">
+                            <!-- New Part No. Textbox with suggestion (Hidden & Set to null) -->
+                            <div class="row g-2 mb-1 d-none">
                                 <div class="col-4 justify-content-start">
                                     <label for="part_no" class="form-label">Part No. / Die No.</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="part_no" name="part_no" onkeyup="suggestPartNo(event, this)" autocomplete="off">
+                                    <input type="hidden" class="form-control" id="part_no" name="part_no" value="">
                                     <div id="part_no_list"></div>
                                     <input type="hidden" name="part_no_suggestion" id="part_no_suggestion">
-                                    <div class="invalid-tooltip">Enter Part No. / Die No.</div>
                                 </div>
                             </div>
 
@@ -333,22 +332,22 @@
                                     <input type="text" class="form-control skip-tab" id="test_technique" name="test_technique" tabindex="-1" readonly>
                                 </div>
                             </div>
-                            <!-- Test Arrangement -->
-                            <div class="row g-2 mb-1">
+                            <!-- Test Arrangement (Hidden & Set to null) -->
+                            <div class="row g-2 mb-1 d-none">
                                 <div class="col-4">
                                     <label for="test_arrangement" class="form-label">Test Arrangement</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="test_arrangement" name="test_arrangement">
+                                    <input type="hidden" class="form-control" id="test_arrangement" name="test_arrangement" value="">
                                 </div>
                             </div>
-                            <!-- Test Class -->
-                            <div class="row g-2 mb-1">
+                            <!-- Test Class (Hidden & Set to null) -->
+                            <div class="row g-2 mb-1 d-none">
                                 <div class="col-4">
                                     <label for="test_class" class="form-label">Test Class</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="test_class" name="test_class">
+                                    <input type="hidden" class="form-control" id="test_class" name="test_class" value="">
                                 </div>
                             </div>
                         </div>
@@ -479,6 +478,17 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Print Ug In Report -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label class="form-label">Print Ug In Report</label>
+                                </div>
+                                <div class="col-8">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="print_ug_in_report" id="print_ug_in_report" value="Yes">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -502,6 +512,7 @@
                                             <th scope="col">Source</th>
                                             <th scope="col">Film Brand</th>
                                             <th scope="col">Film Type</th>
+                                            <th scope="col">Test Method</th>
                                             <th scope="col">Thickness (mm)</th>
                                             <th scope="col" class="th_sfd_unit">SFD</th>
                                             <th scope="col">IQI Designation</th>
@@ -510,6 +521,7 @@
                                             <th scope="col">Film Position</th>
                                             <th scope="col">Film Size</th>
                                             <th scope="col">No. of Film</th>
+                                            <th scope="col">Ug</th>
                                             <th scope="col" class="d-none">Film Qty</th>
                                             <th scope="col" class="d-none th_sq_unit">SqIn / SqCm</th>
                                             <th scope="col" class="d-none th_total_sq_unit">Total SqIn / SqCm</th>
@@ -517,7 +529,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td colspan="15" class="text-center" id="noDetails">
+                                            <td colspan="17" class="text-center" id="noDetails">
                                                 No Technique Sheet Details Added
                                             </td>
                                         </tr>

@@ -785,9 +785,14 @@ function focusInitialTestReportDptField() {
         $chk.attr('tabindex', '0');
     });
     let $target = modal.find('input[name="nabl_type_fix"]:checked');
-    if (!$target.length) $target = modal.find('input[name="nabl_type_fix"]').first();
+    var $edit = jQuery('#TestReportDptModal #id').val();
+    if (!$target.length && $edit != "") $target = modal.find('input[name="nabl_type_fix"]').first();
     setTimeout(() => {
-        if ($target.length) $target[0].focus();
+        if ($target.length && $edit == "") {
+            $target[0].focus();
+        } else {
+            jQuery('#TestReportDptModal #test_report_sequence').focus();
+        }
     }, 30);
 }
 
@@ -802,7 +807,8 @@ jQuery(document).on('keydown', '#TestReportDptModal input[name="nabl_type_fix"]'
     }
 });
 
-jQuery(document).on('keydown', '#TestReportDptModal input[name="job_type_fix"]', function (e) {
+// jQuery(document).on('keydown', '#TestReportDptModal input[name="job_type_fix"]', function (e) {
+jQuery(document).on('keydown', '#TestReportDptModal input[name="nabl_type_fix"]', function (e) {
     if (e.key === 'Tab' || e.keyCode === 9) {
         if (e.shiftKey) {
             e.preventDefault();
@@ -900,6 +906,9 @@ function resetDptForm() {
     jQuery('#defectogram_image_remove').addClass('hide');
     jQuery('#defectogram_image_prev').addClass('hide').attr('href', '#');
     jQuery('#amendment_no, #amendment_date, #amendment_reason').val('').prop('readonly', true).addClass('skip-tab').attr('tabindex', '-1');
+
+    jQuery('#customer_client_suggestion, #type_of_job_suggestion, #project_suggestion, #extent_of_exa_suggestion, #stage_of_exa_suggestion, #method_suggestion, #penetrant_suggestion, #cleaner_suggestion, #post_cleaning_suggestion, #penetrant_time_suggestion, #developing_time_suggestion').val('');
+    jQuery('#customer_client_list, #type_of_job_list, #project_list, #extent_of_exa_list, #stage_of_exa_list, #method_list, #penetrant_list, #cleaner_list, #post_cleaning_list, #penetrant_time_list, #developing_time_list').html('');
 
     let dateVal = (typeof currentDate !== 'undefined') ? currentDate : new Date().toLocaleDateString('en-GB');
     jQuery('#test_report_date').val(dateVal).trigger('change');
@@ -1179,6 +1188,8 @@ function resetReportDetailsForm() {
     jQuery('#detail_result_id').val('').trigger('change.select2');
     jQuery('#DPTReportDetailsForm input[type="hidden"]').val('');
     jQuery('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
+    jQuery('#det_job_description_suggestion').val('');
+    jQuery('#det_job_description_list').html('');
 }
 
 jQuery('#addDetailRowBtn').on('click', function () {
@@ -1486,6 +1497,7 @@ function fetchAndFillTestReportDpt(id) {
                 // jQuery('#developer_application').val(reportMasterData.developer_application);
                 jQuery('#lighting_equipment').val(reportMasterData.lighting_equipment || '');
                 jQuery('#intensity').val(reportMasterData.intensity || '');
+                jQuery('#examination_time').val(reportMasterData.examination_time || '');
                 // jQuery('#background_light').val(reportMasterData.background_light);
                 // jQuery('#uva_light_intensity').val(reportMasterData.uva_light_intensity);
 
@@ -1630,7 +1642,7 @@ jQuery('#TestReportDptModal').on('hidden.bs.modal', function () {
 // Detail modal hidden focus redirection
 jQuery('#DPTReportDetailsModal').on('hidden.bs.modal', function () {
     setTimeout(function () {
-        jQuery('#tested_by_authority_person_id').focus();
+        jQuery('#performed_by_authority_person_id').focus();
     }, 200);
 });
 
@@ -1903,6 +1915,17 @@ function suggestReviewedBy(event, element) {
 function suggestWitnessBy(event, element) {
     bindSuggestionAutocomplete(element, 'test_report_dpt_witness_by-list');
 }
+function suggestTypeOfJob(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#type_of_job_list', url: 'test_report_dpt_type_of_job-list', responseListKey: 'typeOfJobList' }); }
+function suggestProject(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#project_list', url: 'test_report_dpt_project-list', responseListKey: 'projectList' }); }
+function suggestExtentOfExa(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#extent_of_exa_list', url: 'test_report_dpt_extent_of_exa-list', responseListKey: 'extentOfExaList' }); }
+function suggestStageOfExa(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#stage_of_exa_list', url: 'test_report_dpt_stage_of_exa-list', responseListKey: 'stageOfExaList' }); }
+function suggestMethod(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#method_list', url: 'test_report_dpt_method-list', responseListKey: 'methodList' }); }
+function suggestPenetrant(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#penetrant_list', url: 'test_report_dpt_penetrant-list', responseListKey: 'penetrantList' }); }
+function suggestCleaner(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#cleaner_list', url: 'test_report_dpt_cleaner-list', responseListKey: 'cleanerList' }); }
+function suggestPostCleaning(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#post_cleaning_list', url: 'test_report_dpt_post_cleaning-list', responseListKey: 'postCleaningList' }); }
+function suggestPenetrantTime(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#penetrant_time_list', url: 'test_report_dpt_penetrant_time-list', responseListKey: 'penetrantTimeList' }); }
+function suggestDevelopingTime(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#developing_time_list', url: 'test_report_dpt_developing_time-list', responseListKey: 'developingTimeList' }); }
+function suggestJobDescription(event, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#det_job_description_list', url: 'test_report_dpt_job_description-list', responseListKey: 'jobDescriptionList' }); }
 
 function bindSuggestionAutocomplete(element, url) {
     let parentId = jQuery(element).attr('id');
@@ -1973,8 +1996,8 @@ function fillCopyModalTable() {
             <td>${item.test_report_no || ''}</td>
             <td>${item.test_report_date || ''}</td>
             <td>${item.customer || ''}</td>
-            <td>${item.nabl_type_fix || ''}</td>
-            <td>${item.job_type_fix || ''}</td>` +
+            <td>${item.nabl_type_fix || ''}</td>` +
+            // <td>${item.job_type_fix || ''}</td>` +
             // `<td>${item.type_of_job || ''}</td>` +
             // <td>${item.job_description || ''}</td>
             // <td>${item.part_no || ''}</td>
@@ -2151,6 +2174,7 @@ function performCopyDptReport(reportId, copyMaster, copyDetails) {
                     // jQuery('#developer_application').val(copyData.developer_application || '');
                     jQuery('#lighting_equipment').val(copyData.lighting_equipment || '');
                     jQuery('#intensity').val(copyData.intensity || '');
+                    jQuery('#examination_time').val(copyData.examination_time || '');
                     jQuery('#reviewed_by').val(copyData.reviewed_by || '');
                     jQuery('#witness_by').val(copyData.witness_by || '');
                     jQuery('#performed_by_authority_person_id').val(zeroToEmpty(copyData.performed_by_authority_person_id)).trigger('change.select2');

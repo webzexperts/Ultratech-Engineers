@@ -270,7 +270,7 @@ class JobDescriptionController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdJob as $dsKey)
                 {
-                    $output .= '<li parent-id="job_description" list-id="job_description_list" class="list-group-item" tabindex="0">'.$dsKey->job_description.'</li>';
+                    $output .= '<li parent-id="job_description" list-id="job_description_list" class="list-group-item" tabindex="-1">'.$dsKey->job_description.'</li>';
                 }
                 $output .= '</ul>';
 
