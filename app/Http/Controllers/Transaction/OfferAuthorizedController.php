@@ -331,15 +331,16 @@ class OfferAuthorizedController extends Controller
                 $offerDetails = OfferDetails::where('offer_id', $offer->offer_id)->get();
                 foreach ($offerDetails as $detail) {
 
-                    if($offer->nabl_type_fix == 'NABL' && $detail->process_type_fix  != 'Repair'){
-                        $is_observation_sheet = 'Yes';
-                    }else if($detail->process_type_fix == 'Repair'){
-                        $is_observation_sheet = 'N/A';
-                    }else if($detail->type_of_testing_id_fix != 'RT' && $request->nabl_type_fix != 'NABL'){
-                        $is_observation_sheet = 'N/A';
-                    }else{
-                        $is_observation_sheet = 'No';
-                    }
+                    // if($offer->nabl_type_fix == 'NABL' && $detail->process_type_fix  != 'Repair'){
+                    //     $is_observation_sheet = 'Yes';
+                    // }else if($detail->process_type_fix == 'Repair'){
+                    //     $is_observation_sheet = 'N/A';
+                    // }else if($detail->type_of_testing_id_fix != 'RT' && $request->nabl_type_fix != 'NABL'){
+                    //     $is_observation_sheet = 'N/A';
+                    // }else{
+                    //     $is_observation_sheet = 'No';
+                    // }
+                     $is_observation_sheet = 'Yes';
                     MaterialInwardDetails::create([
                         'material_inward_id'     => $materialInward->material_inward_id,
                         'process_type_fix'       => $detail->process_type_fix ?? 'Fresh',

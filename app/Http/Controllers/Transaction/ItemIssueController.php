@@ -808,7 +808,7 @@ class ItemIssueController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdUsername as $usKey){
 
-                    $output .= '<li parent-id="issue_to" list-id="issue_to_list" class="list-group-item" tabindex="0">'.$usKey->issue_to.'</li>';
+                    $output .= '<li parent-id="issue_to" list-id="issue_to_list" class="list-group-item" tabindex="-1">'.$usKey->issue_to.'</li>';
                 } 
                 $output .= '</ul>';
 

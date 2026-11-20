@@ -1096,7 +1096,7 @@ class InquiryController extends Controller
             if ($partNos->isNotEmpty()) {
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($partNos as $row) {
-                    $output .= '<li parent-id="inqd_part_no" list-id="inqd_part_no_list" class="list-group-item" tabindex="0">' . e($row->inqd_part_no) . '</li>';
+                    $output .= '<li parent-id="inqd_part_no" list-id="inqd_part_no_list" class="list-group-item" tabindex="-1">' . e($row->inqd_part_no) . '</li>';
                 }
                 $output .= '</ul>';
 

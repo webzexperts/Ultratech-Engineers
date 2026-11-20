@@ -640,7 +640,7 @@ class CustomerDCNonReturnableController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->$column) === '') continue;
-                    $output .= '<li parent-id="' . $parentId . '" list-id="' . $parentId . '_list" class="list-group-item" tabindex="0">' . e($row->$column) . '</li>';
+                    $output .= '<li parent-id="' . $parentId . '" list-id="' . $parentId . '_list" class="list-group-item" tabindex="-1">' . e($row->$column) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([

@@ -267,7 +267,7 @@ class ProcedureReferenceController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdProcedureReference as $dsKey)
                 {
-                    $output .= '<li parent-id="procedure_reference" list-id="procedure_reference_list" class="list-group-item" tabindex="0">'.$dsKey->procedure_reference.'</li>';
+                    $output .= '<li parent-id="procedure_reference" list-id="procedure_reference_list" class="list-group-item" tabindex="-1">'.$dsKey->procedure_reference.'</li>';
                 }
                 $output .= '</ul>';
 

@@ -417,6 +417,7 @@ jQuery(document).ready(function () {
             originalObsDetailRowBackup = null;
             renderObservationSheetDetailsTable();
             jQuery('#ObservationSheetDetailEditModal').modal('hide');
+            toastSuccess("Record Updated.");
         }
     });
 
@@ -521,9 +522,11 @@ jQuery(document).ready(function () {
                 row.sub_details[subIdx] = subItem;
                 renderObservationSheetSubDetailsTable(detailIdx);
                 jQuery('#ObservationSheetSubDetailModal').modal('hide');
+                toastSuccess("Record Updated.");
             } else {
                 row.sub_details.push(subItem);
                 renderObservationSheetSubDetailsTable(detailIdx);
+                toastSuccess("Record Inserted.");
 
                 // Do not hide modal on add: keep entered values, increment sr_no and advance location for fast continuous entry!
                 let currentSrNo = parseInt(subItem.sr_no) || 0;
@@ -566,7 +569,9 @@ jQuery(document).ready(function () {
     jQuery('#ObservationSheetModal').on('shown.bs.modal', function () {
         setTimeout(function () {
             jQuery('#observation_sheet_sequence').focus().select();
+            setSelect2Readonly('#ObservationSheetModal #prepared_by_user_id', true);
         }, 150);
+
     });
 
     // Modal hide lifecycle
@@ -607,6 +612,21 @@ jQuery(document).ready(function () {
     jQuery('#commonObservationSheetForm').on('submit', function (e) {
         e.preventDefault();
         let form = this;
+        var dateValue = document.getElementById("observation_sheet_date").value.trim();
+
+        if (!isValidDate(dateValue)) {
+            toastr.error("Enter A Valid Date!");
+            jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
+            jQuery('#commonObservationSheetForm').find('#submitbtn').prop('disabled', false);
+            return;
+        }
+
+        if (checkDate(dateValue) === 'no') {
+            toastr.error("Enter Date within Current Financial Year Selected.");
+            jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
+            jQuery('#commonObservationSheetForm').find('#submitbtn').prop('disabled', false);
+            return;
+        }
 
         if (!form.checkValidity()) {
             e.stopPropagation();
@@ -997,7 +1017,7 @@ function renderObservationSheetDetailsTable() {
 
     let validRows = observation_sheet_details_data.filter(row => row.mode !== 'Delete');
     if (!validRows || validRows.length === 0) {
-        tbody.html('<tr id="noDetails"><td colspan="22" class="text-center">No Observation Sheet Details Added</td></tr>');
+        tbody.html('<tr id="noDetails"><td colspan="22" class="text-center">No Worksheet Details Added</td></tr>');
         return;
     }
 
@@ -1127,12 +1147,12 @@ function editObservationDetailRow(indx) {
             if (isFresh) {
                 $btn.prop('disabled', false).text('Pending');
                 $btn.on('click.modalToggle', function () {
-                    fetchPendingTechniqueSheets();
+                    fetchPendingOldRtReports('Fresh');
                 });
             } else if (isRepair && !hasReportId) {
                 $btn.prop('disabled', false).text('Pending');
                 $btn.on('click.modalToggle', function () {
-                    fetchPendingOldRtReports();
+                    fetchPendingOldRtReports('Repair');
                 });
             } else if (isRepair && hasReportId) {
                 $btn.prop('disabled', true).text('Pending');
@@ -1140,7 +1160,7 @@ function editObservationDetailRow(indx) {
                 if (!row.sub_details || row.sub_details.length === 0) {
                     if (!row._fetching_repair) {
                         row._fetching_repair = true;
-                        fetchOldRtReportDetailsForRepair(row.test_report_rt_id, indx);
+                        fetchOldRtReportDetailsForRepair(row.test_report_rt_id, indx, 'Repair');
                     }
                 }
             } else {
@@ -1442,11 +1462,15 @@ function checkObservationSheetSequenceDuplication() {
 }
 
 let isFetchingPendingOldRt = false;
-function fetchPendingOldRtReports() {
+function fetchPendingOldRtReports(processType = 'Fresh') {
     if (isFetchingPendingOldRt) return;
     isFetchingPendingOldRt = true;
     let nablType = jQuery('#nabl').val() || '';
     let customerId = jQuery('#customer_id').val();
+    let detailIdx = jQuery('#detail_index').val();
+    let row = (detailIdx !== '' && observation_sheet_details_data[detailIdx]) ? observation_sheet_details_data[detailIdx] : null;
+    let jobType = row ? (row.job_type_fix || '') : (jQuery('#type').val() || '');
+
     if (!customerId) {
         toastr.error("Please select a customer first.");
         isFetchingPendingOldRt = false;
@@ -1463,7 +1487,12 @@ function fetchPendingOldRtReports() {
     jQuery.ajax({
         url: 'get-old-rt-reports-list-for-observation-sheet',
         type: 'GET',
-        data: { customer_id: customerId, nabl_type: nablType },
+        data: {
+            customer_id: customerId,
+            nabl_type: nablType,
+            job_type: jobType,
+            process_type: processType
+        },
         success: function (res) {
             if (jQuery.fn.DataTable.isDataTable($table)) {
                 $table.DataTable().clear().destroy();
@@ -1481,7 +1510,7 @@ function fetchPendingOldRtReports() {
                         html += '<td>' + (report.test_report_date || '') + '</td>';
                         html += '<td>' + (report.ulr_no || '') + '</td>';
                         html += '<td>' + (report.customer || '') + '</td>';
-                        // html += '<td>' + (report.type_of_job || '') + '</td>';
+                        html += '<td>' + (report.job_type_fix || '') + '</td>';
                         html += '<td>' + (report.job_description || '') + '</td>';
                         html += '<td>' + (report.part_no || '') + '</td>';
                         html += '<td>' + (report.drg_no || '') + '</td>';
@@ -1511,7 +1540,7 @@ function fetchPendingOldRtReports() {
                         initColumnSearch('#PendingOldRtReportTable', [0], 'common_search');
                     }
                 } else {
-                    tbody.html('<tr><td colspan="9" class="text-center">No RT reports found.</td></tr>');
+                    tbody.html('<tr><td colspan="14" class="text-center">No RT reports found.</td></tr>');
                 }
 
                 jQuery('#PendingOldRtReportModal').modal('show');
@@ -1545,8 +1574,13 @@ jQuery(document).on('click', '#submitPendingOldRtReportBtn', function () {
     let material = selectedRadio.data('material') || '';
     let detailIdx = jQuery('#detail_index').val();
 
-    if (detailIdx !== '' && observation_sheet_details_data[detailIdx]) {
-        let row = observation_sheet_details_data[detailIdx];
+    let row = (detailIdx !== '' && observation_sheet_details_data[detailIdx]) ? observation_sheet_details_data[detailIdx] : null;
+    let processType = row ? (row.process_type || 'Fresh') : 'Fresh';
+
+    if (row) {
+        // if (processType === 'Repair') {
+        //     row.test_report_rt_id = reportId;
+        // }
         row.test_report_rt_id = reportId;
         row.rt_no = reportNo;
         row.test_report_no = reportNo;
@@ -1570,17 +1604,17 @@ jQuery(document).on('click', '#submitPendingOldRtReportBtn', function () {
     jQuery('#PendingOldRtReportModal').modal('hide');
 
     // Fetch its details
-    fetchOldRtReportDetailsForRepair(reportId, detailIdx);
+    fetchOldRtReportDetailsForRepair(reportId, detailIdx, processType);
 });
 
-function fetchOldRtReportDetailsForRepair(reportId, detailIdx) {
+function fetchOldRtReportDetailsForRepair(reportId, detailIdx, processType = 'Repair') {
     skipLoader = false;
     if (typeof showLoader === 'function') showLoader();
 
     jQuery.ajax({
         url: 'get-old-rt-report-details-for-repair',
         type: 'GET',
-        data: { test_report_rt_id: reportId },
+        data: { test_report_rt_id: reportId, process_type: processType },
         success: function (res) {
             if (res.response_code === 1) {
                 let details = res.details || [];
@@ -1609,6 +1643,10 @@ function fetchOldRtReportDetailsForRepair(reportId, detailIdx) {
                     if (res.header.material) {
                         row.material = res.header.material;
                         jQuery('#material').val(res.header.material);
+                    }
+                    if (res.header.revision_number !== undefined && res.header.revision_number !== null && res.header.revision_number !== '') {
+                        row.revision_number = res.header.revision_number;
+                        jQuery('#revision_number').val(res.header.revision_number);
                     }
                     if (res.header.film_size_unit_fix) {
                         row.film_size_unit_fix = res.header.film_size_unit_fix;

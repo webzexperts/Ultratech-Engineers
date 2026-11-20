@@ -262,7 +262,7 @@ class IqiDesignationController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdIqiDesignation as $dsKey)
                 {
-                    $output .= '<li parent-id="iqi_designation" list-id="iqi_designation_list" class="list-group-item" tabindex="0">'.$dsKey->iqi_designation.'</li>';
+                    $output .= '<li parent-id="iqi_designation" list-id="iqi_designation_list" class="list-group-item" tabindex="-1">'.$dsKey->iqi_designation.'</li>';
                 }
                 $output .= '</ul>';
 

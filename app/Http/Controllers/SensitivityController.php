@@ -217,7 +217,7 @@ class SensitivityController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdSensitivity as $dsKey)
                 {
-                    $output .= '<li parent-id="sensitivity" list-id="sensitivity_list" class="list-group-item" tabindex="0">'.$dsKey->sensitivity.'</li>';
+                    $output .= '<li parent-id="sensitivity" list-id="sensitivity_list" class="list-group-item" tabindex="-1">'.$dsKey->sensitivity.'</li>';
                 }
                 $output .= '</ul>';
 

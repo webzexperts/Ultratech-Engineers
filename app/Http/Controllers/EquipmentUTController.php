@@ -506,7 +506,7 @@ class EquipmentUTController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdEquipmentUT as $dsKey)
                 {
-                    $output .= '<li parent-id="eu_make" list-id="eu_make_list" class="list-group-item" tabindex="0">'.$dsKey->eu_make.'</li>';
+                    $output .= '<li parent-id="eu_make" list-id="eu_make_list" class="list-group-item" tabindex="-1">'.$dsKey->eu_make.'</li>';
                 }
                 $output .= '</ul>';
 
@@ -542,7 +542,7 @@ class EquipmentUTController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdEquipmentUT as $dsKey)
                 {
-                    $output .= '<li parent-id="eu_display" list-id="eu_display_list" class="list-group-item" tabindex="0">'.$dsKey->eu_display.'</li>';
+                    $output .= '<li parent-id="eu_display" list-id="eu_display_list" class="list-group-item" tabindex="-1">'.$dsKey->eu_display.'</li>';
                 }
                 $output .= '</ul>';
 
@@ -578,7 +578,7 @@ class EquipmentUTController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdEquipmentUT as $dsKey)
                 {
-                    $output .= '<li parent-id="eu_calibration_standard" list-id="eu_calibration_standard_list" class="list-group-item" tabindex="0">'.$dsKey->eu_calibration_standard.'</li>';
+                    $output .= '<li parent-id="eu_calibration_standard" list-id="eu_calibration_standard_list" class="list-group-item" tabindex="-1">'.$dsKey->eu_calibration_standard.'</li>';
                 }
                 $output .= '</ul>';
 
@@ -614,7 +614,7 @@ class EquipmentUTController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdEquipmentUT as $dsKey)
                 {
-                    $output .= '<li parent-id="eu_calibration_technique" list-id="eu_calibration_technique_list" class="list-group-item" tabindex="0">'.$dsKey->eu_calibration_technique.'</li>';
+                    $output .= '<li parent-id="eu_calibration_technique" list-id="eu_calibration_technique_list" class="list-group-item" tabindex="-1">'.$dsKey->eu_calibration_technique.'</li>';
                 }
                 $output .= '</ul>';
 

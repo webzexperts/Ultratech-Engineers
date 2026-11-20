@@ -49,7 +49,7 @@
                                 </div>
                             </div>
 
-                            <div class="row g-2 mb-1">
+                            <div class="row g-2 mb-1" style="display: none;">
                                 <div class="col-4">
                                 </div>
                                 <div class="col-8">
@@ -245,14 +245,16 @@
 
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="type_of_job" class="form-label">Job Type <sup class="astric">*</sup></label>
+                                    <label for="type_of_job" class="form-label">Job Type </label>
                                 </div>
                                 <div class="col-8 position-relative">
                                     <div class="d-flex gap-2">
-                                        <input type="text" class="form-control" name="type_of_job" id="type_of_job" required>
+                                        <input type="text" class="form-control" name="type_of_job" id="type_of_job" oninput="suggestTypeOfJob(event, this)" autocomplete="off">
                                         <div class="invalid-tooltip">Enter Job Type.</div>
                                         <button type="button" class="btn btn-success btn-sm ms-1" id="copy_report_btn">Copy</button>
                                     </div>
+                                    <div id="type_of_job_list"></div>
+                                    <input type="hidden" name="type_of_job_suggestion" id="type_of_job_suggestion">
                                 </div>
                             </div>
                             <div class="row g-2 mb-1">
@@ -261,9 +263,11 @@
                                 </div>
                                 <div class="col-8 position-relative">
                                     <div class="d-flex gap-2">
-                                        <input type="text" class="form-control" name="project" id="project">
+                                        <input type="text" class="form-control" name="project" id="project" oninput="suggestProject(event, this)" autocomplete="off">
                                         <div class="invalid-tooltip">Enter Project.</div>
                                     </div>
+                                    <div id="project_list"></div>
+                                    <input type="hidden" name="project_suggestion" id="project_suggestion">
                                 </div>
                             </div>
                             <!-- PO No. -->
@@ -279,6 +283,22 @@
                                 </div>
                             </div>
                             
+                            <!-- Test Method -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="test_method_id" class="form-label">Test Method <sup class="astric">*</sup></label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <select class="js-example-basic-single" name="test_method_id" id="test_method_id" required style="width: 100%;">
+                                        <option value="">Select Test Method</option>
+                                        @forelse(getTestMethod() as $m)
+                                            <option value="{{ $m->test_method_id }}">{{ $m->test_method }}</option>
+                                        @empty
+                                        @endforelse
+                                    </select>
+                                    <div class="invalid-tooltip">Select Test Method.</div>
+                                </div>
+                            </div>
 
                             
 
@@ -333,26 +353,10 @@
 
                         <!-- Column 2 -->
                         <div class="col-md-4">
-                            <!-- Test Method -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4">
-                                    <label for="test_method_id" class="form-label">Test Method <sup class="astric">*</sup></label>
-                                </div>
-                                <div class="col-8 position-relative">
-                                    <select class="js-example-basic-single" name="test_method_id" id="test_method_id" required style="width: 100%;">
-                                        <option value="">Select Test Method</option>
-                                        @forelse(getTestMethod() as $m)
-                                            <option value="{{ $m->test_method_id }}">{{ $m->test_method }}</option>
-                                        @empty
-                                        @endforelse
-                                    </select>
-                                    <div class="invalid-tooltip">Select Test Method.</div>
-                                </div>
-                            </div>
                             <!-- Acceptance Standard -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="acceptance_standard_id" class="form-label">Acceptance Standard <sup class="astric">*</sup></label>
+                                    <label for="acceptance_standard_id" class="form-label">Acceptance Std. <sup class="astric">*</sup></label>
                                 </div>
                                 <div class="col-8 position-relative">
                                     <select class="js-example-basic-single" name="acceptance_standard_id" id="acceptance_standard_id" required style="width: 100%;">
@@ -383,7 +387,9 @@
                                     <label for="extent_of_exa" class="form-label">Extent Of Exa.</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="extent_of_exa" name="extent_of_exa" autocomplete="off">
+                                    <input type="text" class="form-control" id="extent_of_exa" name="extent_of_exa" oninput="suggestExtentOfExa(event, this)" autocomplete="off">
+                                    <div id="extent_of_exa_list"></div>
+                                    <input type="hidden" name="extent_of_exa_suggestion" id="extent_of_exa_suggestion">
                                 </div>
                             </div>
 
@@ -393,7 +399,9 @@
                                     <label for="stage_of_exa" class="form-label">Stage Of Exa.</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="stage_of_exa" name="stage_of_exa" autocomplete="off">
+                                    <input type="text" class="form-control" id="stage_of_exa" name="stage_of_exa" oninput="suggestStageOfExa(event, this)" autocomplete="off">
+                                    <div id="stage_of_exa_list"></div>
+                                    <input type="hidden" name="stage_of_exa_suggestion" id="stage_of_exa_suggestion">
                                 </div>
                             </div>
                             <!-- Surface Temp -->
@@ -414,7 +422,9 @@
                                     <label for="method" class="form-label">Method</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="method" name="method" autocomplete="off">
+                                    <input type="text" class="form-control" id="method" name="method" oninput="suggestMethod(event, this)" autocomplete="off">
+                                    <div id="method_list"></div>
+                                    <input type="hidden" name="method_suggestion" id="method_suggestion">
                                 </div>
                             </div>
 
@@ -424,7 +434,9 @@
                                     <label for="penetrant" class="form-label">Penetrant</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="penetrant" name="penetrant" autocomplete="off">
+                                    <input type="text" class="form-control" id="penetrant" name="penetrant" oninput="suggestPenetrant(event, this)" autocomplete="off">
+                                    <div id="penetrant_list"></div>
+                                    <input type="hidden" name="penetrant_suggestion" id="penetrant_suggestion">
                                 </div>
                             </div>
 
@@ -446,7 +458,9 @@
                                     <label for="cleaner" class="form-label">Cleaner</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="cleaner" name="cleaner"  autocomplete="off">
+                                    <input type="text" class="form-control" id="cleaner" name="cleaner" oninput="suggestCleaner(event, this)" autocomplete="off">
+                                    <div id="cleaner_list"></div>
+                                    <input type="hidden" name="cleaner_suggestion" id="cleaner_suggestion">
                                 </div>
                             </div>
 
@@ -459,6 +473,18 @@
                                     <input type="text" class="form-control" id="pre_cleaning" name="pre_cleaning" oninput="suggestPreCleaning(event, this)" autocomplete="off">
                                     <div id="pre_cleaning_list"></div>
                                     <input type="hidden" name="pre_cleaning_suggestion" id="pre_cleaning_suggestion">
+                                </div>
+                            </div>
+
+                            <!-- Post-cleaning -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start">
+                                    <label for="post_cleaning" class="form-label">Post-cleaning</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="post_cleaning" name="post_cleaning" oninput="suggestPostCleaning(event, this)" autocomplete="off">
+                                    <div id="post_cleaning_list"></div>
+                                    <input type="hidden" name="post_cleaning_suggestion" id="post_cleaning_suggestion">
                                 </div>
                             </div>
 
@@ -586,17 +612,7 @@
                                 </div>
                             </div> -->
 
-                            <!-- Post-cleaning -->
-                            <div class="row g-2 mb-1">
-                                <div class="col-4 justify-content-start">
-                                    <label for="post_cleaning" class="form-label">Post-cleaning</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="post_cleaning" name="post_cleaning"  autocomplete="off">
-                                    <!-- <div id="post_cleaning_list"></div>
-                                    <input type="hidden" name="post_cleaning_suggestion" id="post_cleaning_suggestion"> -->
-                                </div>
-                            </div>
+                            
 
                             <!-- Penetrant Time -->
                             <div class="row g-2 mb-1">
@@ -604,16 +620,20 @@
                                     <label for="penetrant_time" class="form-label">Penetrant Time</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="penetrant_time" name="penetrant_time" autocomplete="off">
+                                    <input type="text" class="form-control" id="penetrant_time" name="penetrant_time" oninput="suggestPenetrantTime(event, this)" autocomplete="off">
+                                    <div id="penetrant_time_list"></div>
+                                    <input type="hidden" name="penetrant_time_suggestion" id="penetrant_time_suggestion">
                                 </div>
                             </div>
                             <!-- Developing Time -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="developing_time" class="form-label">Developing Time</label>
+                                    <label for="developing_time" class="form-label">Development Time</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="developing_time" name="developing_time">
+                                    <input type="text" class="form-control" id="developing_time" name="developing_time" oninput="suggestDevelopingTime(event, this)" autocomplete="off">
+                                    <div id="developing_time_list"></div>
+                                    <input type="hidden" name="developing_time_suggestion" id="developing_time_suggestion">
                                 </div>
                             </div>
 
@@ -657,6 +677,15 @@
                                 </div>
                                 <div class="col-8">
                                     <input type="text" class="form-control" id="intensity" name="intensity">
+                                </div>
+                            </div>
+                            <!-- Examination Time -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="examination_time" class="form-label">Examination Time</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="examination_time" name="examination_time">
                                 </div>
                             </div>
                             <!-- Background Light -->
@@ -967,7 +996,7 @@
                                         @empty
                                         @endforelse
                                     </select>
-                                    <div class="invalid-tooltip">Enter Authorized By.</div>
+                                    <div class="invalid-tooltip">Select Authorized By.</div>
                                 </div>
                             </div>
                             <!-- Reviewed By -->

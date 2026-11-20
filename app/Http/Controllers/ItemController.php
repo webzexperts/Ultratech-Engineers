@@ -473,7 +473,7 @@ class ItemController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdItem as $dsKey)
                 {
-                    $output .= '<li parent-id="item_name" list-id="item_name_list" class="list-group-item" tabindex="0">'.$dsKey->item_name.'</li>';
+                    $output .= '<li parent-id="item_name" list-id="item_name_list" class="list-group-item" tabindex="-1">'.$dsKey->item_name.'</li>';
                 }
                 $output .= '</ul>';
 

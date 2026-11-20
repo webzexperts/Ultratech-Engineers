@@ -435,7 +435,7 @@ class TestReportMptController extends Controller
                 'observation_sheet_details_id' => $obsId,
                 'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
-                'job_type_fix' => $request->job_type_fix ?? 'Casting',
+                'job_type_fix' => null,
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 'date_of_receipt' => $receiptDate,
@@ -606,12 +606,12 @@ class TestReportMptController extends Controller
         $report_data->test_report_date = ($report_data->test_report_date != "" && $report_data->test_report_date != "0000-00-00")
             ? Date::createFromFormat('Y-m-d', $report_data->test_report_date)->format('d/m/Y') 
             : "";
-        $report_data->dc_date = ($report_data->dc_date != "" && $report_data->dc_date != "0000-00-00")
-            ? Date::createFromFormat('Y-m-d', $report_data->dc_date)->format('d/m/Y') 
-            : "";
-        $report_data->po_date = ($report_data->po_date != "" && $report_data->po_date != "0000-00-00")
-            ? Date::createFromFormat('Y-m-d', $report_data->po_date)->format('d/m/Y') 
-            : "";
+        // $report_data->dc_date = ($report_data->dc_date != "" && $report_data->dc_date != "0000-00-00")
+        //     ? Date::createFromFormat('Y-m-d', $report_data->dc_date)->format('d/m/Y') 
+        //     : "";
+        // $report_data->po_date = ($report_data->po_date != "" && $report_data->po_date != "0000-00-00")
+        //     ? Date::createFromFormat('Y-m-d', $report_data->po_date)->format('d/m/Y') 
+        //     : "";
         $report_data->date_of_testing = ($report_data->date_of_testing != "" && $report_data->date_of_testing != "0000-00-00")
             ? Date::createFromFormat('Y-m-d', $report_data->date_of_testing)->format('d/m/Y') 
             : "";
@@ -997,7 +997,7 @@ class TestReportMptController extends Controller
                 'observation_sheet_details_id' => $obsId,
                 'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
-                'job_type_fix' => $request->job_type_fix ?? 'Casting',
+                'job_type_fix' => null,
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 'date_of_receipt' => $receiptDate,
@@ -1644,6 +1644,14 @@ class TestReportMptController extends Controller
         return $this->existsSuggestion('test_report_mpt', 'witness_by', $request->term, 'witnessByList', 'witness_by');
     }
 
+    public function existsTypeOfJob(Request $request) { return $this->existsSuggestion('test_report_mpt', 'type_of_job', $request->term, 'typeOfJobList', 'type_of_job'); }
+    public function existsProject(Request $request) { return $this->existsSuggestion('test_report_mpt', 'project', $request->term, 'projectList', 'project'); }
+    public function existsExtentOfExa(Request $request) { return $this->existsSuggestion('test_report_mpt', 'extent_of_exa', $request->term, 'extentOfExaList', 'extent_of_exa'); }
+    public function existsMethod(Request $request) { return $this->existsSuggestion('test_report_mpt', 'method', $request->term, 'methodList', 'method'); }
+    public function existsFieldIndicator(Request $request) { return $this->existsSuggestion('test_report_mpt', 'field_indicator', $request->term, 'fieldIndicatorList', 'field_indicator'); }
+    public function existsBackgroundContrast(Request $request) { return $this->existsSuggestion('test_report_mpt', 'background_contrast', $request->term, 'backgroundContrastList', 'background_contrast'); }
+    public function existsJobDescription(Request $request) { return $this->existsSuggestion('test_report_mpt_details', 'job_description', $request->term, 'jobDescriptionList', 'det_job_description'); }
+
     private function existsSuggestion($table, $column, $term, $listId, $parentId)
     {
         if ($term != "") {
@@ -1677,7 +1685,7 @@ class TestReportMptController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->$column) === '') continue;
-                    $output .= '<li parent-id="' . $parentId . '" list-id="' . $parentId . '_list" class="list-group-item" tabindex="0">' . e($row->$column) . '</li>';
+                    $output .= '<li parent-id="' . $parentId . '" list-id="' . $parentId . '_list" class="list-group-item" tabindex="-1">' . e($row->$column) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -1849,7 +1857,7 @@ class TestReportMptController extends Controller
                 'heat_no_label'       => $lnr_data->heat_no_label ?? '',
                 'test_carried_out_at' => $lnr_data->test_carried_out_at ?? '',
                 'nabl_type_fix'       => $nabl_type,
-                'job_type_fix'        => !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : 'Casting',
+                'job_type_fix'        => !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : '',
             ]
         ]);
     }

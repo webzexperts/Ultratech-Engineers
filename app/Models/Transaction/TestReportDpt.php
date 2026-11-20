@@ -72,6 +72,7 @@ class TestReportDpt extends Model
         'developing_time',
         'lighting_equipment',
         'intensity',
+        'examination_time',
         'background_light',
         'uva_light_intensity',
         'procedure_ref_id',

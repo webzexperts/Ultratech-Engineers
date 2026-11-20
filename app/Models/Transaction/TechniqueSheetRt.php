@@ -55,6 +55,7 @@ class TechniqueSheetRt extends Model
         'shooting_sketch_image_blob',
         'film_size_fix',
         'sfd_unit_fix',
+        'print_ug_in_report',
         'no_of_films',
         'film_size',
         'total_area',

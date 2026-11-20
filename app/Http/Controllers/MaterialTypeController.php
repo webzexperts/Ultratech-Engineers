@@ -276,7 +276,7 @@ class MaterialTypeController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdMaterialType as $dsKey)
                 {
-                    $output .= '<li parent-id="material_type" list-id="material_type_list" class="list-group-item" tabindex="0">'.$dsKey->material_type.'</li>';
+                    $output .= '<li parent-id="material_type" list-id="material_type_list" class="list-group-item" tabindex="-1">'.$dsKey->material_type.'</li>';
                 }
                 $output .= '</ul>';
 

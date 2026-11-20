@@ -274,7 +274,7 @@ class FindingLevelController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdFindingLevel as $dsKey)
                 {
-                    $output .= '<li parent-id="finding_level_name" list-id="finding_level_list" class="list-group-item" tabindex="0">'.$dsKey->finding_level_name.'</li>';
+                    $output .= '<li parent-id="finding_level_name" list-id="finding_level_list" class="list-group-item" tabindex="-1">'.$dsKey->finding_level_name.'</li>';
                 }
                 $output .= '</ul>';
 

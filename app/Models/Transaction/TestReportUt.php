@@ -28,6 +28,7 @@ class TestReportUt extends Model
         'type_of_job_id',
         'type_of_job',
         'project',
+        'po_no',
         'test_method_id',
         'job_desc_label',
         'extent_of_exa',

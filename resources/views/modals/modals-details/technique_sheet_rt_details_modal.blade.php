@@ -84,6 +84,20 @@
                                     <div class="invalid-tooltip">Select Film Type.</div>
                                 </div>
                             </div>
+                            <!-- Test Method -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4"><label for="detail_test_method_id" class="form-label">Test Method <sup class="astric">*</sup></label></div>
+                                <div class="col-8 position-relative">
+                                    <select class="js-example-basic-single" name="test_method_id" id="detail_test_method_id" required>
+                                        <option value="">Select Test Method</option>
+                                        @forelse(getTestMethod() as $tm)
+                                            <option value="{{ $tm->test_method_id }}">{{ $tm->test_method }}</option>
+                                        @empty
+                                        @endforelse
+                                    </select>
+                                    <div class="invalid-tooltip">Select Test Method.</div>
+                                </div>
+                            </div>
                             <!-- Thickness -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="detail_thickness" class="form-label">Thickness (mm) <sup class="astric">*</sup></label></div>
@@ -196,6 +210,13 @@
                                         <option value="Quadra">Quadra</option>
                                     </select>
                                     <div class="invalid-tooltip">Select No. of Film.</div>
+                                </div>
+                            </div>
+                             <!-- Ug -->
+                            <div class="row g-2 mb-1">
+                                <div class="col-4 justify-content-start"><label for="detail_ug" class="form-label">Ug</label></div>
+                                <div class="col-8">
+                                    <input type="text" name="ug" id="detail_ug" class="form-control" autocomplete="off">
                                 </div>
                             </div>
                         </div>
