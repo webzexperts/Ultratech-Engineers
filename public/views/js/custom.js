@@ -3153,6 +3153,12 @@ jQuery(document).on('click mousedown focusin', function (e) {
 });
 
 jQuery(document).on('keydown', 'input', function (e) {
+    if (e.which === 9 || e.which === 27) { // Tab or Escape key
+        var inputId = this.id;
+        if (inputId) {
+            jQuery('#' + inputId + '_list').html('');
+        }
+    }
     if (e.which === 40) { // Arrow Down
         var inputId = this.id;
         if (inputId) {
@@ -3188,17 +3194,37 @@ jQuery(document).on('keydown', '.list-group-item', function (e) {
     var parentId = $this.attr('parent-id');
     var listId = $this.attr('list-id');
 
-    if (e.which === 13 || e.which === 32) { // Enter or Space
-        e.preventDefault();
+    if (e.which === 13 || e.which === 32 || e.which === 9) { // Enter, Space or Tab
         var suggest = $this.text();
         if (parentId && listId) {
-            jQuery('#' + parentId).val(suggest).focus();
+            var $parentInput = jQuery('#' + parentId);
+            $parentInput.val(suggest);
 
             // Prevent immediate re-triggering of suggestion ajax
             var storeKey = '#' + listId + '_' + parentId;
             window.suggestionLastSearchStore[storeKey] = suggest;
 
             jQuery('#' + listId).html('');
+
+            if (e.which === 9) { // Tab key -> advance to next field
+                e.preventDefault();
+                var focusables = jQuery('input, select, textarea, button').filter(':visible:not([disabled]):not([readonly]):not([tabindex="-1"])');
+                var nextIndex = focusables.index($parentInput) + 1;
+                if (nextIndex > 0 && nextIndex < focusables.length) {
+                    focusables.eq(nextIndex).focus();
+                } else {
+                    $parentInput.focus();
+                }
+            } else {
+                e.preventDefault();
+                $parentInput.focus();
+            }
+        }
+    } else if (e.which === 27) { // Escape
+        e.preventDefault();
+        jQuery('#' + listId).html('');
+        if (parentId) {
+            jQuery('#' + parentId).focus();
         }
     } else if (e.which === 40) { // Arrow Down
         e.preventDefault();

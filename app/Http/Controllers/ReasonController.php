@@ -255,7 +255,7 @@ class ReasonController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdReason as $dsKey)
                 {
-                    $output .= '<li parent-id="reason_name" list-id="reason_name_list" class="list-group-item" tabindex="0">'.$dsKey->reason_name.'</li>';
+                    $output .= '<li parent-id="reason_name" list-id="reason_name_list" class="list-group-item" tabindex="-1">'.$dsKey->reason_name.'</li>';
                 }
                 $output .= '</ul>';
 

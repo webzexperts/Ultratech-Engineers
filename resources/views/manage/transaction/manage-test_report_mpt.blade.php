@@ -35,7 +35,7 @@
                             <th>NABL</th>
                             <th>ULR No.</th>
                             <th>Test At</th>
-                            <th>Type</th>
+                            <!-- <th>Type</th> -->
                             <th>Customer</th>
                             <!-- <th>DC No.</th>
                             <th>DC Date</th> -->
@@ -78,7 +78,7 @@
             "processing": false,
             "serverSide": true,
             "scrollX": true,
-            "order": [[2, 'desc'], [18, 'desc']],
+            "order": [[2, 'desc'], [17, 'desc']],
             dom: 'Blfrtip',
             buttons: [{
                 extend: 'excel',
@@ -114,7 +114,7 @@
                 { data: 'nabl_type_fix', name: 'test_report_mpt.nabl_type_fix' },
                 { data: 'ulr_no', name: 'test_report_mpt.ulr_no' },
                 { data: 'test_carried_out_at', name: 'test_report_mpt.test_carried_out_at' },
-                { data: 'job_type_fix', name: 'test_report_mpt.job_type_fix' },
+               // { data: 'job_type_fix', name: 'test_report_mpt.job_type_fix' },
                 { data: 'customer', name: 'customers.customer' },
                 // { data: 'dc_no', name: 'material_inward.dc_no' },
                 // { data: 'dc_date', name: 'material_inward.dc_date' },

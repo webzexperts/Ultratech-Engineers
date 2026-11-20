@@ -1,11 +1,11 @@
 @extends('layouts.master')
-@section('title') Observation Sheet @endsection
+@section('title') Worksheet @endsection
 @section('css')
 @endsection
 @section('content')
 @component('components.breadcrumb')
 @slot('li_1') Transaction @endslot
-@slot('title') Observation Sheet @endslot
+@slot('title') Worksheet @endslot
 @endcomponent
 
 @include('modals.modals-transaction.observation_sheet_modal')
@@ -18,7 +18,7 @@
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header d-flex align-items-center pb-2">
-                <h5 class="card-title mb-0 flex-grow-1">Observation Sheet</h5>
+                <h5 class="card-title mb-0 flex-grow-1">Worksheet</h5>
                 <div>
                     @if(hasAccess("observation_sheet", "export"))
                     <a href="javascript:void(0)" class="btn btn-primary" id="export-excel">Excel</a>
@@ -90,7 +90,7 @@
         dom: 'Blfrtip',
         buttons: [{
             extend: 'excel',
-            filename: 'Observation Sheet List',
+            filename: 'Worksheet List',
             title: "",
             className: 'export_observation_sheet d-none',
             exportOptions: {
@@ -136,9 +136,9 @@
             { data: 'heat_no', name: 'mid.heat_no'},
             { data: 'product_code', name: 'mid.product_code'},
             { data: 'observation_qty', name: 'osd.observation_qty'},
-            { data: 'last_by', name: 'observation_sheet.last_by'}, 
+            { data: 'last_by', name: 'last_by'}, 
             { data: 'last_on', name: 'observation_sheet.last_on'}, 
-            { data: 'created_by', name: 'observation_sheet.created_by'}, 
+            { data: 'created_by', name: 'created_by'}, 
             { data: 'created_on', name: 'observation_sheet.created_on'},
             { data: 'observation_sheet_sequence', name: 'observation_sheet.observation_sheet_sequence', visible: false, searchable: false, },
         ], 

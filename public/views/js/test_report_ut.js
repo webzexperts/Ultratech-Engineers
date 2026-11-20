@@ -526,6 +526,8 @@ function resetReportDetailsForm() {
     jQuery('#detail_result_id').val('').trigger('change.select2');
     jQuery('#UTReportDetailsForm input[type="hidden"]').val('');
     jQuery('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
+    jQuery('#det_job_description_suggestion').val('');
+    jQuery('#det_job_description_list').html('');
 }
 
 function resetEquipmentForm() {
@@ -997,7 +999,9 @@ function resetMainForm() {
     jQuery('#authorized_by_authority_person_id').val('').trigger('change.select2');
 
     // Reset suggestion inputs
+    jQuery('#po_no').val('');
     jQuery('#customer_client_suggestion').val('');
+    jQuery('#type_of_job_suggestion, #project_suggestion, #extent_of_exa_suggestion, #stage_of_exa_suggestion, #method_suggestion, #ref_sensitivity_suggestion').val('');
     jQuery('#part_no_suggestion').val('');
     jQuery('#drg_no_suggestion').val('');
     jQuery('#test_carried_out_at_suggestion').val('');
@@ -1012,8 +1016,7 @@ function resetMainForm() {
     jQuery('#product_code_suggestion').val('');
     jQuery('#reviewed_by_suggestion').val('');
     jQuery('#witness_by_suggestion').val('');
-    jQuery('#reviewed_by_list').html('');
-    jQuery('#witness_by_list').html('');
+    jQuery('#customer_client_list, #type_of_job_list, #project_list, #surface_condition_list, #extent_of_exa_list, #stage_of_exa_list, #surface_temp_list, #couplant_list, #method_list, #ref_block_used_list, #ref_sensitivity_list, #reviewed_by_list, #witness_by_list').html('');
     jQuery('#ulr_year').val('');
     applyDynamicDetailLabels();
 
@@ -1630,7 +1633,7 @@ jQuery(document).on('change', '#defectogram_image', function (e) {
                         jQuery('#defectogram_image_doc').val(data.files);
                         jQuery('#defectogram_image_prev').attr('href', data.files_url).text('View').removeClass('hide');
                         jQuery('#defectogram_image_remove').removeClass('hide').addClass('i-block');
-                        console.log(data.response_message);
+                        // console.log(data.response_message);
                     } else {
                         toastr.error(data.response_message);
                     }
@@ -1879,6 +1882,54 @@ function suggestCustomerClient(e, element) {
         responseListKey: 'customerClientList'
     });
 }
+function suggestTypeOfJob(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#type_of_job_list',
+        url: 'test_report_ut_type_of_job-list',
+        responseListKey: 'typeOfJobList'
+    });
+}
+function suggestProject(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#project_list',
+        url: 'test_report_ut_project-list',
+        responseListKey: 'projectList'
+    });
+}
+function suggestExtentOfExa(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#extent_of_exa_list',
+        url: 'test_report_ut_extent_of_exa-list',
+        responseListKey: 'extentOfExaList'
+    });
+}
+function suggestStageOfExa(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#stage_of_exa_list',
+        url: 'test_report_ut_stage_of_exa-list',
+        responseListKey: 'stageOfExaList'
+    });
+}
+function suggestMethod(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#method_list',
+        url: 'test_report_ut_method-list',
+        responseListKey: 'methodList'
+    });
+}
+function suggestRefSensitivity(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#ref_sensitivity_list',
+        url: 'test_report_ut_ref_sensitivity-list',
+        responseListKey: 'refSensitivityList'
+    });
+}
 function suggestPartNo(e, element) {
     commonSuggestionAjax({
         inputElement: element,
@@ -1989,6 +2040,14 @@ function suggestWitnessBy(e, element) {
         listSelector: '#witness_by_list',
         url: 'test_report_ut_witness_by-list',
         responseListKey: 'witnessByList'
+    });
+}
+function suggestJobDescription(e, element) {
+    commonSuggestionAjax({
+        inputElement: element,
+        listSelector: '#det_job_description_list',
+        url: 'test_report_ut_job_description-list',
+        responseListKey: 'jobDescriptionList'
     });
 }
 
@@ -2106,7 +2165,7 @@ jQuery('#TestReportUtModal').on('show.bs.modal', function () {
 // Detail modal hidden focus redirection
 jQuery('#UTReportDetailsModal').on('hidden.bs.modal', function () {
     setTimeout(function () {
-        jQuery('#tested_by_authority_person_id').focus();
+        jQuery('#performed_by_authority_person_id').focus();
     }, 200);
 });
 
@@ -2201,8 +2260,8 @@ function fillCopyReportModalTable() {
             <td>${item.test_report_no || ''}</td>
             <td>${item.test_report_date || ''}</td>
             <td>${item.customer || ''}</td>
-            <td>${item.nabl_type_fix || ''}</td>
-            <td>${item.job_type_fix || ''}</td>` +
+            <td>${item.nabl_type_fix || ''}</td>` +
+            // <td>${item.job_type_fix || ''}</td>` +
             // `<td>${item.type_of_job || ''}</td>` +
             // <td>${item.job_description || ''}</td>
             // <td>${item.part_no || ''}</td>
@@ -2335,6 +2394,7 @@ function performCopyReport(reportId, copyMaster, copyDetails) {
                     jQuery('#customer_client').val(d.customer_client || '');
                     jQuery('#type_of_job').val(d.type_of_job || '');
                     jQuery('#project').val(d.project || '');
+                    jQuery('#po_no').val(d.po_no || '');
                     // jQuery('#test_method_id').val(zeroToEmpty(d.test_method_id)).trigger('change.select2');
                     jQuery('#job_desc_label').val(d.job_desc_label || '');
                     jQuery('#surface_condition').val(d.surface_condition || '');

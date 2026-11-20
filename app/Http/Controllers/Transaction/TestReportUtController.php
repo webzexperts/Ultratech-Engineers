@@ -37,7 +37,7 @@ class TestReportUtController extends Controller
         $location_data = getCurrentLocation();
 
         $reports = TestReportUt::select([
-            'test_report_ut.test_report_ut_id as id','test_report_ut.test_report_no','test_report_ut.test_report_sequence','test_report_ut.test_report_date','test_report_ut.entry_type_fix','test_report_ut.nabl_type_fix','test_report_ut.ulr_no','test_report_ut.test_carried_out_at','test_report_ut.job_type_fix','test_report_ut.from_type_id_fix','customers.customer','test_report_ut.project','material_inward.dc_no','material_inward.dc_date','material_inward.po_no','material_inward.po_date',
+            'test_report_ut.test_report_ut_id as id','test_report_ut.test_report_no','test_report_ut.test_report_sequence','test_report_ut.test_report_date','test_report_ut.entry_type_fix','test_report_ut.nabl_type_fix','test_report_ut.ulr_no','test_report_ut.test_carried_out_at','test_report_ut.job_type_fix','test_report_ut.from_type_id_fix','customers.customer','test_report_ut.project','test_report_ut.po_no','material_inward.dc_no','material_inward.dc_date','material_inward.po_date',
             // 'type_of_job.type_of_job',
             // 'job_descriptions.job_description',
             'test_report_ut.job_desc as job_description',
@@ -322,7 +322,7 @@ class TestReportUtController extends Controller
                 'material_inward_details_id' => $request->material_inward_details_id ?: null,
                 'observation_sheet_details_id' => $request->observation_sheet_details_id ?? null,
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
-                'job_type_fix' => $request->job_type_fix ?? 'Casting',
+                'job_type_fix' => null,
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 // 'type_of_job_id' => $request->type_of_job_id,
@@ -330,6 +330,7 @@ class TestReportUtController extends Controller
                 'type_of_job_id' => $request->type_of_job_id ?? null,
                 'type_of_job' => $request->type_of_job,
                 'project' => $request->project,
+                'po_no' => $request->po_no,
                 'test_method_id' => !empty($request->test_method_id) ? $request->test_method_id : null,
                 'job_desc_label' => $request->job_desc_label,
                 'job_desc_id' => null,
@@ -503,12 +504,12 @@ class TestReportUtController extends Controller
             $report_data->test_report_date = ($report_data->test_report_date != "" && $report_data->test_report_date != "0000-00-00")
                 ? Date::createFromFormat('Y-m-d', $report_data->test_report_date)->format('d/m/Y') 
                 : "";
-            $report_data->dc_date = ($report_data->dc_date != "" && $report_data->dc_date != "0000-00-00")
-                ? Date::createFromFormat('Y-m-d', $report_data->dc_date)->format('d/m/Y') 
-                : "";
-            $report_data->po_date = ($report_data->po_date != "" && $report_data->po_date != "0000-00-00")
-                ? Date::createFromFormat('Y-m-d', $report_data->po_date)->format('d/m/Y') 
-                : "";
+            // $report_data->dc_date = ($report_data->dc_date != "" && $report_data->dc_date != "0000-00-00")
+            //     ? Date::createFromFormat('Y-m-d', $report_data->dc_date)->format('d/m/Y') 
+            //     : "";
+            // $report_data->po_date = ($report_data->po_date != "" && $report_data->po_date != "0000-00-00")
+            //     ? Date::createFromFormat('Y-m-d', $report_data->po_date)->format('d/m/Y') 
+            //     : "";
             $report_data->date_of_receipt = ($report_data->date_of_receipt != "" && $report_data->date_of_receipt != "0000-00-00")
                 ? Date::createFromFormat('Y-m-d', $report_data->date_of_receipt)->format('d/m/Y') 
                 : "";
@@ -764,7 +765,7 @@ class TestReportUtController extends Controller
                 'material_inward_details_id' => $report->material_inward_details_id,
                 'observation_sheet_details_id' => $request->observation_sheet_details_id ?? null,
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
-                'job_type_fix' => $request->job_type_fix ?? 'Casting',
+                'job_type_fix' => null,
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 // 'type_of_job_id' => $request->type_of_job_id,
@@ -772,6 +773,7 @@ class TestReportUtController extends Controller
                 'type_of_job_id' => $request->type_of_job_id ?? null,
                 'type_of_job' => $request->type_of_job,
                 'project' => $request->project,
+                'po_no' => $request->po_no,
                 'test_method_id' => !empty($request->test_method_id) ? $request->test_method_id : null,
                 'job_desc_label' => $request->job_desc_label,
                 'job_desc_id' => null,
@@ -1320,6 +1322,7 @@ class TestReportUtController extends Controller
             $report_data->amendment_date = ($report_data->amendment_date != "" && $report_data->amendment_date != "0000-00-00")
                 ? Date::createFromFormat('Y-m-d', $report_data->amendment_date)->format('d/m/Y') 
                 : "";
+
             $report_data->ut_test_no_label = !empty($report_data->ut_test_no_label) ? $report_data->ut_test_no_label : (TestReportUt::where('test_report_ut_id', $id)->value('ut_test_no_label') ?: 'UT Test No.');
             $report_data->heat_no_label = !empty($report_data->heat_no_label) ? $report_data->heat_no_label : (TestReportUt::where('test_report_ut_id', $id)->value('heat_no_label') ?: 'Heat No.');
             if (!isset($report_data->note) || $report_data->note === null) {
@@ -1386,6 +1389,36 @@ class TestReportUtController extends Controller
     public function existsCustomerClient(Request $request)
     {
         return $this->existsSuggestion('test_report_ut', 'customer_client', $request->term, 'customerClientList', 'customer_client');
+    }
+
+    public function existsTypeOfJob(Request $request)
+    {
+        return $this->existsSuggestion('test_report_ut', 'type_of_job', $request->term, 'typeOfJobList', 'type_of_job');
+    }
+
+    public function existsProject(Request $request)
+    {
+        return $this->existsSuggestion('test_report_ut', 'project', $request->term, 'projectList', 'project');
+    }
+
+    public function existsExtentOfExa(Request $request)
+    {
+        return $this->existsSuggestion('test_report_ut', 'extent_of_exa', $request->term, 'extentOfExaList', 'extent_of_exa');
+    }
+
+    public function existsStageOfExa(Request $request)
+    {
+        return $this->existsSuggestion('test_report_ut', 'stage_of_exa', $request->term, 'stageOfExaList', 'stage_of_exa');
+    }
+
+    public function existsMethod(Request $request)
+    {
+        return $this->existsSuggestion('test_report_ut', 'method', $request->term, 'methodList', 'method');
+    }
+
+    public function existsRefSensitivity(Request $request)
+    {
+        return $this->existsSuggestion('test_report_ut', 'ref_sensitivity', $request->term, 'refSensitivityList', 'ref_sensitivity');
     }
 
     public function existsPartNo(Request $request)
@@ -1456,6 +1489,11 @@ class TestReportUtController extends Controller
     public function existsWitnessBy(Request $request)
     {
         return $this->existsSuggestion('test_report_ut', 'witness_by', $request->term, 'witnessByList', 'witness_by');
+    }
+
+    public function existsJobDescription(Request $request)
+    {
+        return $this->existsSuggestion('test_report_ut_details', 'job_description', $request->term, 'jobDescriptionList', 'det_job_description');
     }
 
     public function getLastReportEquipmentAndProbes(Request $request)
@@ -1609,24 +1647,42 @@ class TestReportUtController extends Controller
             $location_data = getCurrentLocation();
             $locationId = $location_data ? $location_data->location_id : null;
 
-            $query = DB::table($table)
-                ->select($column)
-                ->where($column, 'LIKE', $term . '%')
-                ->whereNotNull($column)
-                ->where($column, '!=', '');
+            if ($table === 'test_report_ut_details') {
+                $query = DB::table('test_report_ut_details')
+                    ->where('test_report_ut_details.' . $column, 'LIKE', $term . '%')
+                    ->whereNotNull('test_report_ut_details.' . $column)
+                    ->where('test_report_ut_details.' . $column, '!=', '');
 
-            if ($locationId) {
-                $query->where('current_location_id', $locationId);
+                if ($locationId) {
+                    $query->join('test_report_ut', 'test_report_ut.test_report_ut_id', '=', 'test_report_ut_details.test_report_ut_id')
+                        ->where('test_report_ut.current_location_id', $locationId);
+                }
+
+                $data = $query->select('test_report_ut_details.' . $column)
+                    ->groupBy('test_report_ut_details.' . $column)
+                    ->orderBy('test_report_ut_details.' . $column, 'asc')
+                    ->get();
+            } else {
+                $query = DB::table($table)
+                    ->select($column)
+                    ->where($column, 'LIKE', $term . '%')
+                    ->whereNotNull($column)
+                    ->where($column, '!=', '');
+
+                if ($locationId) {
+                    $query->where('current_location_id', $locationId);
+                }
+
+                $data = $query->groupBy($column)
+                    ->orderBy($column, 'asc')
+                    ->get();
             }
 
-            $data = $query->groupBy($column)
-                ->orderBy($column, 'asc')
-                ->get();
             if ($data->isNotEmpty()) {
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->$column) === '') continue;
-                    $output .= '<li parent-id="' . $parentId . '" list-id="' . $parentId . '_list" class="list-group-item" tabindex="0">' . e($row->$column) . '</li>';
+                    $output .= '<li parent-id="' . $parentId . '" list-id="' . $parentId . '_list" class="list-group-item" tabindex="-1">' . e($row->$column) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -1667,7 +1723,7 @@ Disclaimer : *Marked informations as given by customer that can affects the vali
         $ut_test_no_label = 'UT Test No.';
         $heat_no_label = 'Heat No.';
         $nabl_type_fix = 'Non NABL';
-        $job_type_fix = 'Casting';
+        $job_type_fix = '';
 
         if ($lnr_data) {
             $note = $lnr_data->note ?? $note;
@@ -1675,7 +1731,7 @@ Disclaimer : *Marked informations as given by customer that can affects the vali
             $ut_test_no_label = !empty($lnr_data->ut_test_no_label) ? $lnr_data->ut_test_no_label : 'UT Test No.';
             $heat_no_label = !empty($lnr_data->heat_no_label) ? $lnr_data->heat_no_label : 'Heat No.';
             $nabl_type_fix = !empty($lnr_data->nabl_type_fix) ? $lnr_data->nabl_type_fix : 'Non NABL';
-            $job_type_fix = !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : 'Casting';
+            $job_type_fix = !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : '';
         }
 
         return response()->json([

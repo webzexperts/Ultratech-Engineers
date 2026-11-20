@@ -274,7 +274,7 @@ class TestMethodController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdTestMethod as $dsKey)
                 {
-                    $output .= '<li parent-id="test_method" list-id="test_method_list" class="list-group-item" tabindex="0">'.$dsKey->test_method.'</li>';
+                    $output .= '<li parent-id="test_method" list-id="test_method_list" class="list-group-item" tabindex="-1">'.$dsKey->test_method.'</li>';
                 }
                 $output .= '</ul>';
 

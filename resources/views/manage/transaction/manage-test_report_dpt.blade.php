@@ -35,7 +35,7 @@
                             <th>NABL</th>
                             <th>ULR No.</th>
                             <th>Test At</th>
-                            <th>Type</th>
+                            <!-- <th>Type</th> -->
                             <th>Customer</th>
                             <th>Test Method</th>
                             <th>Acceptance Standard</th>
@@ -77,7 +77,7 @@
             "serverSide": true,
             "scrollX": true,
             // "order": [[2, 'desc'], [22, 'desc']],
-            "order": [[2, 'desc'], [17, 'desc']],
+            "order": [[2, 'desc'], [16, 'desc']],
             dom: 'Blfrtip',
             buttons: [{
                 extend: 'excel',
@@ -113,7 +113,7 @@
                 { data: 'nabl_type_fix', name: 'test_report_dpt.nabl_type_fix' },
                 { data: 'ulr_no', name: 'test_report_dpt.ulr_no' },
                 { data: 'test_carried_out_at', name: 'test_report_dpt.test_carried_out_at' },
-                { data: 'job_type_fix', name: 'test_report_dpt.job_type_fix' },
+                // { data: 'job_type_fix', name: 'test_report_dpt.job_type_fix' },
                 { data: 'customer', name: 'customers.customer' },
                 { data: 'test_method', name: 'test_method.test_method' },
                 { data: 'acceptance_standard', name: 'acceptance_standards.acceptance_standard' },

@@ -91,6 +91,7 @@ function fetchAndFillAuthorityPerson(id) {
                 jQuery('#AuthorityPersonModal').find('#performed_by').prop('checked', d.performed_by == 'Yes');
                 jQuery('#AuthorityPersonModal').find('#examined_by').prop('checked', d.examined_by == 'Yes');
                 jQuery('#AuthorityPersonModal').find('#authorized_by').prop('checked', d.authorized_by == 'Yes');
+                jQuery('#AuthorityPersonModal').find('#incharge').prop('checked', d.incharge == 'Yes');
                 buildOperatorType();
 
                 // Reset file fields first

@@ -185,8 +185,9 @@ class AuthorityPersonController extends Controller
             $performed_by     = $request->performed_by == 'Yes' ? 'Yes' : 'No';
             $examined_by   = $request->examined_by == 'Yes' ? 'Yes' : 'No';
             $authorized_by = $request->authorized_by == 'Yes' ? 'Yes' : 'No';
+            $incharge = $request->incharge == 'Yes' ? 'Yes' : 'No';
 
-            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes') {
+            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes' && $incharge != 'Yes') {
                 return response()->json([
                     'response_code' => '0',
                     'response_message' => 'Select At Least One Operator Type.',
@@ -232,6 +233,7 @@ class AuthorityPersonController extends Controller
                 'performed_by'      => $performed_by,
                 'examined_by'    => $examined_by,
                 'authorized_by'  => $authorized_by,
+                'incharge'       => $incharge,
                 'operator_type'  => $operator_type,
                 'certificate'      => $certificatePath,
                 'certificate_blob' => $blobImageCertificate,
@@ -322,8 +324,9 @@ class AuthorityPersonController extends Controller
             $performed_by  = $request->performed_by == 'Yes' ? 'Yes' : 'No';
             $examined_by   = $request->examined_by == 'Yes' ? 'Yes' : 'No';
             $authorized_by = $request->authorized_by == 'Yes' ? 'Yes' : 'No';
+            $incharge = $request->incharge == 'Yes' ? 'Yes' : 'No';
 
-            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes') {
+            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes' && $incharge != 'Yes') {
                 return response()->json([
                     'response_code' => '0',
                     'response_message' => 'Please Select At Least One Operator Type.',
@@ -406,6 +409,7 @@ class AuthorityPersonController extends Controller
                 'performed_by'   => $performed_by,
                 'examined_by'    => $examined_by,
                 'authorized_by'  => $authorized_by,
+                'incharge'       => $incharge,
                 'operator_type'  => $operator_type,
                 'signature'      => $signaturePath != "" ? $signaturePath : null,
                 'signature_blob' => $blobImage,
@@ -534,7 +538,7 @@ class AuthorityPersonController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdAuthorityPerson as $dsKey)
                 {
-                    $output .= '<li parent-id="operator" list-id="operator_list" class="list-group-item" tabindex="0">'.$dsKey->operator.'</li>';
+                    $output .= '<li parent-id="operator" list-id="operator_list" class="list-group-item" tabindex="-1">'.$dsKey->operator.'</li>';
                 }
                 $output .= '</ul>';
 

@@ -19,7 +19,9 @@
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="det_job_description" class="form-label" id="lbl_det_job_description">Job Description</label></div>
                                 <div class="col-8">
-                                    <input type="text" name="job_description" id="det_job_description" class="form-control">
+                                    <input type="text" name="job_description" id="det_job_description" class="form-control" oninput="suggestJobDescription(event, this)" autocomplete="off">
+                                    <div id="det_job_description_list"></div>
+                                    <input type="hidden" name="det_job_description_suggestion" id="det_job_description_suggestion">
                                 </div>
                             </div>
                             <!-- Material -->
@@ -70,11 +72,11 @@
                                     <div class="invalid-tooltip">Enter Quantity.</div>
                                 </div>
                             </div>
-                            <div class="row g-2 mb-1">
+                            <div class="row g-2 mb-1 justify-content-start">
                                 <div class="col-4"><label for="det_observation" class="form-label" id="lbl_observation">Observation </label></div>
                                 <div class="col-8">
                                     <!-- <input type="text" name="observation" id="det_observation" class="form-control"> -->
-                                    <textarea name="observation" row="2" id="det_observation" class="form-control"></textarea>
+                                    <textarea name="observation" row="3" id="det_observation" class="form-control"></textarea>
 
                                 </div>
                             </div>

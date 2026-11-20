@@ -507,8 +507,8 @@ $(document).ready(function () {
                     <td>${row.test_report_no || ''}</td>
                     <td>${row.test_report_date || ''}</td>
                     <td>${row.customer || ''}</td>
-                    <td>${row.nabl_type_fix || ''}</td>
-                    <td>${row.job_type_fix || ''}</td>` +
+                    <td>${row.nabl_type_fix || ''}</td> ` +
+                    // <td>${row.job_type_fix || ''}</td>` +
                     // `<td>${row.type_of_job || ''}</td>` +
                     // <td>${row.job_description || ''}</td>
                     // <td>${row.part_no || ''}</td>
@@ -745,6 +745,9 @@ $(document).ready(function () {
         $('#detail_result_id').val('').trigger('change.select2');
 
         $('#det_quantity').val('').prop('readonly', false).removeAttr('tabindex').removeAttr('style');
+
+        $('#det_job_description_suggestion').val('');
+        $('#det_job_description_list').html('');
 
         $('#MPTReportDetailsModal').modal('show');
     });
@@ -1264,6 +1267,9 @@ function loadLatestReportNumber() {
             if (res) {
                 $('#test_report_no').val(res.latest_no);
                 $('#test_report_sequence').val(res.number);
+                if (!_openForEdit) {
+                    $('#test_report_sequence').focus().select();
+                }
             }
         }
     });
@@ -1299,12 +1305,15 @@ function focusInitialTestReportMptField() {
     modal.find('input[name="job_type_fix"]').attr('tabindex', '-1');
     $checkedJob.attr('tabindex', '0');
 
-    modal.find('input[name="nabl_type_fix"]').not($checkedNabl).blur();
-    modal.find('input[name="job_type_fix"]').not($checkedJob).blur();
+    modal.find('input[name="nabl_type_fix"]').blur();
+    modal.find('input[name="job_type_fix"]').blur();
 
     setTimeout(() => {
-        if ($checkedNabl.length) {
-            $checkedNabl[0].focus();
+        let $seq = $('#test_report_sequence');
+        if ($seq.length && !$seq.prop('readonly')) {
+            $seq.focus().select();
+        } else {
+            $('#test_report_date').focus();
         }
     }, 50);
 }
@@ -1428,6 +1437,10 @@ function setAddMode() {
     $('#reviewed_by_authority_person_id').val('').trigger('change.select2');
     $('#reviewed_by').val('');
     $('#witness_by').val('');
+
+    $('#customer_client_suggestion, #type_of_job_suggestion, #project_suggestion, #extent_of_exa_suggestion, #method_suggestion, #field_indicator_suggestion, #background_contrast_suggestion').val('');
+    $('#part_no_suggestion, #drg_no_suggestion, #test_carried_out_at_suggestion, #stage_of_exa_suggestion, #surface_condition_suggestion, #surface_temp_suggestion, #thickness_suggestion, #test_technique_suggestion, #type_of_magnetization_suggestion, #type_of_current_suggestion, #prod_pole_spacing_suggestion, #performance_verification_suggestion, #lighting_suggestion, #light_intensity_suggestion, #background_light_suggestion, #uva_light_intensity_suggestion, #yoke_wt_lift_check_suggestion, #product_code_suggestion, #reviewed_by_suggestion, #witness_by_suggestion').val('');
+    $('#customer_client_list, #type_of_job_list, #project_list, #extent_of_exa_list, #method_list, #field_indicator_list, #background_contrast_list, #part_no_list, #drg_no_list, #test_carried_out_at_list, #stage_of_exa_list, #surface_condition_list, #surface_temp_list, #thickness_list, #test_technique_list, #type_of_magnetization_list, #type_of_current_list, #prod_pole_spacing_list, #performance_verification_list, #lighting_list, #light_intensity_list, #background_light_list, #uva_light_intensity_list, #yoke_wt_lift_check_list, #product_code_list, #reviewed_by_list, #witness_by_list').html('');
 
     $('#defectogram_image_doc').val('');
     $('#defectogram_image').val('');
@@ -1740,6 +1753,8 @@ function editReportDetails(th) {
     $('#det_observation').val(row.observation || '');
     $('#det_discontinuity_evaluation').val(row.discontinuity_evaluation || '');
     $('#detail_result_id').val(row.result_id || row.detail_result_id || '').trigger('change.select2');
+    $('#det_job_description_suggestion').val('');
+    $('#det_job_description_list').html('');
     $('#MPTReportDetailsModal').modal('show');
 }
 
@@ -2234,6 +2249,13 @@ function suggestWitnessBy(e, element) {
         responseListKey: 'witnessByList'
     });
 }
+function suggestTypeOfJob(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#type_of_job_list', url: 'test_report_mpt_type_of_job-list', responseListKey: 'typeOfJobList' }); }
+function suggestProject(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#project_list', url: 'test_report_mpt_project-list', responseListKey: 'projectList' }); }
+function suggestExtentOfExa(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#extent_of_exa_list', url: 'test_report_mpt_extent_of_exa-list', responseListKey: 'extentOfExaList' }); }
+function suggestMethod(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#method_list', url: 'test_report_mpt_method-list', responseListKey: 'methodList' }); }
+function suggestFieldIndicator(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#field_indicator_list', url: 'test_report_mpt_field_indicator-list', responseListKey: 'fieldIndicatorList' }); }
+function suggestBackgroundContrast(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#background_contrast_list', url: 'test_report_mpt_background_contrast-list', responseListKey: 'backgroundContrastList' }); }
+function suggestJobDescription(e, element) { commonSuggestionAjax({ inputElement: element, listSelector: '#det_job_description_list', url: 'test_report_mpt_job_description-list', responseListKey: 'jobDescriptionList' }); }
 
 // Defectogram Sketch file upload validation & handlers
 function validateImage(filePath) {
@@ -2546,7 +2568,13 @@ function getTRLNRData() {
                         $jobGroup.filter('[value="' + lnr.job_type_fix + '"]').prop('checked', true);
                     }
                     lockParentRadios(false);
-                    focusInitialTestReportMptField();
+                    ['nabl_type_fix', 'job_type_fix'].forEach(function (name) {
+                        let $group = $('#TestReportMptModal').find('input[name="' + name + '"]');
+                        $group.attr('tabindex', '-1');
+                        let $chk = $group.filter(':checked');
+                        if (!$chk.length) $chk = $group.first();
+                        $chk.attr('tabindex', '0');
+                    });
                 }
             }
         },

@@ -332,7 +332,7 @@ class PartController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdJob as $dsKey)
                 {
-                    $output .= '<li parent-id="part_no" list-id="part_list" class="list-group-item" tabindex="0">'.$dsKey->part_no.'</li>';
+                    $output .= '<li parent-id="part_no" list-id="part_list" class="list-group-item" tabindex="-1">'.$dsKey->part_no.'</li>';
                 }
                 $output .= '</ul>';
 

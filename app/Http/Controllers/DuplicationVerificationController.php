@@ -2276,10 +2276,10 @@ class DuplicationVerificationController extends Controller
        $seq = "observation_sheet_sequence";
        $modal  =  ObservationSheet::class;
        $sequence = $request->observation_sheet_sequence;      
-       $message = "Sr. No.";
+       $message = "Worksheet No.";
        $id = $request->id;  
        $table_id = 'observation_sheet_id';
-       $pre_fix = 'OS';
+       $pre_fix = 'WS';
        return  $this->checkTranscationDuplication($seq, $modal, $sequence, $message , $id, $table_id,$pre_fix);
     }
    

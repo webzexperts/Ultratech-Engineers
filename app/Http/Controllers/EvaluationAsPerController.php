@@ -267,7 +267,7 @@ class EvaluationAsPerController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdEvaluationAsPer as $dsKey)
                 {
-                    $output .= '<li parent-id="evaluation_as_per" list-id="evaluation_as_per_list" class="list-group-item" tabindex="0">'.$dsKey->evaluation_as_per.'</li>';
+                    $output .= '<li parent-id="evaluation_as_per" list-id="evaluation_as_per_list" class="list-group-item" tabindex="-1">'.$dsKey->evaluation_as_per.'</li>';
                 }
                 $output .= '</ul>';
 

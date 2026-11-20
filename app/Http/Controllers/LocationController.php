@@ -526,7 +526,7 @@ class LocationController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdLocation as $dsKey)
                 {
-                    $output .= '<li parent-id="location_name" list-id="location_name_list" class="list-group-item" tabindex="0">'.$dsKey->location_name.'</li>';
+                    $output .= '<li parent-id="location_name" list-id="location_name_list" class="list-group-item" tabindex="-1">'.$dsKey->location_name.'</li>';
                 }
                 $output .= '</ul>';
 
@@ -562,7 +562,7 @@ class LocationController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdLocation as $dsKey)
                 {
-                    $output .= '<li parent-id="location_code" list-id="location_code_list" class="list-group-item" tabindex="0">'.$dsKey->location_code.'</li>';
+                    $output .= '<li parent-id="location_code" list-id="location_code_list" class="list-group-item" tabindex="-1">'.$dsKey->location_code.'</li>';
                 }
                 $output .= '</ul>';
 

@@ -315,7 +315,7 @@ class CityController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdCity as $dsKey)
                 {
-                    $output .= '<li parent-id="city" list-id="city_list" class="list-group-item" tabindex="0">'.$dsKey->city.'</li>';
+                    $output .= '<li parent-id="city" list-id="city_list" class="list-group-item" tabindex="-1">'.$dsKey->city.'</li>';
                 } 
                 $output .= '</ul>';
 
