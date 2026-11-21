@@ -85,8 +85,8 @@
                                 <div class="col-8 position-relative">
                                     <select class="js-example-basic-single" id="radiographer_authority_person_id" name="radiographer_authority_person_id" required style="width: 100%;">
                                         <option value="">Select Radiographer</option>
-                                        @foreach(getAuthorityPersonsRadiographer() as $rad)
-                                            <option value="{{ $rad->authority_person_id }}">{{ $rad->operator }}</option>
+                                        @foreach(getAuthorityPersonsIncharge() as $incharge)
+                                            <option value="{{ $incharge->authority_person_id }}">{{ $incharge->operator }}</option>
                                         @endforeach
                                     </select>
                                     <div class="invalid-tooltip">Select Radiographer.</div>

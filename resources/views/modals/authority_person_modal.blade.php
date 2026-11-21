@@ -135,7 +135,7 @@
                                         <div class="form-check">
                                             <input class="form-check-input operator_type_chk" type="checkbox" name="incharge" id="incharge" value="Yes">
                                             <label class="form-check-label" for="incharge">
-                                            Incharge
+                                            Incharge / Radiographer
                                         </label>
                                         </div>
                                     </div>
