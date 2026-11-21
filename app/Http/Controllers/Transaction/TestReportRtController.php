@@ -1873,7 +1873,7 @@ class TestReportRtController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->customer_client) === '') continue;
-                    $output .= '<li parent-id="customer_client" list-id="customer_client_list" class="list-group-item" tabindex="0">' . e($row->customer_client) . '</li>';
+                    $output .= '<li parent-id="customer_client" list-id="customer_client_list" class="list-group-item" tabindex="-1">' . e($row->customer_client) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([

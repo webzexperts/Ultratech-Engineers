@@ -59,7 +59,7 @@
                             </div>
 
                             <!-- Job Type Radio (Casting / Fabrication) -->
-                            <div class="row g-2 mb-1">
+                            <div class="row g-2 mb-1" style="display: none;">
                                 <div class="col-4"></div>
                                 <div class="col-8">
                                     <div class="d-flex gap-3 align-items-center mt-1 flex-wrap">
@@ -158,10 +158,12 @@
                                 </div>
                                 <div class="col-8 position-relative">
                                     <div class="d-flex gap-2">
-                                        <input type="text" class="form-control" name="type_of_job" id="type_of_job">
+                                        <input type="text" class="form-control" name="type_of_job" id="type_of_job" oninput="suggestTypeOfJob(event, this)" autocomplete="off">
                                         <div class="invalid-tooltip">Enter Job Type.</div>
                                         <button type="button" class="btn btn-success btn-sm ms-1" id="copy_report_btn">Copy</button>
                                     </div>
+                                    <div id="type_of_job_list"></div>
+                                    <input type="hidden" name="type_of_job_suggestion" id="type_of_job_suggestion">
                                 </div>
                             </div>
                             <input type="hidden" name="type_of_job_id" id="type_of_job_id" value="">
@@ -173,9 +175,11 @@
                                 </div>
                                 <div class="col-8 position-relative">
                                     <div class="d-flex gap-2">
-                                        <input type="text" class="form-control" name="project" id="project">
+                                        <input type="text" class="form-control" name="project" id="project" oninput="suggestProject(event, this)" autocomplete="off">
                                         <div class="invalid-tooltip">Enter Project.</div>
                                     </div>
+                                    <div id="project_list"></div>
+                                    <input type="hidden" name="project_suggestion" id="project_suggestion">
                                 </div>
                             </div>
 
@@ -287,13 +291,13 @@
                                 </div>
                                 <div class="col-8 position-relative">
                                     <select class="js-example-basic-single" name="acceptance_standard_id" id="acceptance_standard_id" required style="width: 100%;">
-                                        <option value="">Select Acceptance Standard</option>
+                                        <option value="">Select Acceptance Std.</option>
                                         @forelse(getAcceptanceStandards() as $as)
                                             <option value="{{ $as->id }}">{{ $as->acceptance_standard }}</option>
                                         @empty
                                         @endforelse
                                     </select>
-                                    <div class="invalid-tooltip">Select Acceptance Standard.</div>
+                                    <div class="invalid-tooltip">Select Acceptance Std.</div>
                                 </div>
                             </div>
 
@@ -315,7 +319,9 @@
                                     <label for="extent_of_exa" class="form-label">Extent of Exa.</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="extent_of_exa" name="extent_of_exa" autocomplete="off">
+                                    <input type="text" class="form-control" id="extent_of_exa" name="extent_of_exa" oninput="suggestExtentOfExa(event, this)" autocomplete="off">
+                                    <div id="extent_of_exa_list"></div>
+                                    <input type="hidden" name="extent_of_exa_suggestion" id="extent_of_exa_suggestion">
                                 </div>
                             </div>
 
@@ -349,7 +355,9 @@
                                     <label for="method" class="form-label">Method</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="method" name="method" autocomplete="off">
+                                    <input type="text" class="form-control" id="method" name="method" oninput="suggestMethod(event, this)" autocomplete="off">
+                                    <div id="method_list"></div>
+                                    <input type="hidden" name="method_suggestion" id="method_suggestion">
                                 </div>
                             </div>
 
@@ -383,7 +391,9 @@
                                     <label for="field_indicator" class="form-label">Field Indicator</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="field_indicator" name="field_indicator" autocomplete="off">
+                                    <input type="text" class="form-control" id="field_indicator" name="field_indicator" oninput="suggestFieldIndicator(event, this)" autocomplete="off">
+                                    <div id="field_indicator_list"></div>
+                                    <input type="hidden" name="field_indicator_suggestion" id="field_indicator_suggestion">
                                 </div>
                             </div>
 
@@ -481,7 +491,9 @@
                                     <label for="background_contrast" class="form-label">Background Contrast</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="background_contrast" name="background_contrast" autocomplete="off">
+                                    <input type="text" class="form-control" id="background_contrast" name="background_contrast" oninput="suggestBackgroundContrast(event, this)" autocomplete="off">
+                                    <div id="background_contrast_list"></div>
+                                    <input type="hidden" name="background_contrast_suggestion" id="background_contrast_suggestion">
                                 </div>
                             </div>
 
@@ -550,7 +562,7 @@
                                 </div>
                                 <div class="col-8 position-relative">
                                     <input type="text" class="form-control" id="job_desc_label" name="job_desc_label" required>
-                                    <div class="invalid-tooltip">Enter Job Desc. Label.</div>
+                                    <div class="invalid-tooltip">Enter Job Description Label.</div>
                                 </div>
                             </div>
 

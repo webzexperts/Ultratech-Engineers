@@ -208,14 +208,14 @@ class TechniqueSheetRtController extends Controller
                 'technique_sheet_rt_no' => $ts_no,
                 'technique_sheet_rt_date' => isset($request->technique_sheet_rt_date) ? Date::createFromFormat('d/m/Y', $request->technique_sheet_rt_date)->format('Y-m-d') : null,
                 'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
-                'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
+                'job_type_fix' => $request->job_type_fix ?? 'Casting',
                 'test_report_rt_id' => !empty($request->test_report_rt_id) ? $request->test_report_rt_id : null,
                 'customer_id' => $request->customer_id,
                 'type_of_job_id' => $request->type_of_job_id ?? null,
                 'job_desc_id' => null,
                 'job_desc' => $request->job_desc,
                 'part_id' => null,
-                'part_no' => $request->part_no,
+                'part_no' => null,
                 'drg_no' => $request->drg_no,
                 'material_id' => $request->material_id,
                 'product_code' => $request->product_code,
@@ -230,8 +230,8 @@ class TechniqueSheetRtController extends Controller
                 'iqi' => $request->iqi,
                 'film_processing' => $request->film_processing,
                 'test_technique' => $request->test_technique,
-                'test_arrangement' => $request->test_arrangement,
-                'test_class' => $request->test_class,
+                'test_arrangement' => null,
+                'test_class' => null,
                 'film_brand' => $request->film_brand,
                 'film_type' => $request->film_type,
                 'procedure_ref_id' => $request->procedure_ref_id,
@@ -242,6 +242,7 @@ class TechniqueSheetRtController extends Controller
                 'shooting_sketch_image_blob' => $blobImage,
                 'film_size_fix' => $request->film_size_fix ?? 'inch',
                 'sfd_unit_fix' => $request->sfd_unit_fix ?? 'mm',
+                'print_ug_in_report' => $request->print_ug_in_report ?? null,
                 'no_of_films' => $request->no_of_films,
                 'film_size' => $request->film_size,
                 'total_area' => $request->total_area,
@@ -269,6 +270,7 @@ class TechniqueSheetRtController extends Controller
                         'source_id_fix' => $row['source_id_fix'],
                         'film_brand_id' => $row['film_brand_id'],
                         'film_type_id' => $row['film_type_id'],
+                        'test_method_id' => !empty($row['test_method_id']) ? $row['test_method_id'] : null,
                         'thickness' => $row['thickness'],
                         'sfd' => $row['sfd'],
                         'iqi_designation' => !empty($row['iqi_designation']) ? $row['iqi_designation'] : null,
@@ -284,6 +286,7 @@ class TechniqueSheetRtController extends Controller
                         'total_sq_cm' => $row['total_sq_cm'],
                         'test_technique' => $row['test_technique'] ?? null,
                         'film_position' => $row['film_position'] ?? null,
+                        'ug' => $row['ug'] ?? null,
                         // 'exposure_time' => '1',
                     ]);
                 }
@@ -477,14 +480,14 @@ class TechniqueSheetRtController extends Controller
                 'technique_sheet_rt_no' => $request->technique_sheet_rt_no,
                 'technique_sheet_rt_date' => isset($request->technique_sheet_rt_date) ? Date::createFromFormat('d/m/Y', $request->technique_sheet_rt_date)->format('Y-m-d') : null,
                 'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
-                'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
+                'job_type_fix' => $request->job_type_fix ?? 'Casting',
                 'test_report_rt_id' => !empty($request->test_report_rt_id) ? $request->test_report_rt_id : null,
                 'customer_id' => $request->customer_id,
                 'type_of_job_id' => $request->type_of_job_id ?? null,
                 'job_desc_id' => null,
                 'job_desc' => $request->job_desc,
                 'part_id' => null,
-                'part_no' => $request->part_no,
+                'part_no' => null,
                 'drg_no' => $request->drg_no,
                 'material_id' => $request->material_id,
                 'product_code' => $request->product_code,
@@ -499,8 +502,8 @@ class TechniqueSheetRtController extends Controller
                 'iqi' => $request->iqi,
                 'film_processing' => $request->film_processing,
                 'test_technique' => $request->test_technique,
-                'test_arrangement' => $request->test_arrangement,
-                'test_class' => $request->test_class,
+                'test_arrangement' => null,
+                'test_class' => null,
                 'film_brand' => $request->film_brand,
                 'film_type' => $request->film_type,
                 'procedure_ref_id' => $request->procedure_ref_id,
@@ -511,6 +514,7 @@ class TechniqueSheetRtController extends Controller
                 'shooting_sketch_image_blob' => $blobImage,
                 'film_size_fix' => $request->film_size_fix ?? 'inch',
                 'sfd_unit_fix' => $request->sfd_unit_fix ?? 'mm',
+                'print_ug_in_report' => $request->print_ug_in_report ?? null,
                 'no_of_films' => $request->no_of_films,
                 'film_size' => $request->film_size,
                 'total_area' => $request->total_area,
@@ -539,6 +543,7 @@ class TechniqueSheetRtController extends Controller
                             'source_id_fix' => $row['source_id_fix'],
                             'film_brand_id' => $row['film_brand_id'],
                             'film_type_id' => $row['film_type_id'],
+                            'test_method_id' => !empty($row['test_method_id']) ? $row['test_method_id'] : null,
                             'thickness' => $row['thickness'],
                             'sfd' => $row['sfd'],
                             'iqi_designation' => !empty($row['iqi_designation']) ? $row['iqi_designation'] : null,
@@ -554,6 +559,7 @@ class TechniqueSheetRtController extends Controller
                             'total_sq_cm' => $row['total_sq_cm'],
                             'test_technique' => $row['test_technique'] ?? null,
                             'film_position' => $row['film_position'] ?? null,
+                            'ug' => $row['ug'] ?? null,
                             // 'exposure_time' => '1',
                         ]);
                     } elseif ($mode === 'Update') {
@@ -565,6 +571,7 @@ class TechniqueSheetRtController extends Controller
                                 'source_id_fix' => $row['source_id_fix'],
                                 'film_brand_id' => $row['film_brand_id'],
                                 'film_type_id' => $row['film_type_id'],
+                                'test_method_id' => !empty($row['test_method_id']) ? $row['test_method_id'] : null,
                                 'thickness' => $row['thickness'],
                                 'sfd' => $row['sfd'],
                                 'iqi_designation' => !empty($row['iqi_designation']) ? $row['iqi_designation'] : null,
@@ -580,6 +587,7 @@ class TechniqueSheetRtController extends Controller
                                 'total_sq_cm' => $row['total_sq_cm'],
                                 'test_technique' => $row['test_technique'] ?? null,
                                 'film_position' => $row['film_position'] ?? null,
+                                'ug' => $row['ug'] ?? null,
                                 // 'exposure_time' => '1',
                             ]);
                         }
@@ -682,7 +690,7 @@ class TechniqueSheetRtController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($fdIqi as $dsKey) {
                     if (trim($dsKey->iqi) === '') continue;
-                    $output .= '<li parent-id="iqi" list-id="iqi_list" class="list-group-item" tabindex="0">' . e($dsKey->iqi) . '</li>';
+                    $output .= '<li parent-id="iqi" list-id="iqi_list" class="list-group-item" tabindex="-1">' . e($dsKey->iqi) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -710,7 +718,7 @@ class TechniqueSheetRtController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($fdFilmProc as $dsKey) {
                     if (trim($dsKey->film_processing) === '') continue;
-                    $output .= '<li parent-id="film_processing" list-id="film_processing_list" class="list-group-item" tabindex="0">' . e($dsKey->film_processing) . '</li>';
+                    $output .= '<li parent-id="film_processing" list-id="film_processing_list" class="list-group-item" tabindex="-1">' . e($dsKey->film_processing) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -737,7 +745,7 @@ class TechniqueSheetRtController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($fdTestTech as $dsKey) {
                     if (trim($dsKey->test_technique) === '') continue;
-                    $output .= '<li parent-id="detail_test_technique" list-id="detail_test_technique_list" class="list-group-item" tabindex="0">' . e($dsKey->test_technique) . '</li>';
+                    $output .= '<li parent-id="detail_test_technique" list-id="detail_test_technique_list" class="list-group-item" tabindex="-1">' . e($dsKey->test_technique) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -766,7 +774,7 @@ class TechniqueSheetRtController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->part_no) === '') continue;
-                    $output .= '<li parent-id="part_no" list-id="part_no_list" class="list-group-item" tabindex="0">' . e($row->part_no) . '</li>';
+                    $output .= '<li parent-id="part_no" list-id="part_no_list" class="list-group-item" tabindex="-1">' . e($row->part_no) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -795,7 +803,7 @@ class TechniqueSheetRtController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->drg_no) === '') continue;
-                    $output .= '<li parent-id="drg_no" list-id="drg_no_list" class="list-group-item" tabindex="0">' . e($row->drg_no) . '</li>';
+                    $output .= '<li parent-id="drg_no" list-id="drg_no_list" class="list-group-item" tabindex="-1">' . e($row->drg_no) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -826,7 +834,7 @@ class TechniqueSheetRtController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->product_code) === '') continue;
-                    $output .= '<li parent-id="product_code" list-id="product_code_list" class="list-group-item" tabindex="0">' . e($row->product_code) . '</li>';
+                    $output .= '<li parent-id="product_code" list-id="product_code_list" class="list-group-item" tabindex="-1">' . e($row->product_code) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -857,7 +865,7 @@ class TechniqueSheetRtController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->welding_process) === '') continue;
-                    $output .= '<li parent-id="welding_process" list-id="welding_process_list" class="list-group-item" tabindex="0">' . e($row->welding_process) . '</li>';
+                    $output .= '<li parent-id="welding_process" list-id="welding_process_list" class="list-group-item" tabindex="-1">' . e($row->welding_process) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -888,7 +896,7 @@ class TechniqueSheetRtController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->joint_type) === '') continue;
-                    $output .= '<li parent-id="joint_type" list-id="joint_type_list" class="list-group-item" tabindex="0">' . e($row->joint_type) . '</li>';
+                    $output .= '<li parent-id="joint_type" list-id="joint_type_list" class="list-group-item" tabindex="-1">' . e($row->joint_type) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -1025,7 +1033,14 @@ class TechniqueSheetRtController extends Controller
             }
 
             if ($request->filled('job_type_fix')) {
-                $pendingListQuery->where('test_report_rt.job_type_fix', $request->job_type_fix);
+                $jobType = $request->job_type_fix;
+                if ($jobType === 'Casting') {
+                    $pendingListQuery->whereIn('test_report_rt.job_type_fix', ['Casting', 'Non-Welding']);
+                } elseif ($jobType === 'Fabrication') {
+                    $pendingListQuery->whereIn('test_report_rt.job_type_fix', ['Fabrication', 'Welding']);
+                } else {
+                    $pendingListQuery->where('test_report_rt.job_type_fix', $jobType);
+                }
             }
 
             $pendingList = $pendingListQuery->orderBy('test_report_no','desc')->orderBy('revision_number', 'desc')->get();
@@ -1086,6 +1101,7 @@ class TechniqueSheetRtController extends Controller
                     'test_report_rt.customer_procedure_ref',
                     'test_report_rt.film_size_unit_fix',
                     'test_report_rt.sfd_unit_fix',
+                    'test_report_rt.print_ug_in_report',
                     'test_report_rt.film_size',
                     'test_report_rt.total_area',
                     'test_report_rt.no_of_films',
@@ -1124,6 +1140,7 @@ class TechniqueSheetRtController extends Controller
                     'test_report_rt_details.sq_cm',
                     'test_report_rt_details.total_sq_in',
                     'test_report_rt_details.total_sq_cm',
+                    'test_report_rt_details.ug',
 
                 
                     

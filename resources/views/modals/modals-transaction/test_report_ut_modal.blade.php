@@ -57,7 +57,7 @@
                                 </div>
                             </div>
 
-                            <div class="row g-2 mb-1">
+                            <div class="row g-2 mb-1" style="display: none;">
                                 <div class="col-4">
                                 </div>
                                 <div class="col-8">
@@ -195,10 +195,12 @@
                                 </div>
                                 <div class="col-8 position-relative">
                                     <div class="d-flex gap-2">
-                                        <input type="text" class="form-control" name="type_of_job" id="type_of_job">
+                                        <input type="text" class="form-control" name="type_of_job" id="type_of_job" oninput="suggestTypeOfJob(event, this)" autocomplete="off">
                                         <div class="invalid-tooltip">Enter Job Type.</div>
                                         <button type="button" class="btn btn-success btn-sm ms-1" id="copy_report_btn">Copy</button>
                                     </div>
+                                    <div id="type_of_job_list"></div>
+                                    <input type="hidden" name="type_of_job_suggestion" id="type_of_job_suggestion">
                                 </div>
                             </div>
                             <div class="row g-2 mb-1">
@@ -207,8 +209,21 @@
                                 </div>
                                 <div class="col-8 position-relative">
                                     <div class="d-flex gap-2">
-                                        <input type="text" class="form-control" name="project" id="project">
+                                        <input type="text" class="form-control" name="project" id="project" oninput="suggestProject(event, this)" autocomplete="off">
                                         <div class="invalid-tooltip">Enter Project.</div>
+                                    </div>
+                                    <div id="project_list"></div>
+                                    <input type="hidden" name="project_suggestion" id="project_suggestion">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-1">
+                                <div class="col-4">
+                                    <label for="po_no" class="form-label">PO No.</label>
+                                </div>
+                                <div class="col-8 position-relative">
+                                    <div class="d-flex gap-2">
+                                        <input type="text" class="form-control" name="po_no" id="po_no">
+                                        <div class="invalid-tooltip">Enter PO No.</div>
                                     </div>
                                 </div>
                             </div>
@@ -230,7 +245,7 @@
                             <!-- Acceptance Standard -->
                             <div class="row g-2 mb-1">
                                 <div class="col-4">
-                                    <label for="acceptance_standard_id" class="form-label">Acceptance Standard <sup class="astric">*</sup></label>
+                                    <label for="acceptance_standard_id" class="form-label">Acceptance Std.<sup class="astric">*</sup></label>
                                 </div>
                                 <div class="col-8 position-relative">
                                     <select class="js-example-basic-single" name="acceptance_standard_id" id="acceptance_standard_id" required style="width: 100%;">
@@ -431,10 +446,9 @@
                                     <label for="extent_of_exa" class="form-label">Extent Of Exa.</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="extent_of_exa" name="extent_of_exa" autocomplete="off">
-                                    <!-- <input type="text" class="form-control" id="surface_temp" name="surface_temp" oninput="suggestSurfaceTemp(event, this)" autocomplete="off">
-                                    <div id="surface_temp_list"></div>
-                                    <input type="hidden" name="surface_temp_suggestion" id="surface_temp_suggestion"> -->
+                                    <input type="text" class="form-control" id="extent_of_exa" name="extent_of_exa" oninput="suggestExtentOfExa(event, this)" autocomplete="off">
+                                    <div id="extent_of_exa_list"></div>
+                                    <input type="hidden" name="extent_of_exa_suggestion" id="extent_of_exa_suggestion">
                                 </div>
                             </div>
 
@@ -444,10 +458,9 @@
                                     <label for="stage_of_exa" class="form-label">Stage Of Exa.</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="stage_of_exa" name="stage_of_exa" autocomplete="off">
-                                    <!-- <input type="text" class="form-control" id="surface_temp" name="surface_temp" oninput="suggestSurfaceTemp(event, this)" autocomplete="off">
-                                    <div id="surface_temp_list"></div>
-                                    <input type="hidden" name="surface_temp_suggestion" id="surface_temp_suggestion"> -->
+                                    <input type="text" class="form-control" id="stage_of_exa" name="stage_of_exa" oninput="suggestStageOfExa(event, this)" autocomplete="off">
+                                    <div id="stage_of_exa_list"></div>
+                                    <input type="hidden" name="stage_of_exa_suggestion" id="stage_of_exa_suggestion">
                                 </div>
                             </div>
 
@@ -481,7 +494,9 @@
                                     <label for="method" class="form-label">Method</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="method" name="method" autocomplete="off">
+                                    <input type="text" class="form-control" id="method" name="method" oninput="suggestMethod(event, this)" autocomplete="off">
+                                    <div id="method_list"></div>
+                                    <input type="hidden" name="method_suggestion" id="method_suggestion">
                                 </div>
                             </div>
 
@@ -502,7 +517,9 @@
                                     <label for="ref_sensitivity" class="form-label">Ref. Sensitivity</label>
                                 </div>
                                 <div class="col-8">
-                                    <input type="text" class="form-control" id="ref_sensitivity" name="ref_sensitivity" autocomplete="off">
+                                    <input type="text" class="form-control" id="ref_sensitivity" name="ref_sensitivity" oninput="suggestRefSensitivity(event, this)" autocomplete="off">
+                                    <div id="ref_sensitivity_list"></div>
+                                    <input type="hidden" name="ref_sensitivity_suggestion" id="ref_sensitivity_suggestion">
                                 </div>
                             </div>
                         </div>

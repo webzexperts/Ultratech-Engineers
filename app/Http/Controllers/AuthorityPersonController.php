@@ -22,12 +22,13 @@ class AuthorityPersonController extends Controller
      * Build the comma-separated operator_type label string from the
      * individual Yes/No flags, preserving the defined order.
      */
-    private function buildOperatorType($performed, $examined, $authorized)
+    private function buildOperatorType($performed, $examined, $authorized, $incharge)
     {
         $labels = [];
         if ($performed == 'Yes')     { $labels[] = 'Performed By'; }
         if ($examined == 'Yes')   { $labels[] = 'Examined By'; }
         if ($authorized == 'Yes') { $labels[] = 'Authorized By'; }
+        if ($incharge == 'Yes') { $labels[] = 'Incharge / Radiographer'; }
         return implode(', ', $labels);
     }
 
@@ -185,15 +186,16 @@ class AuthorityPersonController extends Controller
             $performed_by     = $request->performed_by == 'Yes' ? 'Yes' : 'No';
             $examined_by   = $request->examined_by == 'Yes' ? 'Yes' : 'No';
             $authorized_by = $request->authorized_by == 'Yes' ? 'Yes' : 'No';
+            $incharge = $request->incharge == 'Yes' ? 'Yes' : 'No';
 
-            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes') {
+            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes' && $incharge != 'Yes') {
                 return response()->json([
                     'response_code' => '0',
                     'response_message' => 'Select At Least One Operator Type.',
                 ]);
             }
 
-            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by);
+            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by,$incharge);
 
             $signaturePath = null;
             $blobImage = null;
@@ -232,6 +234,7 @@ class AuthorityPersonController extends Controller
                 'performed_by'      => $performed_by,
                 'examined_by'    => $examined_by,
                 'authorized_by'  => $authorized_by,
+                'incharge'       => $incharge,
                 'operator_type'  => $operator_type,
                 'certificate'      => $certificatePath,
                 'certificate_blob' => $blobImageCertificate,
@@ -322,15 +325,16 @@ class AuthorityPersonController extends Controller
             $performed_by  = $request->performed_by == 'Yes' ? 'Yes' : 'No';
             $examined_by   = $request->examined_by == 'Yes' ? 'Yes' : 'No';
             $authorized_by = $request->authorized_by == 'Yes' ? 'Yes' : 'No';
+            $incharge = $request->incharge == 'Yes' ? 'Yes' : 'No';
 
-            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes') {
+            if ($performed_by != 'Yes' && $examined_by != 'Yes' && $authorized_by != 'Yes' && $incharge != 'Yes') {
                 return response()->json([
                     'response_code' => '0',
                     'response_message' => 'Please Select At Least One Operator Type.',
                 ]);
             }
 
-            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by);
+            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by, $incharge);
 
             $imgs = AuthorityPerson::where('authority_person_id', $request->id)->value('signature');
             $file = new File();
@@ -406,6 +410,7 @@ class AuthorityPersonController extends Controller
                 'performed_by'   => $performed_by,
                 'examined_by'    => $examined_by,
                 'authorized_by'  => $authorized_by,
+                'incharge'       => $incharge,
                 'operator_type'  => $operator_type,
                 'signature'      => $signaturePath != "" ? $signaturePath : null,
                 'signature_blob' => $blobImage,
@@ -534,7 +539,7 @@ class AuthorityPersonController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdAuthorityPerson as $dsKey)
                 {
-                    $output .= '<li parent-id="operator" list-id="operator_list" class="list-group-item" tabindex="0">'.$dsKey->operator.'</li>';
+                    $output .= '<li parent-id="operator" list-id="operator_list" class="list-group-item" tabindex="-1">'.$dsKey->operator.'</li>';
                 }
                 $output .= '</ul>';
 

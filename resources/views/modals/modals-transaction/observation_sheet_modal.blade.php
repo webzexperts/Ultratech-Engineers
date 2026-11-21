@@ -4,7 +4,7 @@
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="ObservationSheetModalLabel">Observation Sheet</h4>
+                <h4 class="modal-title" id="ObservationSheetModalLabel">Worksheet</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -32,11 +32,11 @@
                                 {{-- Row 2: Date --}}
                                 <div class="row g-2 mb-1">
                                     <div class="col-4">
-                                        <label for="observation_sheet_date" class="form-label">Observation Sheet Date <sup class="astric">*</sup></label>
+                                        <label for="observation_sheet_date" class="form-label">Worksheet Date <sup class="astric">*</sup></label>
                                     </div>
                                     <div class="col-8">
                                         <input type="text" class="form-control trans-date-picker" id="observation_sheet_date" name="observation_sheet_date" required autocomplete="off"/>
-                                        <div class="invalid-tooltip">Enter Observation Sheet Date.</div>
+                                        <div class="invalid-tooltip">Enter Worksheet Date.</div>
                                     </div>
                                 </div>
 
@@ -65,7 +65,7 @@
                     <div class="card mb-1 mt-1">
                         <div class="card-header d-flex align-items-center py-2">
                             <!-- <button type="button" class="btn btn-success btn-sm me-2" id="add_detail_btn" data-bs-target="#MaterialInwardDetailsModal">Add</button> -->
-                            <h4 class="card-title mb-0 flex-grow-1"><b>Observation Sheet Details</b></h4>
+                            <h4 class="card-title mb-0 flex-grow-1"><b>Worksheet Details</b></h4>
                         </div>
                         <div class="card-body p-2">
                             <div class="table-responsive">
@@ -97,7 +97,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="details_tbody">
-                                        <tr id="noDetails"><td colspan="21" class="text-center">No Observation Sheet Details Added</td></tr>
+                                        <tr id="noDetails"><td colspan="21" class="text-center">No Worksheet Details Added</td></tr>
                                     </tbody>
                                 </table>
                             </div>

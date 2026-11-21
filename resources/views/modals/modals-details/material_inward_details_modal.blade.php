@@ -49,7 +49,7 @@
                             <div class="row g-2 mb-1">
                                 <div class="col-4"><label for="type_of_testing_id_fix" class="form-label">Process <sup class="astric">*</sup></label></div>
                                 <div class="col-8">
-                                    <select class="js-example-basic-single" name="type_of_testing_id_fix" id="type_of_testing_id_fix" required>
+                                    <select class="js-example-basic-single skip-tab" name="type_of_testing_id_fix" id="type_of_testing_id_fix" required>
                                         <option value="">Select Process</option>
                                         <option value="RT" selected>RT</option>
                                         <option value="UT">UT</option>

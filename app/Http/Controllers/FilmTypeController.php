@@ -272,7 +272,7 @@ class FilmTypeController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdFilmType as $dsKey)
                 {
-                    $output .= '<li parent-id="film_type" list-id="film_type_list" class="list-group-item" tabindex="0">'.$dsKey->film_type.'</li>';
+                    $output .= '<li parent-id="film_type" list-id="film_type_list" class="list-group-item" tabindex="-1">'.$dsKey->film_type.'</li>';
                 }
                 $output .= '</ul>';
 

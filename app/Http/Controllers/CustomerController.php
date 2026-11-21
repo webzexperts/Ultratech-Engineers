@@ -496,7 +496,7 @@ class CustomerController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdCustomer as $dsKey)
                 {
-                    $output .= '<li parent-id="customer" list-id="customer_list" class="list-group-item" tabindex="0">'.$dsKey->customer.'</li>';
+                    $output .= '<li parent-id="customer" list-id="customer_list" class="list-group-item" tabindex="-1">'.$dsKey->customer.'</li>';
                 }
                 $output .= '</ul>';
 
@@ -532,7 +532,7 @@ class CustomerController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdPaymentTerms as $pmKey)
                 {
-                    $output .= '<li parent-id="payment_terms" list-id="payment_terms_list" class="list-group-item" tabindex="0">'.$pmKey->payment_terms.'</li>';
+                    $output .= '<li parent-id="payment_terms" list-id="payment_terms_list" class="list-group-item" tabindex="-1">'.$pmKey->payment_terms.'</li>';
                 }
                 $output .= '</ul>';
 
@@ -568,7 +568,7 @@ class CustomerController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdDesignation as $dsKey)
                 {
-                    $output .= '<li parent-id="contact_designation" list-id="contact_designation_list" class="list-group-item" tabindex="0">'.$dsKey->contact_designation.'</li>';
+                    $output .= '<li parent-id="contact_designation" list-id="contact_designation_list" class="list-group-item" tabindex="-1">'.$dsKey->contact_designation.'</li>';
                 }
                 $output .= '</ul>';
 

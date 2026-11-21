@@ -49,6 +49,7 @@ class AuthorityPerson extends Model
         'performed_by',
         'examined_by',
         'authorized_by',
+        'incharge',
         'operator_type',
         'company_id',
         'created_by',

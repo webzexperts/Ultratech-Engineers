@@ -21,6 +21,7 @@ class TechniqueSheetRtDetails extends Model
         'source_id_fix',
         'film_brand_id',
         'film_type_id',
+        'test_method_id',
         'thickness',
         'sfd',
         'iqi_designation',
@@ -36,6 +37,7 @@ class TechniqueSheetRtDetails extends Model
         'total_sq_cm',
         'test_technique',
         'film_position',
+        'ug',
     ];
 
     public function techniqueSheet()

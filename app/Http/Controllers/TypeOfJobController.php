@@ -256,7 +256,7 @@ class TypeOfJobController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdTypeofJob as $dsKey)
                 {
-                    $output .= '<li parent-id="type_of_job" list-id="type_of_job_list" class="list-group-item" tabindex="0">'.$dsKey->type_of_job.'</li>';
+                    $output .= '<li parent-id="type_of_job" list-id="type_of_job_list" class="list-group-item" tabindex="-1">'.$dsKey->type_of_job.'</li>';
                 }
                 $output .= '</ul>';
 

@@ -264,7 +264,7 @@ class CountryController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdCountry as $dsKey)
                 {
-                    $output .= '<li parent-id="country_name" list-id="country_name_list" class="list-group-item" tabindex="0">'.$dsKey->country_name.'</li>';
+                    $output .= '<li parent-id="country_name" list-id="country_name_list" class="list-group-item" tabindex="-1">'.$dsKey->country_name.'</li>';
                 }
                 $output .= '</ul>';
 

@@ -410,7 +410,7 @@ class SupplierController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($Supplier as $dsKey)
                 {
-                    $output .= '<li parent-id="supplier_name" list-id="supplier_name_list" class="list-group-item" tabindex="0">'.$dsKey->supplier_name.'</li>';
+                    $output .= '<li parent-id="supplier_name" list-id="supplier_name_list" class="list-group-item" tabindex="-1">'.$dsKey->supplier_name.'</li>';
                 }
                 $output .= '</ul>';
 

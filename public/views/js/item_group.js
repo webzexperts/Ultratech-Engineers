@@ -183,7 +183,7 @@ $('#commonItemGroupForm').on('submit', function (e) {
 
                                         jQuery('#item_group').focus();
                                         jQuery('#ig_item_type').val('').trigger('change');
-                                        if (partAfterManage != 'unit') {
+                                        if (partAfterManage != 'item_group') {
                                             jQuery('#ItemGroupModal').modal('hide');
                                         }
                                     }

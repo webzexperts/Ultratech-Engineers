@@ -363,7 +363,7 @@ class TestReportDptController extends Controller
                 'entry_type_fix' => $request->entry_type_fix ?? 'Manual',
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
                 // 'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
-                'job_type_fix' => $request->job_type_fix ?? 'Casting',
+                'job_type_fix' => null,
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 // 'type_of_job_id' => $request->type_of_job_id,
@@ -417,6 +417,7 @@ class TestReportDptController extends Controller
                 'worksheet_no' => $request->worksheet_no,
                 'lighting_equipment' => $request->lighting_equipment,
                 'intensity' => $request->intensity,
+                'examination_time' => $request->examination_time ?? null,
 
                 // 'thickness' => $request->thickness,
                 'thickness' => $request->thickness ?? null,
@@ -571,12 +572,12 @@ class TestReportDptController extends Controller
             $report_data->test_report_date = ($report_data->test_report_date != "" && $report_data->test_report_date != "0000-00-00")
                 ? Date::createFromFormat('Y-m-d', $report_data->test_report_date)->format('d/m/Y') 
                 : "";
-            $report_data->dc_date = ($report_data->dc_date != "" && $report_data->dc_date != "0000-00-00")
-                ? Date::createFromFormat('Y-m-d', $report_data->dc_date)->format('d/m/Y') 
-                : "";
-            $report_data->po_date = ($report_data->po_date != "" && $report_data->po_date != "0000-00-00")
-                ? Date::createFromFormat('Y-m-d', $report_data->po_date)->format('d/m/Y') 
-                : "";
+            // $report_data->dc_date = ($report_data->dc_date != "" && $report_data->dc_date != "0000-00-00")
+            //     ? Date::createFromFormat('Y-m-d', $report_data->dc_date)->format('d/m/Y') 
+            //     : "";
+            // $report_data->po_date = ($report_data->po_date != "" && $report_data->po_date != "0000-00-00")
+            //     ? Date::createFromFormat('Y-m-d', $report_data->po_date)->format('d/m/Y') 
+            //     : "";
             $report_data->date_of_receipt = ($report_data->date_of_receipt != "" && $report_data->date_of_receipt != "0000-00-00")
                 ? Date::createFromFormat('Y-m-d', $report_data->date_of_receipt)->format('d/m/Y') 
                 : "";
@@ -792,7 +793,7 @@ class TestReportDptController extends Controller
                 'entry_type_fix' => $request->entry_type_fix ?? $report->entry_type_fix ?? 'Manual',
                 'nabl_type_fix' => $request->nabl_type_fix ?? 'Non NABL',
                 // 'job_type_fix' => $request->job_type_fix ?? 'Non-Welding',
-                'job_type_fix' => $request->job_type_fix ?? 'Casting',
+                'job_type_fix' => null,
                 'from_type_id_fix' => $fromTypeId,
                 'customer_client' => $request->customer_client,
                 // 'type_of_job_id' => $request->type_of_job_id,
@@ -846,6 +847,7 @@ class TestReportDptController extends Controller
                 'worksheet_no' => $request->worksheet_no,
                 'lighting_equipment' => $request->lighting_equipment,
                 'intensity' => $request->intensity,
+                'examination_time' => $request->examination_time,
 
                 // 'thickness' => $request->thickness,
                 'thickness' => $request->thickness ?? null,
@@ -1652,24 +1654,53 @@ class TestReportDptController extends Controller
         return $this->existsSuggestion('test_report_dpt', 'witness_by', $request->term, 'witnessByList', 'witness_by');
     }
 
+    public function existsTypeOfJob(Request $request) { return $this->existsSuggestion('test_report_dpt', 'type_of_job', $request->term, 'typeOfJobList', 'type_of_job'); }
+    public function existsProject(Request $request) { return $this->existsSuggestion('test_report_dpt', 'project', $request->term, 'projectList', 'project'); }
+    public function existsExtentOfExa(Request $request) { return $this->existsSuggestion('test_report_dpt', 'extent_of_exa', $request->term, 'extentOfExaList', 'extent_of_exa'); }
+    public function existsStageOfExa(Request $request) { return $this->existsSuggestion('test_report_dpt', 'stage_of_exa', $request->term, 'stageOfExaList', 'stage_of_exa'); }
+    public function existsMethod(Request $request) { return $this->existsSuggestion('test_report_dpt', 'method', $request->term, 'methodList', 'method'); }
+    public function existsPenetrant(Request $request) { return $this->existsSuggestion('test_report_dpt', 'penetrant', $request->term, 'penetrantList', 'penetrant'); }
+    public function existsCleaner(Request $request) { return $this->existsSuggestion('test_report_dpt', 'cleaner', $request->term, 'cleanerList', 'cleaner'); }
+    public function existsPostCleaning(Request $request) { return $this->existsSuggestion('test_report_dpt', 'post_cleaning', $request->term, 'postCleaningList', 'post_cleaning'); }
+    public function existsPenetrantTime(Request $request) { return $this->existsSuggestion('test_report_dpt', 'penetrant_time', $request->term, 'penetrantTimeList', 'penetrant_time'); }
+    public function existsDevelopingTime(Request $request) { return $this->existsSuggestion('test_report_dpt', 'developing_time', $request->term, 'developingTimeList', 'developing_time'); }
+    public function existsJobDescription(Request $request) { return $this->existsSuggestion('test_report_dpt_details', 'job_description', $request->term, 'jobDescriptionList', 'det_job_description'); }
+
     private function existsSuggestion($table, $column, $term, $listId, $parentId)
     {
         $location = getCurrentLocation()->location_id;
         if ($term != "") {
-            $data = DB::table($table)
-                ->select($column)
-                ->where('current_location_id', $location)
-                ->where($column, 'LIKE', $term . '%')
-                ->whereNotNull($column)
-                ->where($column, '!=', '')
-                ->groupBy($column)
-                ->orderBy($column, 'asc')
-                ->get();
+            if ($table === 'test_report_dpt_details') {
+                $query = DB::table('test_report_dpt_details')
+                    ->where('test_report_dpt_details.' . $column, 'LIKE', $term . '%')
+                    ->whereNotNull('test_report_dpt_details.' . $column)
+                    ->where('test_report_dpt_details.' . $column, '!=', '');
+
+                if ($location) {
+                    $query->join('test_report_dpt', 'test_report_dpt.test_report_dpt_id', '=', 'test_report_dpt_details.test_report_dpt_id')
+                        ->where('test_report_dpt.current_location_id', $location);
+                }
+
+                $data = $query->select('test_report_dpt_details.' . $column)
+                    ->groupBy('test_report_dpt_details.' . $column)
+                    ->orderBy('test_report_dpt_details.' . $column, 'asc')
+                    ->get();
+            } else {
+                $data = DB::table($table)
+                    ->select($column)
+                    ->where('current_location_id', $location)
+                    ->where($column, 'LIKE', $term . '%')
+                    ->whereNotNull($column)
+                    ->where($column, '!=', '')
+                    ->groupBy($column)
+                    ->orderBy($column, 'asc')
+                    ->get();
+            }
             if ($data->isNotEmpty()) {
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach ($data as $row) {
                     if (trim($row->$column) === '') continue;
-                    $output .= '<li parent-id="' . $parentId . '" list-id="' . $parentId . '_list" class="list-group-item" tabindex="0">' . e($row->$column) . '</li>';
+                    $output .= '<li parent-id="' . $parentId . '" list-id="' . $parentId . '_list" class="list-group-item" tabindex="-1">' . e($row->$column) . '</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -1708,7 +1739,7 @@ Disclaimer : *Marked informations as given by customer that can affects the vali
         $dpt_test_no_label = 'DPT Test No.';
         $heat_no_label = 'Heat No.';
         $nabl_type_fix = 'Non NABL';
-        $job_type_fix = 'Casting';
+        $job_type_fix = '';
 
         if ($lnr_data) {
             $note = $lnr_data->note ?? $note;
@@ -1716,11 +1747,11 @@ Disclaimer : *Marked informations as given by customer that can affects the vali
             $heat_no_label = !empty($lnr_data->heat_no_label) ? $lnr_data->heat_no_label : 'Heat No.';
             $nabl_type_fix = !empty($lnr_data->nabl_type_fix) ? $lnr_data->nabl_type_fix : 'Non NABL';
             // $job_type_fix = !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : 'Casting';
-            $jobType = !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : 'Casting';
+            $jobType = !empty($lnr_data->job_type_fix) ? $lnr_data->job_type_fix : '';
             if ($jobType === 'Non-Welding') {
-                $jobType = 'Casting';
+                $jobType = '';
             } elseif ($jobType === 'Welding') {
-                $jobType = 'Fabrication';
+                $jobType = '';
             }
             $job_type_fix = $jobType;
         }

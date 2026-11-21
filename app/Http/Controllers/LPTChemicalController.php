@@ -334,7 +334,7 @@ class LPTChemicalController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdDesignation as $dsKey)
                 {
-                    $output .= '<li parent-id="lpt_designation" list-id="lpt_designation_list" class="list-group-item" tabindex="0">'.$dsKey->lpt_designation.'</li>';
+                    $output .= '<li parent-id="lpt_designation" list-id="lpt_designation_list" class="list-group-item" tabindex="-1">'.$dsKey->lpt_designation.'</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([
@@ -369,7 +369,7 @@ class LPTChemicalController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdMake as $dsKey)
                 {
-                    $output .= '<li parent-id="lpt_make" list-id="lpt_make_list" class="list-group-item" tabindex="0">'.$dsKey->lpt_make.'</li>';
+                    $output .= '<li parent-id="lpt_make" list-id="lpt_make_list" class="list-group-item" tabindex="-1">'.$dsKey->lpt_make.'</li>';
                 }
                 $output .= '</ul>';
                 return response()->json([

@@ -263,7 +263,7 @@ class UnitController extends Controller
                 $output = '<ul class="list-group" style="display: block; position: relative;" tabindex="-1">';
                 foreach($fdUnit as $dsKey)
                 {
-                    $output .= '<li parent-id="unit" list-id="unit_list" class="list-group-item" tabindex="0">'.$dsKey->unit.'</li>';
+                    $output .= '<li parent-id="unit" list-id="unit_list" class="list-group-item" tabindex="-1">'.$dsKey->unit.'</li>';
                 }
                 $output .= '</ul>';
 

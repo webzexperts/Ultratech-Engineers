@@ -139,7 +139,7 @@ class ObservationSheetController extends Controller
                 if (hasAccess("observation_sheet", "print")) {
                     $sheet_number = !empty($sheet->observation_sheet_no) ? '_' . str_replace('/', '_', $sheet->observation_sheet_no) : "";
                     $cust_name = !empty($sheet->customer_name) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $sheet->customer_name) : "";
-                    $pdfName   = 'Observation_Sheet' . $sheet_number . $cust_name;
+                    $pdfName   = 'Worksheet' . $sheet_number . $cust_name;
                     $encodedId = base64_encode($sheet->id);
                     $url = url("/check-file_exists?id={$encodedId}&name={$pdfName}&type=observation_sheet");
                     $actions .= '<li><a class="dropdown-item" target="_blank" href="' . $url . '"><i class="bx bxs-file-pdf align-bottom me-2 text-muted" id="print_a"></i> Print</a></li>';
@@ -193,7 +193,7 @@ class ObservationSheetController extends Controller
                 $sheet_seq = $request->observation_sheet_sequence;
             }
 
-            $checkDup = checkReportDuplication(ObservationSheet::class, 'observation_sheet_no', $sheet_no, $request, "Duplicate Observation Sheet No. Found.");
+            $checkDup = checkReportDuplication(ObservationSheet::class, 'observation_sheet_no', $sheet_no, $request, "Duplicate Worksheet No. Found.");
             if ($checkDup) {
                 return response()->json($checkDup);
             }
@@ -224,38 +224,40 @@ class ObservationSheetController extends Controller
                 $detailsData = $request->observation_sheet_details_data;
             }
 
-            if (!empty($detailsData)) {
-                // Pending Qty Validation
+            if (!empty($detailsData)) {             
+
                 foreach ($detailsData as $row) {
                     if (isset($row['mode']) && $row['mode'] === 'Delete') continue;
-                    if($row['from_type_id_fix'] == 1){
-                         $is_used_in_mi = DB::table('material_inward_details')
-                        ->where('material_inward_details_id', $row['material_inward_details_id'])
-                        ->first(); 
+
+                    if ($row['from_type_id_fix'] == 1) {
+                        $is_used_in_mi = DB::table('material_inward_details')
+                            ->where('material_inward_details_id', $row['material_inward_details_id'])
+                            ->first();
 
                         if ($is_used_in_mi && $row['quantity'] != (float)$is_used_in_mi->quantity) {
                             DB::rollBack();
                             return response()->json([
                                 'response_code'    => '0',
-                                'response_message' => "You Can't Insert, Observation Sheet Qty. Is Not Matched With Material Inward Qty.",
+                                'response_message' => "You Can't Insert, Worksheet Qty. Is Not Matched With Material Inward Qty.",
                             ]);
                         }
-                    }else{
+                    } else {
                         $is_used_in_report = DB::table('test_report_rt')
-                        ->where('test_report_rt_id', $row['test_report_rt_id'])
-                        ->where('material_inward_details_id', $row['material_inward_details_id'])
-                        ->first(); 
+                            ->where('test_report_rt_id', $row['test_report_rt_id'])
+                            ->where('material_inward_details_id', $row['material_inward_details_id'])
+                            ->first();
 
                         if ($is_used_in_report && $row['quantity'] != (float)$is_used_in_report->rt_report_qty) {
                             DB::rollBack();
                             return response()->json([
                                 'response_code'    => '0',
-                                'response_message' => "You Can't Insert, Observation Sheet Qty. Is Not Matched With Test Report RT Qty.",
+                                'response_message' => "You Can't Insert, Worksheet Qty. Is Not Matched With Test Report RT Qty.",
                             ]);
                         }
                     }
 
-                    $test_report_rt_id = (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0 && ($row['from_type_id_fix'] ?? 1) != 1) ? $row['test_report_rt_id'] : null;
+                    // $test_report_rt_id = (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0 && ($row['from_type_id_fix'] ?? 1) != 1) ? $row['test_report_rt_id'] : null;
+                    $test_report_rt_id = (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0) ? $row['test_report_rt_id'] : null;
                     $from_type_id_fix  = $row['from_type_id_fix'] ?? 1;
                     $enteredQty        = (float)($row['quantity'] ?? 0);
 
@@ -273,13 +275,6 @@ class ObservationSheetController extends Controller
                     if ($checkQty) {
                         return $checkQty;
                     }
-                }
-
-                foreach ($detailsData as $row) {
-                    if (isset($row['mode']) && $row['mode'] === 'Delete') continue;
-
-                    $test_report_rt_id = (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0 && ($row['from_type_id_fix'] ?? 1) != 1) ? $row['test_report_rt_id'] : null;
-                    $from_type_id_fix = $row['from_type_id_fix'];
 
                     $isRt = strtoupper(trim($row['type_of_testing_id_fix'] ?? '')) === 'RT';
                     $filmSizeUnit = $isRt ? (!empty($row['film_size_unit_fix']) ? $row['film_size_unit_fix'] : (!empty($row['film_size_fix']) ? $row['film_size_fix'] : 'inch')) : null;
@@ -351,7 +346,8 @@ class ObservationSheetController extends Controller
                         $row['material_inward_details_id'] ?? 0,
                         $test_report_rt_id,
                         $row['type_of_testing_id_fix'] ?? 'RT',
-                        'I'
+                        'I',
+                        $detailModel->observation_sheet_details_id ?? null
                     );
                     if ($checkPending) {
                         return $checkPending;
@@ -364,7 +360,7 @@ class ObservationSheetController extends Controller
             $sheet_number = !empty($obs->observation_sheet_no) ? '_' . str_replace('/', '_', $obs->observation_sheet_no) : "";
             $cust = DB::table('customers')->where('id', $obs->customer_id)->value('customer');
             $cust_name = !empty($cust) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $cust) : "";
-            $pdf_name = 'Observation_Sheet' . $sheet_number . $cust_name;
+            $pdf_name = 'Worksheet' . $sheet_number . $cust_name;
 
             $this->generateAndMergePdf($obs->observation_sheet_id, $pdf_name);
 
@@ -391,6 +387,7 @@ class ObservationSheetController extends Controller
     public function getOldRtReportDetailsForRepair(Request $request)
     {
         $id = $request->test_report_rt_id;
+        $processType = $request->process_type ?? 'Repair';
         if (!$id) {
             return response()->json(['response_code' => 0, 'response_message' => 'Report ID missing']);
         }
@@ -398,29 +395,41 @@ class ObservationSheetController extends Controller
         $header = DB::table('test_report_rt as tr')
             ->leftJoin('materials as m', 'm.id', '=', 'tr.material_id')
             ->where('tr.test_report_rt_id', $id)
-            ->select('tr.heat_no', 'tr.product_code', 'tr.part_no', 'tr.drg_no', 'm.material', 'tr.film_size_unit_fix')
+            ->select('tr.heat_no', 'tr.product_code', 'tr.part_no', 'tr.drg_no', 'm.material', 'tr.film_size_unit_fix', 'tr.revision_number')
             ->first();
 
         $details = DB::select('CALL test_report_rt_details(?)', [$id]);
 
-        $filmResults = DB::table('film_result')->get()->keyBy('film_result_id');
-
-        $filtered = array_values(array_filter($details, function($d) use ($filmResults) {
-            // First check if result_id exists in the row
-            $resultId = $d->result_id ?? $d->film_result_id ?? $d->detail_film_result_id ?? null;
-            
-            if ($resultId && isset($filmResults[$resultId])) {
-                $type = strtolower(trim($filmResults[$resultId]->film_result_type_fix ?? ''));
-                if (in_array($type, ['repair', 'retake', 'reshoot'])) {
-                    return true;
+        if ($processType === 'Fresh') {
+            // Fresh કેસમાં તે RT રિપોર્ટના તમામે તમામ જોઈન્ટ્સ (All Joints) લેવા
+            $filtered = array_values(array_filter($details, function($d) {
+                return empty($d->mode) || $d->mode !== 'Delete';
+            }));
+        } else {
+            // Repair કેસમાં: જો Repair / Retake / Reshoot વાળા જોઈન્ટ્સ હોય તો તે લેવા
+            $filmResults = DB::table('film_result')->get()->keyBy('film_result_id');
+            $defectJoints = array_values(array_filter($details, function($d) use ($filmResults) {
+                // First check if result_id exists in the row
+                $resultId = $d->result_id ?? $d->film_result_id ?? $d->detail_film_result_id ?? null;
+                
+                if ($resultId && isset($filmResults[$resultId])) {
+                    $type = strtolower(trim($filmResults[$resultId]->film_result_type_fix ?? ''));
+                    if (in_array($type, ['repair', 'retake', 'reshoot'])) {
+                        return true;
+                    }
                 }
-            }
 
-            // Fallback to name check if ID is not found or type didn't match
-            $r = $d->film_result ?? $d->film_result_name ?? $d->result_name ?? $d->result ?? $d->result_type ?? '';
-            $resultName = strtolower(trim($r));
-            return in_array($resultName, ['repair', 'retake', 'reshoot']);
-        }));
+                // Fallback to name check if ID is not found or type didn't match
+                $r = $d->film_result ?? $d->film_result_name ?? $d->result_name ?? $d->result ?? $d->result_type ?? '';
+                $resultName = strtolower(trim($r));
+                return in_array($resultName, ['repair', 'retake', 'reshoot']);
+            }));
+
+            // જો ડિફેક્ટ જોઈન્ટ્સ હોય તો તે, નહિતર તમામ જોઈન્ટ્સ (જેથી ટેબલ ખાલી ન રહે)
+            $filtered = !empty($defectJoints) ? $defectJoints : array_values(array_filter($details, function($d) {
+                return empty($d->mode) || $d->mode !== 'Delete';
+            }));
+        }
 
         return response()->json([
             'response_code' => 1,
@@ -433,22 +442,37 @@ class ObservationSheetController extends Controller
     {
         $customerId = $request->customer_id;
         $nablType = $request->nabl_type;
+        $jobType = $request->job_type;
+        $processType = $request->process_type ?? 'Fresh';
         $location = getCurrentLocation()->location_id;
         $year = getCompanyYearIdsToTill();
 
-        $reports = DB::table('test_report_rt as tr')
+        $query = DB::table('test_report_rt as tr')
             ->leftJoin('customers as c', 'c.id', '=', 'tr.customer_id')
             // ->leftJoin('type_of_job as toj', 'toj.id', '=', 'tr.type_of_job_id')
             // ->leftJoin('job_descriptions as jd', 'jd.id', '=', 'tr.job_desc_id')
             ->leftJoin('materials as m', 'm.id', '=', 'tr.material_id')
-            ->leftJoin('observation_sheet_details as osd', 'osd.test_report_rt_id', '=', 'tr.test_report_rt_id')
             ->where('tr.customer_id', $customerId)
-            ->where('tr.nabl_type_fix', $nablType)
             ->where('tr.current_location_id', $location)
-            ->whereIn('tr.year_id', $year)
-            ->where('tr.result', 'Repair (Send Back)')
-            ->whereNull('osd.test_report_rt_id')
-            ->select([
+            ->whereIn('tr.year_id', $year);
+
+        if (!empty($nablType)) {
+            $query->where('tr.nabl_type_fix', $nablType);
+        }
+
+        // Job Type વાઈઝ ફિલ્ટરિંગ (Casting vs Fabrication)
+        if (!empty($jobType)) {
+            $jt = trim($jobType);
+            if (in_array(strtolower($jt), ['casting', 'non-welding'])) {
+                $query->whereIn('tr.job_type_fix', ['Casting', 'Non-Welding']);
+            } elseif (in_array(strtolower($jt), ['fabrication', 'welding'])) {
+                $query->whereIn('tr.job_type_fix', ['Fabrication', 'Welding']);
+            } else {
+                $query->where('tr.job_type_fix', $jt);
+            }
+        }
+
+        $reports = $query->select([
                 'tr.test_report_rt_id',
                 'tr.revision_number',
                 'tr.test_report_no',
@@ -630,7 +654,7 @@ class ObservationSheetController extends Controller
         $year_data =getCurrentYearData();
         $location_data = getCurrentLocation();
 
-        $checkDup = checkReportDuplication(ObservationSheet::class, 'observation_sheet_no', $request->observation_sheet_no, $request, "Duplicate Observation Sheet No. Found.", $request->id, 'observation_sheet_id');
+        $checkDup = checkReportDuplication(ObservationSheet::class, 'observation_sheet_no', $request->observation_sheet_no, $request, "Duplicate Worksheet No. Found.", $request->id, 'observation_sheet_id');
         if ($checkDup) {
             return response()->json($checkDup);
         }
@@ -663,15 +687,17 @@ class ObservationSheetController extends Controller
                 $detailsData = $request->observation_sheet_details_data;
             }
 
-            if (!empty($detailsData)) {
-                // Pending Qty Validation on Update
+            if (!empty($detailsData)) {                
                 foreach ($detailsData as $row) {
-                    $mode              = $row['mode'] ?? 'Update';
-                    $detailId          = $row['observation_sheet_details_id'] ?? null;
-                    $test_report_rt_id = (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0 && ($row['from_type_id_fix'] ?? 1) != 1) ? $row['test_report_rt_id'] : null;
-                    $from_type_id_fix  = $row['from_type_id_fix'] ?? (!empty($test_report_rt_id) ? 2 : 1);
+                    $mode = $row['mode'] ?? 'Update';
+                    $detailId = $row['observation_sheet_details_id'] ?? null;
+                    
+                    // $test_report_rt_id = (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0 && ($row['from_type_id_fix'] ?? 1) != 1) ? $row['test_report_rt_id'] : null;
+                    $test_report_rt_id = (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0) ? $row['test_report_rt_id'] : null;
+                    $from_type_id_fix = $row['from_type_id_fix'] ?? (!empty($test_report_rt_id) ? 2 : 1);
                     $enteredQty        = (float)($row['quantity'] ?? 1);
 
+                    // Row-level Validation
                     if ($mode === 'Delete') {
                         if ($detailId) {
                             $old_qty = (float)(ObservationSheetDetails::where('observation_sheet_details_id', $detailId)->value('observation_qty') ?? 0);
@@ -688,10 +714,16 @@ class ObservationSheetController extends Controller
                             if ($checkQty) {
                                 return $checkQty;
                             }
+
+                            $dObj = ObservationSheetDetails::find($detailId);
+                            ObservationSheetDetailsPrint::where('observation_sheet_details_id', $detailId)->delete();
+                            ObservationSheetDetailsInput::where('observation_sheet_details_id', $detailId)->delete();
+                            ObservationSheetDetails::destroy($detailId);
                         }
                         continue;
                     }
 
+                    // For Insert and Update:
                     $old_qty = $detailId ? (float)(ObservationSheetDetails::where('observation_sheet_details_id', $detailId)->value('observation_qty') ?? 0) : 0;
                     $diff = (float)$enteredQty - (float)$old_qty;
                     $from_qty = $diff > 0 ? $diff : 0;
@@ -711,23 +743,8 @@ class ObservationSheetController extends Controller
                     if ($checkQty) {
                         return $checkQty;
                     }
-                }
 
-                foreach ($detailsData as $row) {
-                    $mode = $row['mode'] ?? 'Update';
-                    $detailId = $row['observation_sheet_details_id'] ?? null;
-                    
-                    $test_report_rt_id = (!empty($row['test_report_rt_id']) && $row['test_report_rt_id'] != 0 && ($row['from_type_id_fix'] ?? 1) != 1) ? $row['test_report_rt_id'] : null;
-                    $from_type_id_fix = $row['from_type_id_fix'] ?? (!empty($test_report_rt_id) ? 2 : 1);
-
-                    if ($mode === 'Delete') {
-                        if ($detailId) {
-                            $dObj = ObservationSheetDetails::find($detailId);
-                            ObservationSheetDetailsPrint::where('observation_sheet_details_id', $detailId)->delete();
-                            ObservationSheetDetailsInput::where('observation_sheet_details_id', $detailId)->delete();
-                            ObservationSheetDetails::destroy($detailId);
-                        }
-                    } elseif ($mode === 'Insert') {
+                    if ($mode === 'Insert') {
                         $isRt = strtoupper(trim($row['type_of_testing_id_fix'] ?? '')) === 'RT';
                         $filmSizeUnit = $isRt ? (!empty($row['film_size_unit_fix']) ? $row['film_size_unit_fix'] : (!empty($row['film_size_fix']) ? $row['film_size_fix'] : 'inch')) : null;
 
@@ -797,7 +814,8 @@ class ObservationSheetController extends Controller
                             $row['material_inward_details_id'] ?? 0,
                             $test_report_rt_id,
                             $row['type_of_testing_id_fix'] ?? 'RT',
-                            'U'
+                            'U',
+                            $detailModel->observation_sheet_details_id ?? null
                         );
                         if ($checkPending) {
                             return $checkPending;
@@ -830,16 +848,31 @@ class ObservationSheetController extends Controller
 
                                     if ($subMode === 'Delete') {
                                         if ($subInputId) {
-                                             $detailUsage = DB::table('test_report_rt')
-                                                 ->where('observation_sheet_details_id', $detailId)
-                                                 ->exists();
-                                             if ($detailUsage) {
-                                                 DB::rollBack();
-                                                 return response()->json([
-                                                     'response_code' => '0',
-                                                     'response_message' => "You Can't Delete, Observation Detail Is Used In Test Report (RT)."
-                                                 ]);
-                                             }
+                                            /*
+                                            // Old RT code commented out:
+                                            $detailUsage = DB::table('test_report_rt')
+                                                ->where('observation_sheet_details_id', $detailId)
+                                                ->exists();
+                                            if ($detailUsage) {
+                                                DB::rollBack();
+                                                return response()->json([
+                                                    'response_code' => '0',
+                                                    'response_message' => "You Can't Delete, Observation Detail Is Used In Test Report (RT)."
+                                                ]);
+                                            }
+                                            */
+
+                                            // New Job Card Downstream Check:
+                                            $detailUsage = DB::table('job_card_details')
+                                                ->where('observation_sheet_details_id', $detailId)
+                                                ->exists();
+                                            if ($detailUsage) {
+                                                DB::rollBack();
+                                                return response()->json([
+                                                    'response_code' => '0',
+                                                    'response_message' => "You Can't Delete, Observation Detail Is Used In Job Card."
+                                                ]);
+                                            }
                                             ObservationSheetDetailsInput::where('observation_sheet_details_details_input_id', $subInputId)->delete();
                                         }
                                     } else {
@@ -928,7 +961,8 @@ class ObservationSheetController extends Controller
                                 $row['material_inward_details_id'] ?? 0,
                                 $test_report_rt_id,
                                 $row['type_of_testing_id_fix'] ?? 'RT',
-                                'U'
+                                'U',
+                                $detailId
                             );
                             if ($checkPending) {
                                 return $checkPending;
@@ -942,7 +976,7 @@ class ObservationSheetController extends Controller
             $sheet_number = !empty($sheet->observation_sheet_no) ? '_' . str_replace('/', '_', $sheet->observation_sheet_no) : "";
             $cust = DB::table('customers')->where('id', $sheet->customer_id)->value('customer');
             $cust_name = !empty($cust) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $cust) : "";
-            $pdf_name = 'Observation_Sheet' . $sheet_number . $cust_name;
+            $pdf_name = 'Worksheet' . $sheet_number . $cust_name;
 
             $localDirectory = storage_path("app/public/reports/observation_sheet_reports_file/");
             $pattern = $localDirectory . $pdf_name . '*';
@@ -951,13 +985,12 @@ class ObservationSheetController extends Controller
                     @unlink($file);
                 }
             }
-
             DB::commit();
 
             $sheet_number = !empty($sheet->observation_sheet_no) ? '_' . str_replace('/', '_', $sheet->observation_sheet_no) : "";
             $cust = DB::table('customers')->where('id', $sheet->customer_id)->value('customer');
             $cust_name = !empty($cust) ? '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $cust) : "";
-            $pdf_name = 'Observation_Sheet' . $sheet_number . $cust_name;
+            $pdf_name = 'Worksheet' . $sheet_number . $cust_name;
 
             $this->generateAndMergePdf($sheetId, $pdf_name);
 
@@ -987,7 +1020,7 @@ class ObservationSheetController extends Controller
             $usage = DB::select('CALL observation_sheet_used_list(?)', [$request->id]);
 
             if (!empty($usage)) {
-                $message = "You Can't Delete, Observation Sheet Is Used In " . $usage[0]->table_name . ".";
+                $message = "You Can't Delete, Worksheet Is Used In " . $usage[0]->table_name . ".";
                 return response()->json([
                     'response_code' => '0',
                     'response_message' => $message,
@@ -1020,7 +1053,7 @@ class ObservationSheetController extends Controller
     {
         $modal = ObservationSheet::class;
         $sequence = 'observation_sheet_sequence';
-        $prefix = 'OS';
+        $prefix = 'WS';
 
         $num_format = getLatestSequence($modal, $sequence, $prefix);
 
@@ -1289,15 +1322,17 @@ class ObservationSheetController extends Controller
                 DB::rollBack();
                 return response()->json([
                     'response_code'    => '0',
-                    'response_message' => 'Observation Qty. Is Used.',
+                    'response_message' => 'Worksheet Qty. Is Used.',
                 ]);
             }
         }
 
+        /*
         // ===================== 2. Observation Sheet VALIDATION FOR TEST REPORT =====================
         if ($next_qty > 0 && !empty($observation_sheet_details_id)) {
             $obsDetail = DB::table('observation_sheet_details')
                 ->where('observation_sheet_details_id', $observation_sheet_details_id)
+                ->lockForUpdate()
                 ->first();
 
             $testing_type = $obsDetail->type_of_testing_id_fix ?? 'RT';
@@ -1329,8 +1364,8 @@ class ObservationSheetController extends Controller
                 DB::rollBack();
 
                 $message = ($transaction_mode === 'D')
-                    ? "You Can't Delete, Observation Sheet Is Used In Test Report ({$testing_type})."
-                    : "You Can't Update, Observation Qty. Is Used In Test Report ({$testing_type}).";
+                    ? "You Can't Delete, Worksheet Is Used In Test Report ({$testing_type})."
+                    : "You Can't Update, Worksheet Qty. Is Used In Test Report ({$testing_type}).";
 
                 return response()->json([
                     'response_code'    => '0',
@@ -1338,12 +1373,47 @@ class ObservationSheetController extends Controller
                 ]);
             }
         }
+        */
+
+        // ===================== 2. Observation Sheet VALIDATION FOR JOB CARD =====================
+    
+        if ($next_qty > 0 && !empty($observation_sheet_details_id)) {
+            $obsDetail = DB::table('observation_sheet_details')
+                ->where('observation_sheet_details_id', $observation_sheet_details_id)
+               ->lockForUpdate()
+                ->first();
+            $testing_type = $obsDetail->type_of_testing_id_fix ?? 'RT';
+
+            if (strtoupper(trim($testing_type)) === 'RT') {
+                // Job Card Pending View માં માત્ર observation_sheet_details_id થી જ ચેક થશે
+                // $usedInJobCard = DB::table('pending_worksheet_for_job_card')
+                //     ->where('observation_sheet_details_id', $observation_sheet_details_id)
+                //     ->exists();
+
+                 $isUsedInJobCard = DB::table('job_card_details')
+                    ->where('observation_sheet_details_id', $observation_sheet_details_id)
+                    ->exists();
+                // dd($isUsedInJobCard);
+                if ($isUsedInJobCard) {
+                    DB::rollBack();
+
+                    $message = ($transaction_mode === 'D')
+                        ? "You Can't Delete, Worksheet Is Used In Job Card."
+                        : "You Can't Update, Worksheet Qty. Is Used In Job Card.";
+
+                    return response()->json([
+                        'response_code'    => '0',
+                        'response_message' => $message,
+                    ]);
+                }
+            }
+        }
 
         return null; // No error
     }
 
 
-    public function checkNegativePendingQty($customer_id, $location_id, $from_type_id_fix, $material_inward_details_id, $test_report_rt_id, $testing_type = 'RT', $transaction_mode = 'U')
+    public function checkNegativePendingQty($customer_id, $location_id, $from_type_id_fix, $material_inward_details_id, $test_report_rt_id, $testing_type = 'RT', $transaction_mode = 'U', $observation_sheet_details_id = null)
     {
         $test_report_rt_id = ($from_type_id_fix == 1) ? null : ($test_report_rt_id ?? null);
 
@@ -1369,7 +1439,8 @@ class ObservationSheetController extends Controller
             ]);
         }
 
-        // 2. Check material inward testing view if from inward
+        /*
+        // 2. Check material inward testing view if from inward (Old RT Check Commented Out)
         if ($from_type_id_fix == 1 && !empty($material_inward_details_id)) {
             $inwardPendingQty = null;
             if ($testing_type === 'RT') {
@@ -1398,6 +1469,7 @@ class ObservationSheetController extends Controller
                 ]);
             }
         }
+        */
 
         return null;
     }

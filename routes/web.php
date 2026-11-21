@@ -106,6 +106,7 @@ use App\Http\Controllers\Transaction\RtLabelPrintController;
 use App\Http\Controllers\Transaction\ObservationSheetController;
 use App\Http\Controllers\Transaction\FilmDCController;
 use App\Http\Controllers\Transaction\InvoiceController;
+use App\Http\Controllers\Transaction\JobCardController;
 
 use App\Models\Transaction\DeliveryChallanCustomer;
 use App\Http\Controllers\Reports\DeliveryChallanCustomerReportController;
@@ -258,6 +259,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('manage-invoice',                            [InvoiceController::class, 'manage'])->name('manage-invoice');
 
     Route::get('manage-observation_sheet', [ObservationSheetController::class, 'manage'])->name('manage-observation_sheet');
+    Route::get('/manage-job_card', [JobCardController::class, 'manage'])->name('manage-job_card');
     
 
 
@@ -341,7 +343,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     
     Route::post('/listing-material_inward',[MaterialInwardController::class,'index'])->name('listing-material_inward');
     Route::post('/listing-offer',[OfferController::class,'index'])->name('listing-offer');
-    Route::post('/listing-offer_authorized',[OfferAuthorizedController::class,'index'])->name('listing-offer_authorized');
+    Route::post('/listing-offer_authorised',[OfferAuthorizedController::class,'index'])->name('listing-offer_authorised');
     Route::post('/listing-material_inspection',[MaterialInspectionController::class,'index'])->name('listing-material_inspection');
     Route::post('/listing-order_acceptance',[OrderAcceptanceController::class,'index'])->name('listing-order_acceptance');
     Route::post('/listing-non_returnable_material_challan',[NonRetMatChallanController::class,'index'])->name('listing-non_returnable_material_challan');
@@ -381,7 +383,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('listing-invoice',                           [InvoiceController::class, 'index'])->name('listing-invoice');
     Route::post('listing-observation_sheet', [ObservationSheetController::class, 'index'])->name('listing-observation_sheet');
     Route::post('/listing-material_type', [MaterialTypeController::class, 'index'])->name('listing-material_type');
-
+    Route::post('/listing-job_card', [JobCardController::class, 'index'])->name('listing-job_card');
 
 
     /* Reports Listing Routes*/
@@ -506,6 +508,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('store-invoice',                             [InvoiceController::class, 'store'])->name('store-invoice');
     Route::post('store-observation_sheet', [ObservationSheetController::class, 'store'])->name('store-observation_sheet');
     Route::post('/store-material_type', [MaterialTypeController::class, 'store'])->name('store-material_type');
+    Route::post('/store-job_card', [JobCardController::class, 'store'])->name('store-job_card');
     
 
     /* Edit Route */
@@ -591,6 +594,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
 
      Route::get('edit-observation_sheet', [ObservationSheetController::class, 'edit'])->name('edit-observation_sheet');
      Route::get('/edit-material_type', [MaterialTypeController::class, 'edit'])->name('edit-material_type');
+     Route::get('/edit-job_card', [JobCardController::class, 'edit'])->name('edit-job_card');
     
 
 
@@ -676,6 +680,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::post('update-invoice',                            [InvoiceController::class, 'update'])->name('update-invoice');
      Route::post('update-observation_sheet', [ObservationSheetController::class, 'update'])->name('update-observation_sheet');
      Route::post('/update-material_type', [MaterialTypeController::class, 'update'])->name('update-material_type');
+     Route::post('/update-job_card', [JobCardController::class, 'update'])->name('update-job_card');
     
     
 
@@ -764,6 +769,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('delete-invoice',                            [InvoiceController::class, 'destroy'])->name('delete-invoice');
      Route::get('delete-observation_sheet', [ObservationSheetController::class, 'destroy'])->name('delete-observation_sheet');
      Route::get('/delete-material_type', [MaterialTypeController::class, 'destroy'])->name('delete-material_type');
+     Route::post('/delete-job_card', [JobCardController::class, 'destroy'])->name('delete-job_card');
      Route::get('view-pdf-observation_sheet', [ObservationSheetController::class, 'viewPdf'])->name('view-pdf-observation_sheet');
 
 
@@ -844,10 +850,16 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/test_report_rt_finding-list',                [TestReportRtController::class, 'existsFinding'])->name('test_report_rt_finding-list');
 
     Route::get('/test_report_ut_customer_client-list',        [TestReportUtController::class, 'existsCustomerClient'])->name('test_report_ut_customer_client-list');
+    Route::get('/test_report_ut_type_of_job-list',            [TestReportUtController::class, 'existsTypeOfJob'])->name('test_report_ut_type_of_job-list');
+    Route::get('/test_report_ut_project-list',                [TestReportUtController::class, 'existsProject'])->name('test_report_ut_project-list');
     Route::get('/test_report_ut_part_no-list',                [TestReportUtController::class, 'existsPartNo'])->name('test_report_ut_part_no-list');
     Route::get('/test_report_ut_drg_no-list',                 [TestReportUtController::class, 'existsDrgNo'])->name('test_report_ut_drg_no-list');
     Route::get('/test_report_ut_surface_condition-list',      [TestReportUtController::class, 'existsSurfaceCondition'])->name('test_report_ut_surface_condition-list');
+    Route::get('/test_report_ut_extent_of_exa-list',          [TestReportUtController::class, 'existsExtentOfExa'])->name('test_report_ut_extent_of_exa-list');
+    Route::get('/test_report_ut_stage_of_exa-list',           [TestReportUtController::class, 'existsStageOfExa'])->name('test_report_ut_stage_of_exa-list');
     Route::get('/test_report_ut_couplant-list',               [TestReportUtController::class, 'existsCouplant'])->name('test_report_ut_couplant-list');
+    Route::get('/test_report_ut_method-list',                 [TestReportUtController::class, 'existsMethod'])->name('test_report_ut_method-list');
+    Route::get('/test_report_ut_ref_sensitivity-list',        [TestReportUtController::class, 'existsRefSensitivity'])->name('test_report_ut_ref_sensitivity-list');
     Route::get('/test_report_ut_test_technique-list',         [TestReportUtController::class, 'existsTestTechnique'])->name('test_report_ut_test_technique-list');
     Route::get('/test_report_ut_ref_block_used-list',         [TestReportUtController::class, 'existsRefBlockUsed'])->name('test_report_ut_ref_block_used-list');
     Route::get('/test_report_ut_scanning_area-list',          [TestReportUtController::class, 'existsScanningArea'])->name('test_report_ut_scanning_area-list');
@@ -858,6 +870,7 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/test_report_ut_product_code-list',           [TestReportUtController::class, 'existsProductCode'])->name('test_report_ut_product_code-list');
     Route::get('/test_report_ut_reviewed_by-list',            [TestReportUtController::class, 'existsReviewedBy'])->name('test_report_ut_reviewed_by-list');
     Route::get('/test_report_ut_witness_by-list',             [TestReportUtController::class, 'existsWitnessBy'])->name('test_report_ut_witness_by-list');
+    Route::get('/test_report_ut_job_description-list',        [TestReportUtController::class, 'existsJobDescription'])->name('test_report_ut_job_description-list');
 
     Route::get('/test_report_dpt_customer_client-list',        [TestReportDptController::class, 'existsCustomerClient'])->name('test_report_dpt_customer_client-list');
     Route::get('/test_report_dpt_part_no-list',                [TestReportDptController::class, 'existsPartNo'])->name('test_report_dpt_part_no-list');
@@ -878,6 +891,17 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/test_report_dpt_background_light-list',       [TestReportDptController::class, 'existsBackgroundLight'])->name('test_report_dpt_background_light-list');
     Route::get('/test_report_dpt_reviewed_by-list',            [TestReportDptController::class, 'existsReviewedBy'])->name('test_report_dpt_reviewed_by-list');
     Route::get('/test_report_dpt_witness_by-list',             [TestReportDptController::class, 'existsWitnessBy'])->name('test_report_dpt_witness_by-list');
+    Route::get('/test_report_dpt_type_of_job-list',            [TestReportDptController::class, 'existsTypeOfJob'])->name('test_report_dpt_type_of_job-list');
+    Route::get('/test_report_dpt_project-list',                [TestReportDptController::class, 'existsProject'])->name('test_report_dpt_project-list');
+    Route::get('/test_report_dpt_extent_of_exa-list',          [TestReportDptController::class, 'existsExtentOfExa'])->name('test_report_dpt_extent_of_exa-list');
+    Route::get('/test_report_dpt_stage_of_exa-list',           [TestReportDptController::class, 'existsStageOfExa'])->name('test_report_dpt_stage_of_exa-list');
+    Route::get('/test_report_dpt_method-list',                 [TestReportDptController::class, 'existsMethod'])->name('test_report_dpt_method-list');
+    Route::get('/test_report_dpt_penetrant-list',              [TestReportDptController::class, 'existsPenetrant'])->name('test_report_dpt_penetrant-list');
+    Route::get('/test_report_dpt_cleaner-list',                [TestReportDptController::class, 'existsCleaner'])->name('test_report_dpt_cleaner-list');
+    Route::get('/test_report_dpt_post_cleaning-list',           [TestReportDptController::class, 'existsPostCleaning'])->name('test_report_dpt_post_cleaning-list');
+    Route::get('/test_report_dpt_penetrant_time-list',         [TestReportDptController::class, 'existsPenetrantTime'])->name('test_report_dpt_penetrant_time-list');
+    Route::get('/test_report_dpt_developing_time-list',        [TestReportDptController::class, 'existsDevelopingTime'])->name('test_report_dpt_developing_time-list');
+    Route::get('/test_report_dpt_job_description-list',        [TestReportDptController::class, 'existsJobDescription'])->name('test_report_dpt_job_description-list');
 
 
     /* Duplication Verification Route */
@@ -1170,6 +1194,13 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/test_report_mpt_product_code-list',           [TestReportMptController::class, 'existsProductCode'])->name('test_report_mpt_product_code-list');
     Route::get('/test_report_mpt_reviewed_by-list',          [TestReportMptController::class, 'existsReviewedBy'])->name('test_report_mpt_reviewed_by-list');
     Route::get('/test_report_mpt_witness_by-list',           [TestReportMptController::class, 'existsWitnessBy'])->name('test_report_mpt_witness_by-list');
+    Route::get('/test_report_mpt_type_of_job-list',          [TestReportMptController::class, 'existsTypeOfJob'])->name('test_report_mpt_type_of_job-list');
+    Route::get('/test_report_mpt_project-list',              [TestReportMptController::class, 'existsProject'])->name('test_report_mpt_project-list');
+    Route::get('/test_report_mpt_extent_of_exa-list',        [TestReportMptController::class, 'existsExtentOfExa'])->name('test_report_mpt_extent_of_exa-list');
+    Route::get('/test_report_mpt_method-list',               [TestReportMptController::class, 'existsMethod'])->name('test_report_mpt_method-list');
+    Route::get('/test_report_mpt_field_indicator-list',      [TestReportMptController::class, 'existsFieldIndicator'])->name('test_report_mpt_field_indicator-list');
+    Route::get('/test_report_mpt_background_contrast-list',  [TestReportMptController::class, 'existsBackgroundContrast'])->name('test_report_mpt_background_contrast-list');
+    Route::get('/test_report_mpt_job_description-list',      [TestReportMptController::class, 'existsJobDescription'])->name('test_report_mpt_job_description-list');
     Route::get('/customer_dc_non_returnable_vehicle_no-list', [CustomerDCNonReturnableController::class, 'getVehicleNoList'])->name('customer_dc_non_returnable_vehicle_no-list');
     Route::get('/customer_dc_non_returnable_mode_of_transport-list', [CustomerDCNonReturnableController::class, 'getModeOfTransportList'])->name('customer_dc_non_returnable_mode_of_transport-list');
     Route::get('/customer_dc_non_returnable_sp_note-list', [CustomerDCNonReturnableController::class, 'getSpNoteList'])->name('customer_dc_non_returnable_sp_note-list');
@@ -1325,6 +1356,9 @@ use App\Http\Controllers\Reports\CameraHistoryReportController;
     Route::get('/get-customer-details-for-invoice', [InvoiceController::class, 'getCustomerDetails'])->name('get-customer-details-for-invoice');
     Route::get('/get-pending-film-dc-for-invoice', [InvoiceController::class, 'getPendingFilmDc'])->name('get-pending-film-dc-for-invoice');
     Route::post('/get-film-dc-items-for-invoice', [InvoiceController::class, 'getFilmDcItemsForInvoice'])->name('get-film-dc-items-for-invoice');
+    Route::get('/get-latest-job_card-number', [JobCardController::class, 'getLatestJobCardNumber'])->name('get-latest-job_card-number');
+    Route::get('/check-job_card_number_duplication', [JobCardController::class, 'checkJobCardSequenceDuplication'])->name('check-job_card_number_duplication');
+    Route::get('/get-pending-worksheets-for-job_card', [JobCardController::class, 'getPendingWorksheets'])->name('get-pending-worksheets-for-job_card');
 
     /* Offer authorized Routes */
     Route::get('/get-offer_authorized_details',[OfferAuthorizedController::class,'getOfferDetails'])->name('get-offer_authorized_details');

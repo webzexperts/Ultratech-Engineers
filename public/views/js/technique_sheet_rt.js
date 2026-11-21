@@ -26,7 +26,7 @@ function fillTSDetailTable() {
     if (validRows.length === 0) {
         tbody.append(`
             <tr>
-                <td colspan="15" class="text-center" id="noDetails">
+                <td colspan="17" class="text-center" id="noDetails">
                     No Radiographic Shooting Sketch Details Added
                 </td>
             </tr>
@@ -67,6 +67,7 @@ function fillTSDetailTable() {
                 <td>${row.source_id_fix}</td>
                 <td>${row.film_brand_name || ''}</td>
                 <td>${row.film_type_name || ''}</td>
+                <td>${row.test_method_name || row.test_method || ''}</td>
                 <td>${row.thickness || ''}</td>
                 <td>${row.sfd || ''}</td>
                 <td>${row.iqi_designation || row.iqi_designation_name || ''}</td>
@@ -75,6 +76,7 @@ function fillTSDetailTable() {
                 <td>${row.film_position || ''}</td>
                 <td>${film_size_display || ''}</td>
                 <td>${row.no_of_film_fix}</td>
+                <td>${row.ug || ''}</td>
                 <td class="d-none">${row.film_qty}</td>
                 <td class="d-none">${sq_display}</td>
                 <td class="d-none">${total_sq_display}</td>
@@ -340,7 +342,7 @@ function resetTechniqueSheetRtForm() {
     jQuery('#technique_sheet_rt_sequence').val('');
     jQuery('#technique_sheet_rt_no').val('');
     jQuery('input[name="entry_type_fix"][value="Manual"]').prop('checked', true).trigger('change');
-    jQuery('input[name="job_type_fix"][value="Non-Welding"]').prop('checked', true);
+    jQuery('input[name="job_type_fix"][value="Casting"]').prop('checked', true);
     setRadioReadonly('input[name*="entry_type_fix"]', false);
     setSelect2Readonly('#TechniqueSheetRtModal #customer_id', false);
     jQuery('#customer_id').val('').trigger('change');
@@ -349,6 +351,8 @@ function resetTechniqueSheetRtForm() {
     jQuery('#job_desc_id').val('').trigger('change');
     // jQuery('#part_id').val('').trigger('change');
     jQuery('#part_no').val('');
+    jQuery('#test_arrangement').val('');
+    jQuery('#test_class').val('');
     jQuery('#drg_no').val('');
     jQuery('#material_id').val('').trigger('change');
     jQuery('#product_code').val('');
@@ -363,6 +367,7 @@ function resetTechniqueSheetRtForm() {
 
     jQuery('#film_size_fix_inch').prop('checked', true);
     jQuery('#sfd_unit_fix_mm').prop('checked', true);
+    jQuery('#print_ug_in_report').prop('checked', false);
     setRadioReadonly('input[name="sfd_unit_fix"]', false);
 
     // Reset file fields
@@ -436,7 +441,10 @@ function fetchAndFillTechniqueSheetRt(id) {
                 jQuery('#technique_sheet_rt_no').val(d.technique_sheet_rt_no);
                 jQuery('#technique_sheet_rt_date').val(d.technique_sheet_rt_date);
                 jQuery(`input[name="entry_type_fix"][value="${d.entry_type_fix}"]`).prop('checked', true).change();
-                jQuery(`input[name="job_type_fix"][value="${d.job_type_fix || 'Non-Welding'}"]`).prop('checked', true);
+                let jt = d.job_type_fix;
+                if (jt === 'Non-Welding') jt = 'Casting';
+                if (jt === 'Welding') jt = 'Fabrication';
+                jQuery(`input[name="job_type_fix"][value="${jt || 'Casting'}"]`).prop('checked', true);
                 jQuery('#customer_id').val(zeroToEmpty(d.customer_id)).trigger('change');
                 setTimeout(() => {
                     setSelect2Readonly('#TechniqueSheetRtModal #customer_id', true);
@@ -445,7 +453,7 @@ function fetchAndFillTechniqueSheetRt(id) {
                 // Set part_id value BEFORE triggering job_desc_id change
                 // so filterPartsByJobDesc() can read and restore the correct part selection
                 // jQuery('#part_id').val(zeroToEmpty(d.part_id));
-                jQuery('#part_no').val(d.part_no || '');
+                jQuery('#part_no').val('');
                 jQuery('#job_desc').val(d.job_description || d.job_desc || '');
                 jQuery('#job_desc_id').val(zeroToEmpty(d.job_desc_id)).trigger('change');
                 // After filtering, re-apply part_id and update Select2
@@ -465,8 +473,8 @@ function fetchAndFillTechniqueSheetRt(id) {
                 jQuery('#iqi').val(d.iqi);
                 jQuery('#film_processing').val(d.film_processing);
                 jQuery('#test_technique').val(d.test_technique);
-                jQuery('#test_arrangement').val(d.test_arrangement);
-                jQuery('#test_class').val(d.test_class);
+                jQuery('#test_arrangement').val('');
+                jQuery('#test_class').val('');
 
                 jQuery('#customer_procedure_ref').val(d.customer_procedure_ref);
                 jQuery('#procedure_ref_id').val(zeroToEmpty(d.procedure_ref_id)).trigger('change');
@@ -485,6 +493,12 @@ function fetchAndFillTechniqueSheetRt(id) {
                     jQuery('#sfd_unit_fix_mm').prop('checked', true);
                 }
                 setRadioReadonly('input[name="sfd_unit_fix"]', false);
+
+                if (d.print_ug_in_report === 'Yes' || d.print_ug_in_report == 1) {
+                    jQuery('#print_ug_in_report').prop('checked', true);
+                } else {
+                    jQuery('#print_ug_in_report').prop('checked', false);
+                }
 
                 // File Sketch field reset
                 jQuery('#shooting_sketch_image_doc').val('');
@@ -524,6 +538,8 @@ function fetchAndFillTechniqueSheetRt(id) {
                             film_brand_name: row.film_brand,
                             film_type_id: row.film_type_id,
                             film_type_name: row.film_type,
+                            test_method_id: row.test_method_id,
+                            test_method_name: row.test_method,
                             thickness: row.thickness,
                             sfd: row.sfd,
                             // iqi_designation_id: row.iqi_designation_id,
@@ -543,6 +559,7 @@ function fetchAndFillTechniqueSheetRt(id) {
                             total_sq_cm: parseFloat(row.total_sq_cm || 0),
                             test_technique: row.test_technique || '',
                             film_position: row.film_position || '',
+                            ug: row.ug || '',
                             mode: 'Update'
                         });
                     });
@@ -590,11 +607,13 @@ jQuery('#TSDetailsModal').on('shown.bs.modal show.bs.modal', function () {
         thisForm.find('#detail_source_id_fix').val(frmData.source_id_fix).trigger('change').trigger('change.select2');
         thisForm.find('#detail_film_brand_id').val(frmData.film_brand_id).trigger('change').trigger('change.select2');
         thisForm.find('#detail_film_type_id').val(frmData.film_type_id).trigger('change').trigger('change.select2');
+        thisForm.find('#detail_test_method_id').val(zeroToEmpty(frmData.test_method_id)).trigger('change').trigger('change.select2');
 
         thisForm.find('#detail_thickness').val(frmData.thickness);
         thisForm.find('#detail_sfd').val(frmData.sfd);
         thisForm.find('#detail_test_technique').val(frmData.test_technique || '');
         thisForm.find('#detail_film_position').val(frmData.film_position || '');
+        thisForm.find('#detail_ug').val(frmData.ug || '');
 
         // thisForm.find('#detail_iqi_designation_id').val(frmData.iqi_designation_id).trigger('change').trigger('change.select2');
         thisForm.find('#iqi_designation').val(frmData.iqi_designation || frmData.iqi_designation_name || '');
@@ -665,10 +684,12 @@ jQuery(document).on('blur change', '#copy_from_sr_no', function () {
         jQuery('#detail_source_id_fix').val(zeroToEmpty(targetRow.source_id_fix)).trigger('change').trigger('change.select2');
         jQuery('#detail_film_brand_id').val(zeroToEmpty(targetRow.film_brand_id || targetRow.detail_film_brand_id)).trigger('change').trigger('change.select2');
         jQuery('#detail_film_type_id').val(zeroToEmpty(targetRow.film_type_id || targetRow.detail_film_type_id)).trigger('change').trigger('change.select2');
+        jQuery('#detail_test_method_id').val(zeroToEmpty(targetRow.test_method_id || targetRow.detail_test_method_id)).trigger('change').trigger('change.select2');
         jQuery('#detail_thickness').val(targetRow.thickness || '');
         jQuery('#detail_sfd').val(targetRow.sfd || '');
         jQuery('#detail_test_technique').val(targetRow.test_technique || '');
         jQuery('#detail_film_position').val(targetRow.film_position || '');
+        jQuery('#detail_ug').val(targetRow.ug || '');
         // jQuery('#detail_iqi_designation_id').val(zeroToEmpty(targetRow.iqi_designation_id || targetRow.detail_iqi_designation_id)).trigger('change').trigger('change.select2');
         jQuery('#iqi_designation').val(targetRow.iqi_designation || targetRow.iqi_designation_name || '');
         // jQuery('#detail_iqi_sensitivity_id').val(zeroToEmpty(targetRow.iqi_sensitivity_id || targetRow.detail_iqi_sensitivity_id)).trigger('change').trigger('change.select2');
@@ -717,10 +738,12 @@ jQuery(document).on('click', '#addDetailRowBtn', function () {
     jQuery('#copy_from_sr_no').val('');
     jQuery('#detail_test_technique').val('');
     jQuery('#detail_film_position').val('');
+    jQuery('#detail_ug').val('');
     jQuery('#iqi_designation').val('');
     jQuery('#iqi_sensitivity').val('');
     jQuery('#detail_film_id').find('.temp-option').remove();
     jQuery('#detail_film_id').val('').trigger('change').trigger('change.select2');
+    jQuery('#detail_test_method_id').val('').trigger('change').trigger('change.select2');
 
     jQuery('#form_type').val('add');
     jQuery('#form_index').val('');
@@ -756,11 +779,13 @@ function loadTSDetailByIndex(index) {
     thisForm.find('#detail_source_id_fix').val(frmData.source_id_fix || '').trigger('change').trigger('change.select2');
     thisForm.find('#detail_film_brand_id').val(frmData.film_brand_id || '').trigger('change').trigger('change.select2');
     thisForm.find('#detail_film_type_id').val(frmData.film_type_id || '').trigger('change').trigger('change.select2');
+    thisForm.find('#detail_test_method_id').val(zeroToEmpty(frmData.test_method_id)).trigger('change').trigger('change.select2');
 
     thisForm.find('#detail_thickness').val(frmData.thickness || '');
     thisForm.find('#detail_sfd').val(frmData.sfd || '');
     thisForm.find('#detail_test_technique').val(frmData.test_technique || '');
     thisForm.find('#detail_film_position').val(frmData.film_position || '');
+    thisForm.find('#detail_ug').val(frmData.ug || '');
 
     // thisForm.find('#detail_iqi_designation_id').val(frmData.iqi_designation_id || '').trigger('change').trigger('change.select2');
     thisForm.find('#iqi_designation').val(frmData.iqi_designation || frmData.iqi_designation_name || '');
@@ -902,6 +927,8 @@ jQuery('#submitDetailRowBtn').on('click', function (e) {
         film_brand_name: jQuery('#detail_film_brand_id option:selected').text().trim(),
         film_type_id: jQuery('#detail_film_type_id').val(),
         film_type_name: jQuery('#detail_film_type_id option:selected').text().trim(),
+        test_method_id: jQuery('#detail_test_method_id').val() || null,
+        test_method_name: jQuery('#detail_test_method_id option:selected').val() ? jQuery('#detail_test_method_id option:selected').text().trim() : '',
         thickness: jQuery('#detail_thickness').val(),
         sfd: jQuery('#detail_sfd').val(),
         // iqi_designation_id: '',
@@ -921,6 +948,7 @@ jQuery('#submitDetailRowBtn').on('click', function (e) {
         total_sq_cm: sq_cm * film_qty,
         test_technique: jQuery('#detail_test_technique').val() || '',
         film_position: jQuery('#detail_film_position').val() || '',
+        ug: jQuery('#detail_ug').val() || null,
     };
 
     if (form_type === 'edit') {
@@ -1202,6 +1230,15 @@ jQuery('#commonTechniqueSheetRtForm').on('submit', function (e) {
     });
     if (invalidFilmRow) {
         toastr.error("Please Select Film Size");
+        jQuery('#submitbtn').prop('disabled', false);
+        hideLoader();
+        return;
+    }
+
+    let invalidTestMethodRow = activeDetails.find(r => !zeroToEmpty(r.test_method_id));
+    if (invalidTestMethodRow) {
+        toastr.error("Select Test Method.");
+        jQuery('#full-page-loader').removeClass('loader-progress-whole-page').addClass('hidden-loader');
         jQuery('#submitbtn').prop('disabled', false);
         hideLoader();
         return;
@@ -1612,7 +1649,8 @@ function suggestProductCode(e, element) {
 }
 
 function suggestWeldingProcess(e, element) {
-    if (jQuery(element).prop('readonly') || jQuery(element).prop('disabled') || jQuery('input[name="job_type_fix"]:checked').val() === 'Non-Welding') {
+    let currentJobType = jQuery('input[name="job_type_fix"]:checked').val();
+    if (jQuery(element).prop('readonly') || jQuery(element).prop('disabled') || currentJobType === 'Casting' || currentJobType === 'Non-Welding') {
         return;
     }
     commonSuggestionAjax({
@@ -1624,7 +1662,8 @@ function suggestWeldingProcess(e, element) {
 }
 
 function suggestJointType(e, element) {
-    if (jQuery(element).prop('readonly') || jQuery(element).prop('disabled') || jQuery('input[name="job_type_fix"]:checked').val() === 'Non-Welding') {
+    let currentJobType = jQuery('input[name="job_type_fix"]:checked').val();
+    if (jQuery(element).prop('readonly') || jQuery(element).prop('disabled') || currentJobType === 'Casting' || currentJobType === 'Non-Welding') {
         return;
     }
     commonSuggestionAjax({
@@ -1636,8 +1675,8 @@ function suggestJointType(e, element) {
 }
 
 function toggleWeldingFields() {
-    let jobType = jQuery('input[name="job_type_fix"]:checked').val() || 'Non-Welding';
-    if (jobType === 'Non-Welding') {
+    let jobType = jQuery('input[name="job_type_fix"]:checked').val() || 'Casting';
+    if (jobType === 'Casting' || jobType === 'Non-Welding') {
         jQuery('#welding_process, #joint_type').val('').prop('readonly', true).css('pointer-events', 'none').addClass('skip-tab').attr('tabindex', '-1');
         jQuery('#welding_process_suggestion, #joint_type_suggestion').val('');
         jQuery('#welding_process_list, #joint_type_list').empty();
@@ -1899,6 +1938,8 @@ function performCopy(selectedId, copyMaster, copyDetails) {
                                 film_brand_name: row.film_brand,
                                 film_type_id: row.film_type_id,
                                 film_type_name: row.film_type,
+                                test_method_id: row.test_method_id || null,
+                                test_method_name: row.test_method || row.test_method_name || '',
                                 thickness: row.thickness,
                                 sfd: row.sfd,
                                 // iqi_designation_id: row.iqi_designation_id,
@@ -1918,6 +1959,7 @@ function performCopy(selectedId, copyMaster, copyDetails) {
                                 total_sq_cm: parseFloat(row.total_sq_cm || 0),
                                 test_technique: row.test_technique || '',
                                 film_position: row.film_position || '',
+                                ug: row.ug || '',
                                 mode: 'Insert'
                             });
                         });
@@ -1931,13 +1973,16 @@ function performCopy(selectedId, copyMaster, copyDetails) {
                     // jQuery('#customer_id').val(zeroToEmpty(d.customer_id)).trigger('change');
                     jQuery('#type_of_job_id').val(zeroToEmpty(d.type_of_job_id)).trigger('change');
                     if (d.job_type_fix) {
-                        jQuery(`input[name="job_type_fix"][value="${d.job_type_fix}"]`).prop('checked', true);
+                        let jt = d.job_type_fix;
+                        if (jt === 'Non-Welding') jt = 'Casting';
+                        if (jt === 'Welding') jt = 'Fabrication';
+                        jQuery(`input[name="job_type_fix"][value="${jt}"]`).prop('checked', true);
                     }
                     // jQuery('#part_id').val(zeroToEmpty(d.part_id));
                     jQuery('#job_desc').val(d.job_description || d.job_desc || '');
                     jQuery('#job_desc_id').val(zeroToEmpty(d.job_desc_id)).trigger('change');
                     // jQuery('#part_id').val(zeroToEmpty(d.part_id)).trigger('change.select2');
-                    jQuery('#part_no').val(d.part_no || '');
+                    jQuery('#part_no').val('');
                     jQuery('#drg_no').val(d.drg_no || '');
                     jQuery('#material_id').val(zeroToEmpty(d.material_id)).trigger('change');
                     jQuery('#product_code').val(d.product_code || '');
@@ -1958,8 +2003,8 @@ function performCopy(selectedId, copyMaster, copyDetails) {
                     jQuery('#iqi').val(d.iqi || '');
                     jQuery('#film_processing').val(d.film_processing || '');
                     jQuery('#test_technique').val(d.test_technique || '');
-                    jQuery('#test_arrangement').val(d.test_arrangement || '');
-                    jQuery('#test_class').val(d.test_class || '');
+                    jQuery('#test_arrangement').val('');
+                    jQuery('#test_class').val('');
 
                     jQuery('#customer_procedure_ref').val(d.customer_procedure_ref || '');
                     jQuery('#procedure_ref_id').val(zeroToEmpty(d.procedure_ref_id)).trigger('change');
@@ -1976,6 +2021,12 @@ function performCopy(selectedId, copyMaster, copyDetails) {
                         jQuery('#sfd_unit_fix_inch').prop('checked', true);
                     } else {
                         jQuery('#sfd_unit_fix_mm').prop('checked', true);
+                    }
+
+                    if (d.print_ug_in_report === 'Yes' || d.print_ug_in_report == 1) {
+                        jQuery('#print_ug_in_report').prop('checked', true);
+                    } else {
+                        jQuery('#print_ug_in_report').prop('checked', false);
                     }
 
                     jQuery('#sp_note').val(d.sp_note || '');
@@ -2298,6 +2349,8 @@ $('#addPendingTestReportRTForm').on('submit', function (e) {
                                     film_brand_name: item.film_brand || '',
                                     film_type_id: item.film_type_id,
                                     film_type_name: item.film_type || '',
+                                    test_method_id: item.test_method_id || null,
+                                    test_method_name: item.test_method || '',
                                     thickness: item.thickness,
                                     sfd: item.sfd,
                                     // iqi_designation_id: item.iqi_designation_id,
@@ -2317,6 +2370,7 @@ $('#addPendingTestReportRTForm').on('submit', function (e) {
                                     total_sq_cm: sq_cm * parseInt(item.film_qty || 1),
                                     test_technique: item.test_technique || (data.test_report ? data.test_report.test_technique : '') || '',
                                     film_position: item.film_position || '',
+                                    ug: item.ug || '',
                                     mode: 'Insert'
                                 });
                             });
@@ -2369,12 +2423,15 @@ function FillMasterTable(data) {
     if (!data) return;
 
     if (data.job_type_fix) {
-        jQuery('input[name="job_type_fix"][value="' + data.job_type_fix + '"]').prop('checked', true);
+        let jt = data.job_type_fix;
+        if (jt === 'Non-Welding') jt = 'Casting';
+        if (jt === 'Welding') jt = 'Fabrication';
+        jQuery('input[name="job_type_fix"][value="' + jt + '"]').prop('checked', true);
     }
     jQuery('#type_of_job_id').val(zeroToEmpty(data.type_of_job_id)).trigger('change.select2');
     // jQuery('#job_desc_id').val(zeroToEmpty(data.job_desc_id)).trigger('change');
     jQuery('#job_desc').val(data.job_desc);
-    jQuery('#part_no').val(data.part_no);
+    jQuery('#part_no').val('');
     jQuery('#drg_no').val(data.drg_no);
     jQuery('#material_id').val(zeroToEmpty(data.material_id)).trigger('change');
     jQuery('#product_code').val(data.product_code);
@@ -2391,8 +2448,8 @@ function FillMasterTable(data) {
     jQuery('#iqi').val(data.iqi);
     jQuery('#film_processing').val(data.film_processing);
     jQuery('#test_technique').val(data.test_technique);
-    jQuery('#test_arrangement').val(data.test_arrangement);
-    jQuery('#test_class').val(data.test_class);
+    jQuery('#test_arrangement').val('');
+    jQuery('#test_class').val('');
     jQuery('#film_brand').val(data.film_brand);
     jQuery('#film_type').val(data.film_type);
     jQuery('#procedure_ref_id').val(data.procedure_ref_id).trigger('change.select2');
@@ -2404,6 +2461,11 @@ function FillMasterTable(data) {
     }
     if (data.sfd_unit_fix) {
         jQuery('input[name="sfd_unit_fix"][value="' + data.sfd_unit_fix + '"]').prop('checked', true);
+    }
+    if (data.print_ug_in_report === 'Yes' || data.print_ug_in_report == 1) {
+        jQuery('#print_ug_in_report').prop('checked', true);
+    } else {
+        jQuery('#print_ug_in_report').prop('checked', false);
     }
     jQuery('#no_of_films').val(data.no_of_films);
     jQuery('#film_size').val(data.film_size);
@@ -2431,12 +2493,14 @@ function fillRTDetailTable() {
             var source = technique_sheet_rt_details_data[key].source_id_fix ?? '';
             var film_brand = technique_sheet_rt_details_data[key].film_brand ?? '';
             var film_type = technique_sheet_rt_details_data[key].film_type ?? '';
+            var test_method = technique_sheet_rt_details_data[key].test_method ?? technique_sheet_rt_details_data[key].test_method_name ?? '';
             var thickness = technique_sheet_rt_details_data[key].thickness ?? '';
             var sfd = technique_sheet_rt_details_data[key].sfd ?? '';
             var iqi_designation = technique_sheet_rt_details_data[key].iqi_designation || technique_sheet_rt_details_data[key].iqi_designation_name || '';
             var iqi_sensitivity = technique_sheet_rt_details_data[key].iqi_sensitivity || technique_sheet_rt_details_data[key].iqi_sensitivity_name || '';
             var film_size = technique_sheet_rt_details_data[key].film_size ?? '';
             var no_of_film = technique_sheet_rt_details_data[key].no_of_film_fix ?? '';
+            var test_ug = technique_sheet_rt_details_data[key].ug ?? '';
             var test_technique = technique_sheet_rt_details_data[key].test_technique ?? '';
             var film_position = technique_sheet_rt_details_data[key].film_position ?? '';
 
@@ -2453,6 +2517,7 @@ function fillRTDetailTable() {
             tblHtml += `<td>${source}</td>`;
             tblHtml += `<td>${film_brand}</td>`;
             tblHtml += `<td>${film_type}</td>`;
+            tblHtml += `<td>${test_method}</td>`;
             tblHtml += `<td>${thickness}</td>`;
             tblHtml += `<td>${sfd}</td>`;
             tblHtml += `<td>${iqi_designation}</td>`;
@@ -2461,6 +2526,7 @@ function fillRTDetailTable() {
             tblHtml += `<td>${film_position}</td>`;
             tblHtml += `<td>${film_size}</td>`;
             tblHtml += `<td>${no_of_film}</td>`;
+            tblHtml += `<td>${test_ug}</td>`;
             tblHtml += `</tr>`;
         }
 
