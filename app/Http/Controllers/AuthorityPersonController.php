@@ -22,12 +22,13 @@ class AuthorityPersonController extends Controller
      * Build the comma-separated operator_type label string from the
      * individual Yes/No flags, preserving the defined order.
      */
-    private function buildOperatorType($performed, $examined, $authorized)
+    private function buildOperatorType($performed, $examined, $authorized, $incharge)
     {
         $labels = [];
         if ($performed == 'Yes')     { $labels[] = 'Performed By'; }
         if ($examined == 'Yes')   { $labels[] = 'Examined By'; }
         if ($authorized == 'Yes') { $labels[] = 'Authorized By'; }
+        if ($incharge == 'Yes') { $labels[] = 'Incharge / Radiographer'; }
         return implode(', ', $labels);
     }
 
@@ -194,7 +195,7 @@ class AuthorityPersonController extends Controller
                 ]);
             }
 
-            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by);
+            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by,$incharge);
 
             $signaturePath = null;
             $blobImage = null;
@@ -333,7 +334,7 @@ class AuthorityPersonController extends Controller
                 ]);
             }
 
-            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by);
+            $operator_type = $this->buildOperatorType($performed_by, $examined_by, $authorized_by, $incharge);
 
             $imgs = AuthorityPerson::where('authority_person_id', $request->id)->value('signature');
             $file = new File();
